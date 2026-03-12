@@ -46,5 +46,6 @@ export const useFilterStore = create<FilterStore>()((set) => ({
       rooms: [],
       priceRange: [2000, 50000],
       sortBy: 'featured',
+      viewMode: 'grid',
     }),
 }))
