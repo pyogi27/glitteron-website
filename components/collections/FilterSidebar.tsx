@@ -21,7 +21,11 @@ interface FilterItemProps {
 
 function FilterItem({ label, count, active, onToggle }: FilterItemProps) {
   return (
-    <div onClick={onToggle} className="flex items-center gap-2.5 mb-2.5 cursor-pointer">
+    <button
+      type="button"
+      onClick={onToggle}
+      className="flex items-center gap-2.5 mb-2.5 w-full text-left"
+    >
       <div className={`w-[15px] h-[15px] border-[1.5px] rounded-[3px] flex-shrink-0 flex items-center justify-center transition-all ${active ? 'bg-[#1A1714] border-[#1A1714]' : 'border-[#E8E4DC]'}`}>
         {active && (
           <svg viewBox="0 0 10 10" width="9" height="9">
@@ -31,7 +35,7 @@ function FilterItem({ label, count, active, onToggle }: FilterItemProps) {
       </div>
       <span className="text-[12px] text-[#1A1714] opacity-75 flex-1">{label}</span>
       {count !== undefined && <span className="text-[10px] text-[#9A958C]">{count}</span>}
-    </div>
+    </button>
   )
 }
 
@@ -43,14 +47,14 @@ interface FilterGroupProps {
 function FilterGroup({ title, children }: FilterGroupProps) {
   return (
     <div className="mb-7">
-      <div className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[#1A1714] mb-3.5 pb-2.5 border-b border-[#E8E4DC]">{title}</div>
+      <h3 className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[#1A1714] mb-3.5 pb-2.5 border-b border-[#E8E4DC]">{title}</h3>
       {children}
     </div>
   )
 }
 
 export default function FilterSidebar() {
-  const { activeTab, setActiveTab, materials, rooms, toggleMaterial, toggleRoom, clearAll } = useFilterStore()
+  const { activeTab, setActiveTab, materials, rooms, toggleMaterial, toggleRoom, priceRange, setPriceRange, clearAll } = useFilterStore()
 
   return (
     <aside className="w-[268px] flex-shrink-0 px-7 py-8 border-r border-[#E8E4DC] sticky top-[72px] h-[calc(100vh-72px)] overflow-y-auto [scrollbar-width:thin]">
@@ -71,16 +75,28 @@ export default function FilterSidebar() {
       <FilterGroup title="Price Range">
         <div className="flex gap-2 mb-3">
           <input
+            type="text"
+            value={`₹${priceRange[0].toLocaleString('en-IN')}`}
+            readOnly
             className="flex-1 bg-transparent border border-[#E8E4DC] text-[#1A1714] px-2.5 py-1.5 rounded-lg text-[12px] focus:border-[#C8A96E] outline-none"
-            defaultValue="₹2,000"
           />
           <span className="text-[#9A958C] text-[12px] self-center">–</span>
           <input
+            type="text"
+            value={`₹${priceRange[1].toLocaleString('en-IN')}`}
+            readOnly
             className="flex-1 bg-transparent border border-[#E8E4DC] text-[#1A1714] px-2.5 py-1.5 rounded-lg text-[12px] focus:border-[#C8A96E] outline-none"
-            defaultValue="₹50,000"
           />
         </div>
-        <input type="range" min={0} max={100} defaultValue={78} className="w-full accent-[#C8A96E]" />
+        <input
+          type="range"
+          min={2000}
+          max={50000}
+          step={1000}
+          value={priceRange[1]}
+          onChange={e => setPriceRange([priceRange[0], Number(e.target.value)])}
+          className="w-full accent-[#C8A96E]"
+        />
       </FilterGroup>
 
       <hr className="border-[#E8E4DC] my-7" />

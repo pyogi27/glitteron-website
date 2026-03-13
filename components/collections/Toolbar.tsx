@@ -8,11 +8,28 @@ const SORT_OPTIONS = [
   { value: 'price-asc', label: 'Price: Low to High' },
   { value: 'price-desc', label: 'Price: High to Low' },
   { value: 'rating', label: 'Top Rated' },
-  { value: 'newest', label: 'Newest First' },
 ]
 
 export default function Toolbar() {
-  const { activeTab, setActiveTab, sortBy, setSortBy, viewMode, setViewMode } = useFilterStore()
+  const { activeTab, setActiveTab, sortBy, setSortBy, viewMode, setViewMode, materials, priceRange } = useFilterStore()
+
+  const filteredCount = (() => {
+    let filtered = products
+    if (activeTab !== 'All') {
+      filtered = filtered.filter(p => p.category.toLowerCase().includes(activeTab.toLowerCase()))
+    }
+    if (materials.length > 0) {
+      filtered = filtered.filter(p =>
+        materials.some(m =>
+          p.name.toLowerCase().includes(m.toLowerCase()) ||
+          p.subtitle.toLowerCase().includes(m.toLowerCase()) ||
+          p.category.toLowerCase().includes(m.toLowerCase())
+        )
+      )
+    }
+    filtered = filtered.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1])
+    return filtered.length
+  })()
 
   return (
     <div className="border-b border-[#E8E4DC] bg-[#FAFAF8] px-8 py-4 flex flex-col gap-3">
@@ -36,12 +53,13 @@ export default function Toolbar() {
       {/* Sort + view + count */}
       <div className="flex items-center justify-between">
         <span className="text-[12px] text-[#9A958C]">
-          Showing <strong className="text-[#1A1714]">{products.length}</strong> results
+          Showing <strong className="text-[#1A1714]">{filteredCount}</strong> results
         </span>
         <div className="flex items-center gap-3">
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value)}
+            aria-label="Sort products"
             className="bg-transparent border border-[#E8E4DC] text-[#1A1714] text-[12px] px-3 py-1.5 rounded-lg outline-none focus:border-[#C8A96E] cursor-pointer"
           >
             {SORT_OPTIONS.map(o => (

@@ -6,7 +6,7 @@ import { Product } from '@/lib/types'
 interface Props { products: Product[] }
 
 export default function ProductGrid({ products }: Props) {
-  const { activeTab, materials, sortBy, viewMode } = useFilterStore()
+  const { activeTab, materials, sortBy, viewMode, priceRange } = useFilterStore()
 
   // Filter
   let filtered = products
@@ -24,6 +24,7 @@ export default function ProductGrid({ products }: Props) {
     )
   }
   // rooms filter omitted: mock Product type has no room field; apply when API provides room metadata
+  filtered = filtered.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1])
 
   // Sort
   const sorted = [...filtered].sort((a, b) => {
