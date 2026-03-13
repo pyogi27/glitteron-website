@@ -6,7 +6,7 @@ import { Product } from '@/lib/types'
 interface Props { products: Product[] }
 
 export default function ProductGrid({ products }: Props) {
-  const { activeTab, materials, rooms, sortBy, viewMode } = useFilterStore()
+  const { activeTab, materials, sortBy, viewMode } = useFilterStore()
 
   // Filter
   let filtered = products
@@ -14,9 +14,16 @@ export default function ProductGrid({ products }: Props) {
     filtered = filtered.filter(p => p.category.toLowerCase().includes(activeTab.toLowerCase()))
   }
   if (materials.length > 0) {
-    // If product has no material field in our mock data, skip material filter
-    // This is a UI-level filter — the real API will handle it
+    // Approximate match against name/subtitle/category until API provides a dedicated material field
+    filtered = filtered.filter(p =>
+      materials.some(m =>
+        p.name.toLowerCase().includes(m.toLowerCase()) ||
+        p.subtitle.toLowerCase().includes(m.toLowerCase()) ||
+        p.category.toLowerCase().includes(m.toLowerCase())
+      )
+    )
   }
+  // rooms filter omitted: mock Product type has no room field; apply when API provides room metadata
 
   // Sort
   const sorted = [...filtered].sort((a, b) => {
