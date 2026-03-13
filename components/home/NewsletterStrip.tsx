@@ -20,24 +20,26 @@ export default function NewsletterStrip() {
         <p className="text-[13px] font-light text-white/50 mb-8 leading-[1.8]">
           New arrivals, exclusive offers, and design inspiration — delivered monthly.
         </p>
-        {submitted ? (
-          <div className="text-[#C8A96E] font-serif text-[18px] italic">Thank you for subscribing ✦</div>
-        ) : (
-          <form onSubmit={handleSubmit} className="flex gap-3 max-w-[440px] mx-auto">
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              required
-              className="flex-1 bg-white/8 border border-white/15 text-white placeholder:text-white/30 px-5 py-3.5 rounded-3xl text-[13px] font-light outline-none focus:border-[#C8A96E] transition-colors"
-            />
-            <button type="submit"
-              className="bg-[#C8A96E] text-[#1A1714] border-none px-7 py-3.5 rounded-3xl font-sans text-[12px] font-semibold tracking-[0.08em] uppercase whitespace-nowrap transition-all hover:-translate-y-0.5 hover:bg-[#E8D5A3]">
-              Subscribe
-            </button>
-          </form>
-        )}
+        <div aria-live="polite">
+          {submitted ? (
+            <div className="text-[#C8A96E] font-serif text-[18px] italic">Thank you for subscribing ✦</div>
+          ) : (
+            <form onSubmit={handleSubmit} className="flex gap-3 max-w-[440px] mx-auto">
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                required
+                className="flex-1 bg-white/8 border border-white/15 text-white placeholder:text-white/30 px-5 py-3.5 rounded-3xl text-[13px] font-light outline-none focus:border-[#C8A96E] transition-colors"
+              />
+              <button type="submit"
+                className="bg-[#C8A96E] text-[#1A1714] border-none px-7 py-3.5 rounded-3xl font-sans text-[12px] font-semibold tracking-[0.08em] uppercase whitespace-nowrap transition-all hover:-translate-y-0.5 hover:bg-[#E8D5A3]">
+                Subscribe
+              </button>
+            </form>
+          )}
+        </div>
       </div>
     </section>
   )

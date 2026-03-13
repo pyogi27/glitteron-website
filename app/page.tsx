@@ -15,9 +15,9 @@ export default function HomePage() {
     <>
       <HeroSection />
       <TickerStrip />
-      <ProductCarousel title="New <em>Arrivals</em>" label="Just In" products={featured.slice(0, 6)} />
+      <ProductCarousel titlePrefix="New" titleHighlight="Arrivals" label="Just In" products={featured.slice(0, 6)} />
       <StatsDivider />
-      <ProductCarousel title="<em>Bestselling</em> Lights" label="Most Loved" products={featured} />
+      <ProductCarousel titlePrefix="Bestselling" titleHighlight="Lights" label="Most Loved" products={featured} />
       <RoomGrid />
       <ShuffleDeck products={featured} />
       <SocialGrid />

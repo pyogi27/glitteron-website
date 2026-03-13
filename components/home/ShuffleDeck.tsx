@@ -15,6 +15,7 @@ export default function ShuffleDeck({ products }: Props) {
   const shuffle = () => {
     const topCard = cardRefs.current[currentIndex % deck.length]
     if (!topCard) return
+    gsap.killTweensOf(topCard)
     gsap.to(topCard, {
       rotation: 15,
       x: 300,

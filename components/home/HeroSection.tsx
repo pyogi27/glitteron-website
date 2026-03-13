@@ -47,7 +47,7 @@ export default function HeroSection() {
           <Link href="/collections" className="bg-[#F4F1EB] text-[#1A1714] border-none px-9 py-3.5 rounded-3xl font-sans text-[13px] font-medium tracking-[0.08em] uppercase no-underline inline-flex items-center gap-2 transition-all hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(196,113,74,0.4)]">
             Explore Collections →
           </Link>
-          <button className="bg-transparent border border-white/30 text-white px-9 py-3.5 rounded-3xl font-sans text-[13px] font-light tracking-[0.08em] uppercase transition-all hover:border-[#C8A96E] hover:bg-[#C8A96E]/10">
+          <button type="button" className="bg-transparent border border-white/30 text-white px-9 py-3.5 rounded-3xl font-sans text-[13px] font-light tracking-[0.08em] uppercase transition-all hover:border-[#C8A96E] hover:bg-[#C8A96E]/10">
             Watch Story
           </button>
         </div>

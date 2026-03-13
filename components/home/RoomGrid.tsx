@@ -16,7 +16,7 @@ export default function RoomGrid() {
         {/* Large featured room */}
         <Link href={`/collections?room=${rooms[0].slug}`}
           className="col-span-1 row-span-2 relative rounded-2xl overflow-hidden group no-underline">
-          <Image src={rooms[0].image} alt={rooms[0].name} fill className="object-cover transition-transform duration-700 group-hover:scale-[1.05]" sizes="33vw" />
+          <Image src={rooms[0].image} alt={rooms[0].name} fill priority className="object-cover transition-transform duration-700 group-hover:scale-[1.05]" sizes="33vw" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           <div className="absolute bottom-5 left-5 text-white">
             <div className="text-[9px] font-medium tracking-[0.18em] uppercase text-[#C8A96E] mb-1">{rooms[0].tag}</div>
