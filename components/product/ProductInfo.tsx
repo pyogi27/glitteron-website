@@ -40,7 +40,7 @@ export default function ProductInfo({ product }: { product: Product }) {
   const emi = Math.round(product.price / 12)
 
   return (
-    <div className="p-[40px_48px_48px_40px] overflow-y-auto h-[calc(100vh-72px)] bg-white">
+    <div className="p-5 lg:p-[40px_48px_48px_40px] overflow-y-auto h-auto lg:h-[calc(100vh-72px)] bg-white">
       {/* Category */}
       <div className="text-[10px] font-medium tracking-[0.18em] uppercase text-[#C8A96E] mb-3">{product.category}</div>
 

@@ -30,7 +30,7 @@ export default function ShuffleDeck({ products }: Props) {
   }
 
   return (
-    <section className="bg-[#1A1714] py-[120px] px-12 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
+    <section className="bg-[#1A1714] py-[120px] px-4 md:px-12 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
       {/* Left text */}
       <div className="flex-1 max-w-[500px] text-center lg:text-left">
         <div className="text-[11px] font-medium tracking-[0.22em] uppercase text-[#C4714A] mb-5">Curated For You</div>

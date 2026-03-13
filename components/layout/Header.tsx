@@ -29,6 +29,11 @@ export default function Header({ transparent = false }: HeaderProps) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [transparent])
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [pathname])
+
   const isLight = transparent && !scrolled
 
   return (
@@ -102,7 +107,9 @@ export default function Header({ transparent = false }: HeaderProps) {
             type="button"
             onClick={() => setMenuOpen(prev => !prev)}
             aria-label="Toggle menu"
-            className="md:hidden w-9 h-9 flex items-center justify-center text-[#1A1714]"
+            className={`md:hidden w-9 h-9 flex items-center justify-center transition-colors ${
+              !scrolled ? 'text-white' : 'text-[#1A1714]'
+            }`}
           >
             {menuOpen ? (
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

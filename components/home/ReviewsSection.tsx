@@ -4,14 +4,14 @@ import RevealOnScroll from '@/components/ui/RevealOnScroll'
 
 export default function ReviewsSection() {
   return (
-    <section className="py-[100px] px-12 bg-[#FAFAF8]">
+    <section className="py-[100px] px-4 md:px-12 bg-[#FAFAF8]">
       <RevealOnScroll className="text-center mb-14">
         <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#C4714A] mb-4">Testimonials</div>
         <h2 className="font-serif text-[clamp(32px,4vw,48px)] font-light">
           Loved by <em className="italic">12,000+</em> homes
         </h2>
       </RevealOnScroll>
-      <div className="grid grid-cols-3 gap-7 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-7 max-w-6xl mx-auto">
         {testimonials.map((t, i) => (
           <RevealOnScroll key={t.id} delay={i * 0.12} className="bg-[#F4F1EB] rounded-2xl p-8 flex flex-col">
             <StarRating rating={t.rating} size={14} />

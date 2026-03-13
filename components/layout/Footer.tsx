@@ -27,8 +27,8 @@ const FOOTER_LINKS = {
 
 export default function Footer() {
   return (
-    <footer className="bg-black text-white/60 pt-[72px] pb-9 px-12">
-      <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-14 mb-14 pb-14 border-b border-white/[0.07]">
+    <footer className="bg-black text-white/60 pt-[72px] pb-9 px-4 md:px-12">
+      <div className="grid grid-cols-2 md:grid-cols-[2fr_1fr_1fr_1fr] gap-8 md:gap-14 mb-14 pb-14 border-b border-white/[0.07]">
         {/* Brand column */}
         <div>
           <Logo light />

@@ -11,7 +11,7 @@ export default function ProductCarousel({ titlePrefix, titleHighlight, label, pr
   const scrollBy = (dir: number) => track.current?.scrollBy({ left: dir * 320, behavior: 'smooth' })
 
   return (
-    <section className="py-[100px] px-12">
+    <section className="py-[100px] px-4 md:px-12">
       <div className="flex items-end justify-between mb-12">
         <div>
           <div className="flex items-center gap-3 text-[11px] font-medium tracking-[0.2em] uppercase text-[#C4714A] mb-4">
@@ -26,11 +26,11 @@ export default function ProductCarousel({ titlePrefix, titleHighlight, label, pr
           View All →
         </Link>
       </div>
-      <div className="relative -mx-12">
+      <div className="relative -mx-4 md:-mx-12">
         <button aria-label="Scroll left" onClick={() => scrollBy(-1)} className="absolute left-2 top-1/2 -translate-y-1/2 w-11 h-11 bg-white border border-[#E8E4DC] rounded-full flex items-center justify-center z-10 shadow-md hover:bg-[#C8A96E] hover:border-[#C8A96E] transition-all hover:scale-[1.08]">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
-        <div ref={track} className="flex gap-6 px-12 pb-12 overflow-x-auto [scroll-snap-type:x_mandatory] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div ref={track} className="flex gap-6 px-4 md:px-12 pb-12 overflow-x-auto [scroll-snap-type:x_mandatory] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {products.map(p => (
             <div key={p.id} className="flex-none w-[280px] [scroll-snap-align:start]">
               <ProductCard product={p} />

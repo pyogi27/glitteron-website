@@ -11,7 +11,7 @@ export default function NewsletterStrip() {
   }
 
   return (
-    <section className="bg-[#1A1714] py-[80px] px-12 text-center">
+    <section className="bg-[#1A1714] py-[80px] px-4 md:px-12 text-center">
       <div className="max-w-[560px] mx-auto">
         <div className="text-[10px] font-medium tracking-[0.22em] uppercase text-[#C8A96E] mb-4">Stay Illuminated</div>
         <h2 className="font-serif text-[36px] font-light text-white leading-[1.2] mb-3">
