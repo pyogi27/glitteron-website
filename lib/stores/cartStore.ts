@@ -27,11 +27,13 @@ export const useCartStore = create<CartStore>()(
       items: [],
       addItem: (item) =>
         set((s) => {
-          const existing = s.items.find((i) => i.productId === item.productId)
+          const existing = s.items.find(
+            (i) => i.productId === item.productId && i.size === item.size && i.finish === item.finish
+          )
           if (existing) {
             return {
               items: s.items.map((i) =>
-                i.productId === item.productId
+                i.productId === item.productId && i.size === item.size && i.finish === item.finish
                   ? { ...i, quantity: i.quantity + item.quantity }
                   : i
               ),

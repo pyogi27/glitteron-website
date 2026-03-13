@@ -349,7 +349,18 @@ export const products: Product[] = [
 export const getFeaturedProducts = (): Product[] => products.slice(0, 6)
 export const getProductBySlug = (slug: string): Product | undefined =>
   products.find((p) => p.slug === slug)
-export const getRelatedProducts = (id: string): Product[] =>
-  products.filter((p) => p.id !== id).slice(0, 4)
+export const getRelatedProducts = (id: string): Product[] => {
+  const product = products.find(p => p.id === id)
+  if (!product) return products.filter(p => p.id !== id).slice(0, 4)
+
+  const sameCategory = products.filter(
+    p => p.id !== id && p.category === product.category
+  )
+  const others = products.filter(
+    p => p.id !== id && p.category !== product.category
+  )
+
+  return [...sameCategory, ...others].slice(0, 4)
+}
 export const getProductsByCategory = (category: string): Product[] =>
   category === 'All' ? products : products.filter((p) => p.category === category)

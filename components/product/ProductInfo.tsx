@@ -19,7 +19,7 @@ export default function ProductInfo({ product }: { product: Product }) {
   const [qty, setQty] = useState(1)
   const [size, setSize] = useState(product.variants.sizes[0])
   const [finish, setFinish] = useState(product.variants.finishes[0])
-  const [crystalTone, setCrystalTone] = useState(product.variants.crystalTones?.[0]?.name ?? '')
+  const [crystalTone, setCrystalTone] = useState(product.variants.crystalTones[0]?.name ?? '')
 
   const addItem = useCartStore(s => s.addItem)
   const { toggle, has } = useWishlistStore()
@@ -85,8 +85,8 @@ export default function ProductInfo({ product }: { product: Product }) {
       </div>
 
       {/* Variants */}
-      <VariantSelector label="Size" options={product.variants.sizes} onChange={setSize} />
-      <VariantSelector label="Finish" options={product.variants.finishes} onChange={setFinish} />
+      <VariantSelector label="Size" value={size} options={product.variants.sizes} onChange={setSize} />
+      <VariantSelector label="Finish" value={finish} options={product.variants.finishes} onChange={setFinish} />
 
       {/* Crystal tones */}
       {product.variants.crystalTones?.length > 0 && (
@@ -113,7 +113,7 @@ export default function ProductInfo({ product }: { product: Product }) {
 
       {/* Quantity + Actions */}
       <div className="flex items-center gap-3 mb-4">
-        <QuantityControl max={product.stock} onChange={setQty} />
+        <QuantityControl value={qty} max={product.stock} onChange={setQty} />
         <button
           type="button"
           onClick={handleAddToCart}
@@ -134,6 +134,7 @@ export default function ProductInfo({ product }: { product: Product }) {
       </div>
       <button
         type="button"
+        onClick={handleAddToCart}
         className="w-full bg-[#C8A96E] text-[#1A1714] border-none py-3 rounded-3xl font-sans text-[13px] font-semibold tracking-[0.08em] uppercase mb-7 transition-all hover:bg-[#E8D5A3] hover:-translate-y-0.5"
       >
         Buy Now

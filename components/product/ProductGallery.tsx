@@ -37,7 +37,7 @@ export default function ProductGallery({ images, name }: Props) {
           fill
           className="object-cover transition-opacity duration-300"
           sizes="50vw"
-          priority
+          priority={active === 0}
         />
         <button
           type="button"
