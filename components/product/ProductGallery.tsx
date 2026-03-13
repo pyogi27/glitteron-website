@@ -8,7 +8,7 @@ interface Props { images: string[]; name: string }
 export default function ProductGallery({ images, name }: Props) {
   const [active, setActive] = useState(0)
   return (
-    <div className="sticky top-[72px] flex gap-3.5 p-[32px_24px_32px_48px] bg-[#FAFAF8] h-[calc(100vh-72px)]">
+    <div className="lg:sticky lg:top-[72px] flex gap-3.5 p-[32px_24px_32px_48px] bg-[#FAFAF8] h-[50vh] lg:h-[calc(100vh-72px)]">
       {/* Thumbnails */}
       <div className="flex flex-col gap-2.5 w-[76px] flex-shrink-0">
         {images.map((src, i) => (

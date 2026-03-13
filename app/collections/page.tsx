@@ -24,7 +24,9 @@ export default function CollectionsPage() {
       />
       <Toolbar />
       <div className="flex items-start min-h-screen bg-[#FAFAF8]">
-        <FilterSidebar />
+        <div className="hidden lg:block">
+          <FilterSidebar />
+        </div>
         <ProductGrid products={products} />
       </div>
     </>

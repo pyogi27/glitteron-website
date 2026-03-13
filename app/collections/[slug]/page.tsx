@@ -45,7 +45,7 @@ export default async function ProductPage({ params }: Props) {
       </div>
 
       {/* Split layout */}
-      <div className="grid grid-cols-2 min-h-[calc(100vh-110px)]">
+      <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[calc(100vh-110px)]">
         <ProductGallery images={product.images} name={product.name} />
         <ProductInfo product={product} />
       </div>

@@ -10,7 +10,7 @@ const stats = [
 export default function StatsDivider() {
   return (
     <div className="bg-[#E8E4DC] py-14 px-12">
-      <div className="max-w-5xl mx-auto grid grid-cols-4 gap-8">
+      <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
         {stats.map((s, i) => (
           <RevealOnScroll key={s.num} delay={i * 0.1} className="text-center">
             <div className="font-serif text-[clamp(36px,4vw,52px)] font-light text-[#1A1714] leading-none mb-2">{s.num}</div>
