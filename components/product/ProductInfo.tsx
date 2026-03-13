@@ -19,6 +19,7 @@ export default function ProductInfo({ product }: { product: Product }) {
   const [qty, setQty] = useState(1)
   const [size, setSize] = useState(product.variants.sizes[0])
   const [finish, setFinish] = useState(product.variants.finishes[0])
+  const [crystalTone, setCrystalTone] = useState(product.variants.crystalTones?.[0]?.name ?? '')
 
   const addItem = useCartStore(s => s.addItem)
   const { toggle, has } = useWishlistStore()
@@ -88,23 +89,27 @@ export default function ProductInfo({ product }: { product: Product }) {
       <VariantSelector label="Finish" options={product.variants.finishes} onChange={setFinish} />
 
       {/* Crystal tones */}
-      <div className="mb-5">
-        <div className="text-[11px] font-semibold tracking-[0.14em] uppercase text-[#1A1714] mb-3">
-          Crystal Tone
+      {product.variants.crystalTones?.length > 0 && (
+        <div className="mb-5">
+          <div className="text-[11px] font-semibold tracking-[0.14em] uppercase text-[#1A1714] mb-3">
+            Crystal Tone
+            <span className="text-[#9A958C] font-light tracking-[0.04em] normal-case ml-1.5">— {crystalTone}</span>
+          </div>
+          <div className="flex gap-2.5">
+            {product.variants.crystalTones.map(ct => (
+              <button
+                key={ct.name}
+                type="button"
+                title={ct.name}
+                aria-label={ct.name}
+                onClick={() => setCrystalTone(ct.name)}
+                className={`w-6 h-6 rounded-full border-2 transition-all ${crystalTone === ct.name ? 'border-[#C8A96E] scale-110' : 'border-[#E8E4DC] hover:border-[#C8A96E]'}`}
+                style={{ backgroundColor: ct.hex }}
+              />
+            ))}
+          </div>
         </div>
-        <div className="flex gap-2.5">
-          {product.variants.crystalTones.map(ct => (
-            <button
-              key={ct.name}
-              type="button"
-              title={ct.name}
-              aria-label={ct.name}
-              className="w-6 h-6 rounded-full border-2 border-[#E8E4DC] hover:border-[#C8A96E] transition-all"
-              style={{ backgroundColor: ct.hex }}
-            />
-          ))}
-        </div>
-      </div>
+      )}
 
       {/* Quantity + Actions */}
       <div className="flex items-center gap-3 mb-4">
