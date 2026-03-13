@@ -1,7 +1,28 @@
+import HeroSection from '@/components/home/HeroSection'
+import TickerStrip from '@/components/home/TickerStrip'
+import ProductCarousel from '@/components/home/ProductCarousel'
+import StatsDivider from '@/components/home/StatsDivider'
+import RoomGrid from '@/components/home/RoomGrid'
+import ShuffleDeck from '@/components/home/ShuffleDeck'
+import SocialGrid from '@/components/home/SocialGrid'
+import ReviewsSection from '@/components/home/ReviewsSection'
+import NewsletterStrip from '@/components/home/NewsletterStrip'
+import { getFeaturedProducts } from '@/lib/data/products'
+
 export default function HomePage() {
+  const featured = getFeaturedProducts()
   return (
-    <main className="min-h-screen flex items-center justify-center">
-      <h1 className="font-serif text-5xl text-gold">GlitterOn</h1>
-    </main>
+    <>
+      <HeroSection />
+      <TickerStrip />
+      <ProductCarousel title="New <em>Arrivals</em>" label="Just In" products={featured.slice(0, 6)} />
+      <StatsDivider />
+      <ProductCarousel title="<em>Bestselling</em> Lights" label="Most Loved" products={featured} />
+      <RoomGrid />
+      <ShuffleDeck products={featured} />
+      <SocialGrid />
+      <ReviewsSection />
+      <NewsletterStrip />
+    </>
   )
 }
