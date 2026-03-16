@@ -17,24 +17,27 @@ interface HeaderProps {
   transparent?: boolean
 }
 
-export default function Header({ transparent = false }: HeaderProps) {
+export default function Header({ transparent }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const pathname = usePathname()
 
+  const isTransparent = transparent ?? pathname === '/'
+
   useEffect(() => {
-    if (!transparent) return
+    if (!isTransparent) return
+    setScrolled(window.scrollY > 10)
     const onScroll = () => setScrolled(window.scrollY > 10)
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
-  }, [transparent])
+  }, [isTransparent])
 
   // Close mobile menu on route change
   useEffect(() => {
     setMenuOpen(false)
   }, [pathname])
 
-  const isLight = transparent && !scrolled
+  const isLight = isTransparent && !scrolled
 
   return (
     <header
@@ -108,7 +111,7 @@ export default function Header({ transparent = false }: HeaderProps) {
             onClick={() => setMenuOpen(prev => !prev)}
             aria-label="Toggle menu"
             className={`md:hidden w-9 h-9 flex items-center justify-center transition-colors ${
-              !scrolled ? 'text-white' : 'text-[#1A1714]'
+              isLight ? 'text-white' : 'text-[#2C2825]'
             }`}
           >
             {menuOpen ? (
@@ -125,13 +128,13 @@ export default function Header({ transparent = false }: HeaderProps) {
       </div>
 
       {menuOpen && (
-        <nav className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-[#E8E4DC] shadow-lg py-4 px-6 flex flex-col gap-3">
+        <nav className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-[#D8D0C4] shadow-lg py-4 px-6 flex flex-col gap-3">
           {NAV_LINKS.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
               onClick={() => setMenuOpen(false)}
-              className="text-[14px] font-medium tracking-[0.06em] uppercase text-[#1A1714] opacity-70 hover:opacity-100 hover:text-[#9A7840] transition-all no-underline py-1"
+              className="text-[14px] font-medium tracking-[0.06em] uppercase text-[#2C2825] opacity-70 hover:opacity-100 hover:text-[#8B5E3C] transition-all no-underline py-1"
             >
               {label}
             </Link>

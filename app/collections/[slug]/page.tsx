@@ -34,13 +34,13 @@ export default async function ProductPage({ params }: Props) {
   return (
     <>
       {/* Breadcrumb */}
-      <div className="pt-[72px] bg-white border-b border-[#E8E4DC]">
-        <div className="px-12 py-3.5 flex items-center gap-2 text-[11.5px] text-[#9A958C]">
-          <Link href="/" className="hover:text-[#9A7840] transition-colors">Home</Link>
+      <div className="pt-[72px] bg-white border-b border-[#D8D0C4]">
+        <div className="px-12 py-3.5 flex items-center gap-2 text-[11.5px] text-[#A09488]">
+          <Link href="/" className="hover:text-[#8B5E3C] transition-colors">Home</Link>
           <span className="opacity-45">›</span>
-          <Link href="/collections" className="hover:text-[#9A7840] transition-colors">Collections</Link>
+          <Link href="/collections" className="hover:text-[#8B5E3C] transition-colors">Collections</Link>
           <span className="opacity-45">›</span>
-          <span className="text-[#1A1714] font-normal">{product.name}</span>
+          <span className="text-[#2C2825] font-normal">{product.name}</span>
         </div>
       </div>
 

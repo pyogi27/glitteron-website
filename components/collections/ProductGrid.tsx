@@ -35,15 +35,15 @@ export default function ProductGrid({ products }: Props) {
   })
 
   return (
-    <div className="flex-1 p-8">
+    <div className="flex-1 p-8 overflow-visible">
       {sorted.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 text-center">
-          <div className="font-serif text-[24px] font-light text-[#1A1714] mb-3">No products found</div>
-          <div className="text-[13px] text-[#9A958C]">Try adjusting your filters</div>
+          <div className="font-serif text-[24px] font-light text-[#2C2825] mb-3">No products found</div>
+          <div className="text-[13px] text-[#A09488]">Try adjusting your filters</div>
         </div>
       ) : (
         <div className={viewMode === 'grid'
-          ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'
+          ? 'cards-track grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4'
           : 'flex flex-col gap-4'
         }>
           {sorted.map(p => (

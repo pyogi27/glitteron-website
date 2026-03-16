@@ -37,6 +37,7 @@ export interface Room {
   id: string
   name: string
   tag: string
+  subtitle: string
   count: number
   image: string
   slug: string

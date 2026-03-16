@@ -26,15 +26,15 @@ function FilterItem({ label, count, active, onToggle }: FilterItemProps) {
       onClick={onToggle}
       className="flex items-center gap-2.5 mb-2.5 w-full text-left"
     >
-      <div className={`w-[15px] h-[15px] border-[1.5px] rounded-[3px] flex-shrink-0 flex items-center justify-center transition-all ${active ? 'bg-[#1A1714] border-[#1A1714]' : 'border-[#E8E4DC]'}`}>
+      <div className={`w-[15px] h-[15px] border-[1.5px] rounded-[3px] flex-shrink-0 flex items-center justify-center transition-all ${active ? 'bg-[#2C2825] border-[#2C2825]' : 'border-[#D8D0C4]'}`}>
         {active && (
           <svg viewBox="0 0 10 10" width="9" height="9">
-            <path d="M1.5 5l2.5 2.5 5-5" stroke="#FAFAF8" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M1.5 5l2.5 2.5 5-5" stroke="#EDE8E0" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         )}
       </div>
-      <span className="text-[12px] text-[#1A1714] opacity-75 flex-1">{label}</span>
-      {count !== undefined && <span className="text-[10px] text-[#9A958C]">{count}</span>}
+      <span className="text-[12px] text-[#2C2825] opacity-75 flex-1">{label}</span>
+      {count !== undefined && <span className="text-[10px] text-[#A09488]">{count}</span>}
     </button>
   )
 }
@@ -47,7 +47,7 @@ interface FilterGroupProps {
 function FilterGroup({ title, children }: FilterGroupProps) {
   return (
     <div className="mb-7">
-      <h3 className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[#1A1714] mb-3.5 pb-2.5 border-b border-[#E8E4DC]">{title}</h3>
+      <h3 className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[#2C2825] mb-3.5 pb-2.5 border-b border-[#D8D0C4]">{title}</h3>
       {children}
     </div>
   )
@@ -57,7 +57,7 @@ export default function FilterSidebar() {
   const { activeTab, setActiveTab, materials, rooms, toggleMaterial, toggleRoom, priceRange, setPriceRange, clearAll } = useFilterStore()
 
   return (
-    <aside className="w-[268px] flex-shrink-0 px-7 py-8 border-r border-[#E8E4DC] sticky top-[72px] h-[calc(100vh-72px)] overflow-y-auto [scrollbar-width:thin]">
+    <aside className="w-[268px] flex-shrink-0 px-7 py-8 border-r border-[#D8D0C4] sticky top-[72px] h-[calc(100vh-72px)] overflow-y-auto [scrollbar-width:thin]">
       <FilterGroup title="Category">
         {CATEGORIES.map(c => (
           <FilterItem
@@ -70,7 +70,7 @@ export default function FilterSidebar() {
         ))}
       </FilterGroup>
 
-      <hr className="border-[#E8E4DC] my-7" />
+      <hr className="border-[#D8D0C4] my-7" />
 
       <FilterGroup title="Price Range">
         <div className="flex gap-2 mb-3">
@@ -78,14 +78,14 @@ export default function FilterSidebar() {
             type="text"
             value={`₹${priceRange[0].toLocaleString('en-IN')}`}
             readOnly
-            className="flex-1 bg-transparent border border-[#E8E4DC] text-[#1A1714] px-2.5 py-1.5 rounded-lg text-[12px] focus:border-[#C8A96E] outline-none"
+            className="flex-1 bg-transparent border border-[#D8D0C4] text-[#2C2825] px-2.5 py-1.5 rounded-lg text-[12px] focus:border-[#C4714A] outline-none"
           />
-          <span className="text-[#9A958C] text-[12px] self-center">–</span>
+          <span className="text-[#A09488] text-[12px] self-center">–</span>
           <input
             type="text"
             value={`₹${priceRange[1].toLocaleString('en-IN')}`}
             readOnly
-            className="flex-1 bg-transparent border border-[#E8E4DC] text-[#1A1714] px-2.5 py-1.5 rounded-lg text-[12px] focus:border-[#C8A96E] outline-none"
+            className="flex-1 bg-transparent border border-[#D8D0C4] text-[#2C2825] px-2.5 py-1.5 rounded-lg text-[12px] focus:border-[#C4714A] outline-none"
           />
         </div>
         <input
@@ -95,11 +95,11 @@ export default function FilterSidebar() {
           step={1000}
           value={priceRange[1]}
           onChange={e => setPriceRange([priceRange[0], Number(e.target.value)])}
-          className="w-full accent-[#C8A96E]"
+          className="w-full accent-[#C4714A]"
         />
       </FilterGroup>
 
-      <hr className="border-[#E8E4DC] my-7" />
+      <hr className="border-[#D8D0C4] my-7" />
 
       <FilterGroup title="Material">
         {MATERIALS.map(m => (
@@ -112,7 +112,7 @@ export default function FilterSidebar() {
         ))}
       </FilterGroup>
 
-      <hr className="border-[#E8E4DC] my-7" />
+      <hr className="border-[#D8D0C4] my-7" />
 
       <FilterGroup title="Best For">
         {ROOMS.map(r => (
@@ -125,11 +125,11 @@ export default function FilterSidebar() {
         ))}
       </FilterGroup>
 
-      <hr className="border-[#E8E4DC] my-7" />
+      <hr className="border-[#D8D0C4] my-7" />
 
       <button
         onClick={clearAll}
-        className="w-full border border-[#E8E4DC] text-[#9A958C] px-3 py-2.5 rounded-2xl text-[11px] tracking-[0.08em] uppercase transition-all hover:border-[#9A7840] hover:text-[#9A7840]"
+        className="w-full border border-[#D8D0C4] text-[#A09488] px-3 py-2.5 rounded-2xl text-[11px] tracking-[0.08em] uppercase transition-all hover:border-[#8B5E3C] hover:text-[#8B5E3C]"
       >
         Clear All Filters
       </button>

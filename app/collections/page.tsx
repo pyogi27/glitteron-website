@@ -23,7 +23,7 @@ export default function CollectionsPage() {
         ]}
       />
       <Toolbar />
-      <div className="flex items-start min-h-screen bg-[#FAFAF8]">
+      <div className="flex items-start min-h-screen bg-[#EDE8E0]">
         <div className="hidden lg:block">
           <FilterSidebar />
         </div>

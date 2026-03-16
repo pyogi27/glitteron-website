@@ -16,9 +16,9 @@ export default function VariantSelector({ label, value, options, disabledOptions
   }
   return (
     <div className="mb-5">
-      <div className="text-[11px] font-semibold tracking-[0.14em] uppercase text-[#1A1714] mb-3 flex items-center gap-1.5">
+      <div className="text-[11px] font-semibold tracking-[0.14em] uppercase text-[#2C2825] mb-3 flex items-center gap-1.5">
         {label}
-        <span className="text-[#9A958C] font-light tracking-[0.04em] normal-case">— {value}</span>
+        <span className="text-[#A09488] font-light tracking-[0.04em] normal-case">— {value}</span>
       </div>
       <div className="flex flex-wrap gap-2">
         {options.map(opt => (
@@ -28,10 +28,10 @@ export default function VariantSelector({ label, value, options, disabledOptions
             onClick={() => select(opt)}
             className={`px-4 py-[7px] border rounded-[20px] text-[12px] transition-all
               ${disabledOptions.includes(opt)
-                ? 'opacity-40 line-through cursor-not-allowed border-[#E8E4DC] text-[#1A1714]'
+                ? 'opacity-40 line-through cursor-not-allowed border-[#D8D0C4] text-[#2C2825]'
                 : value === opt
-                  ? 'bg-[#1A1714] border-[#1A1714] text-[#FAFAF8]'
-                  : 'bg-transparent border-[#E8E4DC] text-[#1A1714] hover:border-[#C8A96E] hover:text-[#9A7840]'
+                  ? 'bg-[#2C2825] border-[#2C2825] text-[#EDE8E0]'
+                  : 'bg-transparent border-[#D8D0C4] text-[#2C2825] hover:border-[#C4714A] hover:text-[#8B5E3C]'
               }`}
           >
             {opt}
