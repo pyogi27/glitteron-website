@@ -1,16 +1,23 @@
 'use client'
+import { useEffect } from 'react'
 import { useFilterStore } from '@/lib/stores/filterStore'
+import { useRouter, useSearchParams } from 'next/navigation'
 
-const CATEGORIES = [
-  { label: 'All', count: 364 },
-  { label: 'Chandeliers', count: 128 },
-  { label: 'Pendant Lights', count: 96 },
-  { label: 'Sputnik Lights', count: 42 },
-  { label: 'Dome Lights', count: 38 },
-  { label: 'Crystal Lights', count: 56 },
+const DEFAULT_CATEGORIES = [
+  { label: 'All' },
+  { label: 'Chandeliers' },
+  { label: 'Pendant Lights' },
+  { label: 'Sputnik Lights' },
+  { label: 'Dome Lights' },
+  { label: 'Crystal Lights' },
 ]
 const MATERIALS = ['Crystal', 'Brass', 'Iron & Steel', 'Blown Glass', 'Wood & Rattan']
 const ROOMS = ['Living Room', 'Dining Room', 'Bedroom', 'Home Office', 'Foyer / Entrance']
+
+interface CategoryItem {
+  label: string
+  count?: number
+}
 
 interface FilterItemProps {
   label: string
@@ -53,19 +60,70 @@ function FilterGroup({ title, children }: FilterGroupProps) {
   )
 }
 
-export default function FilterSidebar() {
-  const { activeTab, setActiveTab, materials, rooms, toggleMaterial, toggleRoom, priceRange, setPriceRange, clearAll } = useFilterStore()
+interface FilterSidebarProps {
+  categories?: CategoryItem[]
+}
+
+export default function FilterSidebar({ categories = DEFAULT_CATEGORIES }: FilterSidebarProps) {
+  const { materials, rooms, toggleMaterial, toggleRoom, priceRange, setPriceRange, clearAll } = useFilterStore()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const activeCategory = searchParams.get('category') ?? 'All'
+
+  // Sync URL price params to store on mount
+  useEffect(() => {
+    const minPriceStr = searchParams.get('minPrice')
+    const maxPriceStr = searchParams.get('maxPrice')
+    if (minPriceStr && maxPriceStr) {
+      const minPrice = Number(minPriceStr)
+      const maxPrice = Number(maxPriceStr)
+      if (!isNaN(minPrice) && !isNaN(maxPrice)) {
+        setPriceRange([minPrice, maxPrice])
+      }
+    }
+  }, [])
+
+  function handleCategoryToggle(label: string) {
+    const params = new URLSearchParams(searchParams.toString())
+    if (label === 'All') {
+      params.delete('category')
+    } else {
+      params.set('category', label)
+    }
+    params.set('page', '1')
+    router.push(`/collections?${params.toString()}`)
+  }
+
+  function handleClearAll() {
+    clearAll()
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('category')
+    params.delete('minPrice')
+    params.delete('maxPrice')
+    params.set('page', '1')
+    router.push(`/collections?${params.toString()}`)
+  }
+
+  function handlePriceRangeChange(newMin: number, newMax: number) {
+    setPriceRange([newMin, newMax])
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('minPrice', String(newMin))
+    params.set('maxPrice', String(newMax))
+    params.set('page', '1')
+    router.push(`/collections?${params.toString()}`)
+  }
 
   return (
     <aside className="w-[268px] flex-shrink-0 px-7 py-8 border-r border-[#D8D0C4] sticky top-[72px] h-[calc(100vh-72px)] overflow-y-auto [scrollbar-width:thin]">
       <FilterGroup title="Category">
-        {CATEGORIES.map(c => (
+        {categories.map(c => (
           <FilterItem
             key={c.label}
             label={c.label}
             count={c.count}
-            active={activeTab === c.label}
-            onToggle={() => setActiveTab(c.label)}
+            active={activeCategory === c.label}
+            onToggle={() => handleCategoryToggle(c.label)}
           />
         ))}
       </FilterGroup>
@@ -94,7 +152,7 @@ export default function FilterSidebar() {
           max={50000}
           step={1000}
           value={priceRange[1]}
-          onChange={e => setPriceRange([priceRange[0], Number(e.target.value)])}
+          onChange={e => handlePriceRangeChange(priceRange[0], Number(e.target.value))}
           className="w-full accent-[#C4714A]"
         />
       </FilterGroup>
@@ -128,7 +186,7 @@ export default function FilterSidebar() {
       <hr className="border-[#D8D0C4] my-7" />
 
       <button
-        onClick={clearAll}
+        onClick={handleClearAll}
         className="w-full border border-[#D8D0C4] text-[#A09488] px-3 py-2.5 rounded-2xl text-[11px] tracking-[0.08em] uppercase transition-all hover:border-[#8B5E3C] hover:text-[#8B5E3C]"
       >
         Clear All Filters

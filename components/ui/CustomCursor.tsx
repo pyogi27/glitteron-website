@@ -11,6 +11,10 @@ export default function CustomCursor() {
     const ring = ringRef.current
     if (!dot || !ring) return
 
+    // Force-hide the native cursor via JS as a reliable fallback on top of CSS
+    document.documentElement.style.setProperty('cursor', 'none', 'important')
+    document.body.style.setProperty('cursor', 'none', 'important')
+
     const moveCursor = (e: MouseEvent) => {
       gsap.to(dot, { x: e.clientX, y: e.clientY, duration: 0.1, ease: 'none' })
       gsap.to(ring, { x: e.clientX, y: e.clientY, duration: 0.15, ease: 'power2.out' })

@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useCartStore } from '@/lib/stores/cartStore'
 
 export default function CartButton() {
@@ -8,7 +9,7 @@ export default function CartButton() {
   useEffect(() => setMounted(true), [])
 
   return (
-    <button className="relative flex items-center gap-2 bg-dark text-white border-none px-[18px] py-2 rounded-3xl font-sans text-xs font-medium tracking-[0.06em] uppercase transition-all duration-300 hover:bg-gold-dark hover:-translate-y-0.5 cursor-none">
+    <Link href="/cart" className="relative flex items-center gap-2 bg-dark text-white no-underline px-[18px] py-2 rounded-3xl font-sans text-xs font-medium tracking-[0.06em] uppercase transition-all duration-300 hover:bg-gold-dark hover:-translate-y-0.5 cursor-none">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
         <line x1="3" y1="6" x2="21" y2="6" />
@@ -20,6 +21,6 @@ export default function CartButton() {
           {count}
         </span>
       )}
-    </button>
+    </Link>
   )
 }

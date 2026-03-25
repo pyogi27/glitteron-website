@@ -1,8 +1,7 @@
 'use client'
 import { useFilterStore } from '@/lib/stores/filterStore'
-import { products } from '@/lib/data/products'
+import { useRouter, useSearchParams } from 'next/navigation'
 
-const TABS = ['All', 'Chandeliers', 'Pendant Lights', 'Sputnik Lights', 'Dome Lights', 'Crystal Lights']
 const SORT_OPTIONS = [
   { value: 'featured', label: 'Featured' },
   { value: 'price-asc', label: 'Price: Low to High' },
@@ -10,52 +9,92 @@ const SORT_OPTIONS = [
   { value: 'rating', label: 'Top Rated' },
 ]
 
-export default function Toolbar() {
-  const { activeTab, setActiveTab, sortBy, setSortBy, viewMode, setViewMode, materials, priceRange } = useFilterStore()
+const LIMIT_OPTIONS = [12, 24, 48]
 
-  const filteredCount = (() => {
-    let filtered = products
-    if (activeTab !== 'All') {
-      filtered = filtered.filter(p => p.category.toLowerCase().includes(activeTab.toLowerCase()))
+interface Category {
+  id?: number
+  name: string
+}
+
+interface Props {
+  categories?: Category[]
+  total?: number
+}
+
+export default function Toolbar({ categories = [], total }: Props) {
+  const { sortBy, setSortBy, viewMode, setViewMode } = useFilterStore()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const activeCategory = searchParams.get('category') ?? 'All'
+  const currentLimit = Number(searchParams.get('limit')) || 12
+
+  const tabs: Category[] = [{ name: 'All' }, ...categories]
+
+  function handleCategoryChange(name: string) {
+    const params = new URLSearchParams(searchParams.toString())
+    if (name === 'All') {
+      params.delete('category')
+    } else {
+      params.set('category', name)
     }
-    if (materials.length > 0) {
-      filtered = filtered.filter(p =>
-        materials.some(m =>
-          p.name.toLowerCase().includes(m.toLowerCase()) ||
-          p.subtitle.toLowerCase().includes(m.toLowerCase()) ||
-          p.category.toLowerCase().includes(m.toLowerCase())
-        )
-      )
-    }
-    filtered = filtered.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1])
-    return filtered.length
-  })()
+    params.set('page', '1')
+    router.push(`/collections?${params.toString()}`)
+  }
+
+  function handleLimitChange(limit: number) {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('limit', String(limit))
+    params.set('page', '1')
+    router.push(`/collections?${params.toString()}`)
+  }
 
   return (
     <div className="border-b border-[#D8D0C4] bg-[#EDE8E0] px-8 py-4 flex flex-col gap-3">
       {/* Category tabs */}
       <div className="flex items-center gap-2 flex-wrap">
-        {TABS.map(tab => (
+        {tabs.map(tab => (
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
+            key={tab.name}
+            onClick={() => handleCategoryChange(tab.name)}
             className={`px-4 py-1.5 rounded-2xl text-[12px] font-medium tracking-[0.06em] transition-all border
-              ${activeTab === tab
+              ${activeCategory === tab.name
                 ? 'bg-[#2C2825] text-[#EDE8E0] border-[#2C2825]'
                 : 'bg-transparent text-[#A09488] border-[#D8D0C4] hover:border-[#C4714A] hover:text-[#8B5E3C]'
               }`}
           >
-            {tab}
+            {tab.name}
           </button>
         ))}
       </div>
 
-      {/* Sort + view + count */}
+      {/* Sort + limit + view + count */}
       <div className="flex items-center justify-between">
         <span className="text-[12px] text-[#A09488]">
-          Showing <strong className="text-[#2C2825]">{filteredCount}</strong> results
+          {total !== undefined
+            ? <>Showing <strong className="text-[#2C2825]">{total}</strong> results</>
+            : <>&nbsp;</>
+          }
         </span>
         <div className="flex items-center gap-3">
+          {/* Per-page selector */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] text-[#A09488] whitespace-nowrap">Show:</span>
+            {LIMIT_OPTIONS.map(n => (
+              <button
+                key={n}
+                onClick={() => handleLimitChange(n)}
+                className={`w-8 h-7 rounded-md text-[11px] font-medium transition-all border
+                  ${currentLimit === n
+                    ? 'bg-[#2C2825] text-[#EDE8E0] border-[#2C2825]'
+                    : 'bg-transparent text-[#A09488] border-[#D8D0C4] hover:border-[#2C2825] hover:text-[#2C2825]'
+                  }`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value)}

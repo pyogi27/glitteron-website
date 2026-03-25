@@ -6,13 +6,11 @@ import { Product } from '@/lib/types'
 interface Props { products: Product[] }
 
 export default function ProductGrid({ products }: Props) {
-  const { activeTab, materials, sortBy, viewMode, priceRange } = useFilterStore()
+  const { materials, sortBy, viewMode } = useFilterStore()
 
-  // Filter
+  // Category filtering is server-side via ?category= URL param
+  // Price filtering is now server-side via ?minPrice= and ?maxPrice= URL params
   let filtered = products
-  if (activeTab !== 'All') {
-    filtered = filtered.filter(p => p.category.toLowerCase().includes(activeTab.toLowerCase()))
-  }
   if (materials.length > 0) {
     // Approximate match against name/subtitle/category until API provides a dedicated material field
     filtered = filtered.filter(p =>
@@ -24,7 +22,6 @@ export default function ProductGrid({ products }: Props) {
     )
   }
   // rooms filter omitted: mock Product type has no room field; apply when API provides room metadata
-  filtered = filtered.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1])
 
   // Sort
   const sorted = [...filtered].sort((a, b) => {

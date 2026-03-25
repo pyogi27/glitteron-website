@@ -1,5 +1,6 @@
 export interface Product {
   id: string
+  apiProductId?: number
   slug: string
   name: string
   subtitle: string

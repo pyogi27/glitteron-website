@@ -24,8 +24,18 @@ export default function HeroSection() {
 
   return (
     <section className="relative h-screen min-h-[680px] flex items-center justify-center overflow-hidden">
-      {/* Dark background */}
-      <div className="absolute inset-0 bg-[#1A1210]" />
+      {/* Video background */}
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover"
+      >
+        <source src="/hero-video.mp4" type="video/mp4" />
+      </video>
+      {/* Dark fallback background */}
+      <div className="absolute inset-0 bg-[#1A1210]" style={{ zIndex: -1 }} />
       {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/52 via-black/38 to-black/60 z-[1]" />
 

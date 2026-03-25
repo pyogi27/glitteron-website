@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getProductBySlug, getRelatedProducts, products } from '@/lib/data/products'
+import { fetchProducts, fetchRelatedProducts, findApiProductBySlug, fetchProductById } from '@/lib/api/server'
 import ProductGallery from '@/components/product/ProductGallery'
 import ProductInfo from '@/components/product/ProductInfo'
 import RelatedProducts from '@/components/product/RelatedProducts'
@@ -11,12 +12,35 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
+// Generate static params from API products (limit high for coverage)
 export async function generateStaticParams() {
+  const limit = 250
+  const { products: firstPageProducts, totalPages } = await fetchProducts({ page: 1, limit })
+  if (firstPageProducts.length > 0) {
+    const allProducts = [...firstPageProducts]
+    for (let page = 2; page <= totalPages; page += 1) {
+      const { products: pageProducts } = await fetchProducts({ page, limit })
+      allProducts.push(...pageProducts)
+    }
+    return allProducts.map(p => ({ slug: p.slug ?? '' })).filter(p => p.slug)
+  }
+
+  // Fallback to static data
   return products.map(p => ({ slug: p.slug }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
+
+  const apiProduct = await findApiProductBySlug(slug)
+  if (apiProduct) {
+    return {
+      title: `${apiProduct.name} — GlitterOn`,
+      description: apiProduct.description ?? apiProduct.name,
+    }
+  }
+  
+  // Fallback to static
   const product = getProductBySlug(slug)
   if (!product) return { title: 'Product Not Found — GlitterOn' }
   return {
@@ -27,9 +51,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params
-  const product = getProductBySlug(slug)
+
+  const apiProduct = await findApiProductBySlug(slug)
+  let product = null
+
+  if (apiProduct) {
+    product = await fetchProductById(apiProduct.id)
+    if (product) product = { ...product, apiProductId: apiProduct.id }
+  }
+
+  if (!product) {
+    product = getProductBySlug(slug)
+  }
+
   if (!product) notFound()
-  const related = getRelatedProducts(product.id)
+
+  let related = getRelatedProducts(product.id)
+  if (apiProduct?.categoryId) {
+    const apiRelated = await fetchRelatedProducts(apiProduct.categoryId, apiProduct.id, 4)
+    if (apiRelated.length > 0) {
+      related = apiRelated
+    }
+  }
 
   return (
     <>

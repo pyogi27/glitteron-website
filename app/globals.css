@@ -86,6 +86,19 @@
   body { overflow-x: hidden; }
 }
 
+/*
+  Cursor override — intentionally outside @layer so it sits in the unlayered
+  author origin and beats any layered utility or UA stylesheet rule.
+  !important is also needed to override browser-injected cursor: text/pointer
+  on inputs, anchors, and buttons.
+*/
+html,
+html *,
+html *::before,
+html *::after {
+  cursor: none !important;
+}
+
 @layer utilities {
   /* ── Product card focus/defocus system ─────────────────────────────────
      Mirrors the HTML design exactly:
@@ -253,6 +266,20 @@
   .room-grid:has(.rg-card:hover) .rg-card:hover .rg-pill {
     background: rgba(196, 113, 74, 0.35);
     color: #EDE8E0;
+  }
+
+  /* ── Auth form inputs ──────────────────────────────────────────────── */
+  .auth-input {
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+
+  .auth-input:focus {
+    border-color: rgba(196, 113, 74, 0.65) !important;
+  }
+
+  .auth-input::placeholder {
+    color: rgba(44, 40, 37, 0.32);
   }
 
   .grain-overlay {

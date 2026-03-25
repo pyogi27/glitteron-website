@@ -1,9 +1,188 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Logo from '@/components/ui/Logo'
 import CartButton from './CartButton'
+import { useAuthStore } from '@/lib/stores/authStore'
+import { logoutApi } from '@/lib/auth/api'
+
+// ─── Profile button + dropdown ────────────────────────────────────────────────
+
+function ProfileButton({ isLight }: { isLight: boolean }) {
+  const user = useAuthStore(s => s.user)
+  const clearAuth = useAuthStore(s => s.clearAuth)
+  const [mounted, setMounted] = useState(false)
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const router = useRouter()
+  const pathname = usePathname()
+
+  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => { setOpen(false) }, [pathname])
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  const handleLogout = async () => {
+    setOpen(false)
+    try { await logoutApi() } catch { /* ignore */ }
+    clearAuth()
+    router.push('/')
+  }
+
+  const initials = mounted && user
+    ? `${(user.firstName ?? '?').charAt(0)}${(user.lastName ?? '?').charAt(0)}`.toUpperCase()
+    : null
+
+  return (
+    <div ref={ref} className="relative">
+      {/* Trigger */}
+      {mounted && user ? (
+        <button
+          type="button"
+          onClick={() => setOpen(v => !v)}
+          aria-label="Account menu"
+          className="w-8 h-8 rounded-full flex items-center justify-center font-sans text-[11px] font-semibold transition-all duration-200 hover:brightness-110"
+          style={{ background: '#C4714A', color: '#EDE8E0' }}
+        >
+          {initials}
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(v => !v)}
+          aria-label="Account menu"
+          className={`w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 border-none bg-transparent ${
+            isLight
+              ? 'text-white/80 hover:text-gold'
+              : 'text-dark opacity-70 hover:opacity-100 hover:text-gold-dark'
+          }`}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+            strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </button>
+      )}
+
+      {/* Dropdown */}
+      {open && (
+        <div
+          className="absolute right-0 top-[calc(100%+10px)] w-[220px] rounded-[18px] border border-[#D8D0C4] shadow-[0_12px_40px_rgba(44,40,37,0.14)] overflow-hidden z-50"
+          style={{ background: '#FFFFFF' }}
+        >
+          {mounted && user ? (
+            <>
+              {/* User info */}
+              <div className="px-4 py-4 border-b border-[#D8D0C4]" style={{ background: '#FAF7F2' }}>
+                <p className="font-sans text-[13px] font-medium truncate" style={{ color: '#1A1210' }}>
+                  {user.firstName} {user.lastName}
+                </p>
+                <p className="font-sans text-[11.5px] font-light mt-0.5" style={{ color: '#A09488' }}>
+                  +91 {user.phone}
+                </p>
+              </div>
+
+              {/* Links */}
+              <div className="py-1.5">
+                <Link
+                  href="/profile"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-2.5 font-sans text-[12.5px] font-medium no-underline transition-colors hover:bg-[#F4EFE8]"
+                  style={{ color: '#2C2825' }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                  My Profile
+                </Link>
+                <Link
+                  href="/profile?tab=orders"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-2.5 font-sans text-[12.5px] font-medium no-underline transition-colors hover:bg-[#F4EFE8]"
+                  style={{ color: '#2C2825' }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <path d="M16 10a4 4 0 01-8 0"/>
+                  </svg>
+                  My Orders
+                </Link>
+              </div>
+
+              <div className="h-px mx-4" style={{ background: '#D8D0C4' }} />
+
+              {/* Sign out */}
+              <div className="py-1.5">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 font-sans text-[12.5px] font-medium text-left transition-colors hover:bg-[#FFF0EB]"
+                  style={{ color: '#C4714A' }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16,17 21,12 16,7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                  </svg>
+                  Sign Out
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="py-1.5">
+              <Link
+                href="/login"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 px-4 py-2.5 font-sans text-[12.5px] font-medium no-underline transition-colors hover:bg-[#F4EFE8]"
+                style={{ color: '#2C2825' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                  <polyline points="10,17 15,12 10,7"/>
+                  <line x1="15" y1="12" x2="3" y2="12"/>
+                </svg>
+                Sign In
+              </Link>
+              <Link
+                href="/signup"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 px-4 py-2.5 font-sans text-[12.5px] font-medium no-underline transition-colors hover:bg-[#F4EFE8]"
+                style={{ color: '#2C2825' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <line x1="19" y1="8" x2="19" y2="14"/>
+                  <line x1="22" y1="11" x2="16" y2="11"/>
+                </svg>
+                Create Account
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
@@ -102,6 +281,8 @@ export default function Header({ transparent }: HeaderProps) {
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
           </button>
+
+          <ProfileButton isLight={isLight} />
 
           <CartButton />
 

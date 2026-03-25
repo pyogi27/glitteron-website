@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useState, useEffect } from 'react'
 import { Product } from '@/lib/types'
 import Badge from '@/components/ui/Badge'
 import StarRating from '@/components/ui/StarRating'
@@ -14,10 +15,16 @@ interface ProductCardProps {
   variant?: CardVariant
 }
 
+const FALLBACK_IMAGE =
+  'https://images.pexels.com/photos/1123262/pexels-photo-1123262.jpeg?auto=compress&cs=tinysrgb&w=800&h=900&fit=crop'
+
 export default function ProductCard({ product, variant = 'grid' }: ProductCardProps) {
   const addItem = useCartStore((s) => s.addItem)
   const { toggle, has } = useWishlistStore()
-  const isWishlisted = has(product.id)
+  const [mounted, setMounted] = useState(false)
+  const [imgSrc, setImgSrc] = useState(product.images[0] || FALLBACK_IMAGE)
+  useEffect(() => { setMounted(true) }, [])
+  const isWishlisted = mounted && has(product.id)
 
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault()
@@ -29,6 +36,7 @@ export default function ProductCard({ product, variant = 'grid' }: ProductCardPr
       quantity: 1,
       size: product.variants.sizes[0] ?? '',
       finish: product.variants.finishes[0] ?? '',
+      apiProductId: product.apiProductId,
     })
   }
 
@@ -49,11 +57,12 @@ export default function ProductCard({ product, variant = 'grid' }: ProductCardPr
         <div className="relative w-[220px] h-full flex-shrink-0 overflow-hidden bg-offwhite">
           {product.badge && <Badge variant={product.badge} />}
           <Image
-            src={product.images[0]}
+            src={imgSrc}
             alt={product.name}
             fill
             className="object-cover transition-transform duration-[650ms] [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.07]"
             sizes="220px"
+            onError={() => setImgSrc(FALLBACK_IMAGE)}
           />
         </div>
         <div className="flex flex-col flex-1 p-[20px_24px] justify-between">
@@ -105,11 +114,12 @@ export default function ProductCard({ product, variant = 'grid' }: ProductCardPr
       <div className="relative rounded-[inherit] overflow-hidden w-full h-full">
 
         <Image
-          src={product.images[0]}
+          src={imgSrc}
           alt={product.name}
           fill
           className="product-card-img object-cover transition-transform duration-[650ms] [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]"
           sizes={variant === 'related' ? '(max-width: 768px) 50vw, 25vw' : '(max-width: 768px) 100vw, 33vw'}
+          onError={() => setImgSrc(FALLBACK_IMAGE)}
         />
 
         {product.badge && <Badge variant={product.badge} />}

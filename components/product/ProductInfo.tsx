@@ -37,6 +37,7 @@ export default function ProductInfo({ product }: { product: Product }) {
       quantity: qty,
       size,
       finish,
+      apiProductId: product.apiProductId,
     })
   }
 
