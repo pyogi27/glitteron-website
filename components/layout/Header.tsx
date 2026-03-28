@@ -188,6 +188,7 @@ const NAV_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/collections', label: 'Collections' },
   { href: '/rooms', label: 'Rooms' },
+  { href: '/room-visualizer', label: 'Visualizer' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ]

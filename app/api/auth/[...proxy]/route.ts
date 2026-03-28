@@ -7,7 +7,8 @@ type RouteContext = { params: Promise<{ proxy: string[] }> };
 async function proxyRequest(req: NextRequest, ctx: RouteContext): Promise<NextResponse> {
   const { proxy } = await ctx.params;
   const path = proxy.join('/');
-  const url = `${BACKEND}/api/v1/auth/${path}`;
+  const search = req.nextUrl.search;
+  const url = `${BACKEND}/api/v1/auth/${path}${search}`;
 
   // Build forwarded headers
   const headers: Record<string, string> = {

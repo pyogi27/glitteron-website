@@ -7,6 +7,9 @@ export default function CustomCursor() {
   const ringRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // Only activate on pointer/mouse devices, not touch screens
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
+
     const dot = dotRef.current
     const ring = ringRef.current
     if (!dot || !ring) return
@@ -51,12 +54,12 @@ export default function CustomCursor() {
     <>
       <div
         ref={dotRef}
-        className="fixed top-0 left-0 w-[10px] h-[10px] bg-gold rounded-full pointer-events-none z-[9999] -translate-x-1/2 -translate-y-1/2"
+        className="fixed top-0 left-0 w-[10px] h-[10px] bg-gold rounded-full pointer-events-none z-[9999] -translate-x-1/2 -translate-y-1/2 hidden [@media(hover:hover)_and_(pointer:fine)]:block"
         aria-hidden="true"
       />
       <div
         ref={ringRef}
-        className="fixed top-0 left-0 w-[36px] h-[36px] border border-gold rounded-full pointer-events-none z-[9998] -translate-x-1/2 -translate-y-1/2 opacity-60"
+        className="fixed top-0 left-0 w-[36px] h-[36px] border border-gold rounded-full pointer-events-none z-[9998] -translate-x-1/2 -translate-y-1/2 opacity-60 hidden [@media(hover:hover)_and_(pointer:fine)]:block"
         aria-hidden="true"
       />
     </>

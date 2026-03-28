@@ -5,8 +5,11 @@ interface AuthState {
   /** Short-lived JWT — kept in memory only, never persisted */
   accessToken: string | null;
   user: WebsiteUser | null;
+  /** True once SessionRestorer has finished (success or failure) */
+  hydrated: boolean;
   setAuth: (token: string, user: WebsiteUser) => void;
   clearAuth: () => void;
+  setHydrated: () => void;
 }
 
 // No `persist` middleware — the API requires the token to stay in-memory.
@@ -14,6 +17,8 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()((set) => ({
   accessToken: null,
   user: null,
+  hydrated: false,
   setAuth: (accessToken, user) => set({ accessToken, user }),
   clearAuth: () => set({ accessToken: null, user: null }),
+  setHydrated: () => set({ hydrated: true }),
 }));

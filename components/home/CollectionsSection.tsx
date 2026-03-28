@@ -88,7 +88,7 @@ export default function CollectionsSection({ categories = STATIC_CATEGORIES }: P
               <img
                 src={FALLBACK_IMAGES[i % FALLBACK_IMAGES.length]}
                 alt={cat.name}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 [@media(hover:hover)]:group-hover:scale-105"
               />
               {/* Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -98,7 +98,7 @@ export default function CollectionsSection({ categories = STATIC_CATEGORIES }: P
                 <p className="text-[11px] text-white/60 tracking-wide">{cat.description ?? ''}</p>
               </div>
               {/* Hover border */}
-              <div className="absolute inset-0 rounded-2xl ring-1 ring-white/0 group-hover:ring-white/30 transition-all duration-300" />
+              <div className="absolute inset-0 rounded-2xl ring-1 ring-white/0 [@media(hover:hover)]:group-hover:ring-white/30 transition-all duration-300" />
             </Link>
           ))}
         </div>

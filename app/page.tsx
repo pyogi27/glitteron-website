@@ -20,7 +20,7 @@ export default async function HomePage() {
     <>
       <HeroSection />
       <TickerStrip />
-      <CollectionsSection categories={apiCategories.length > 0 ? apiCategories : undefined} />
+      <CollectionsSection categories={apiCategories.length > 0 ? apiCategories.slice(0, 6) : undefined} />
       <ProductCarousel titlePrefix="New" titleHighlight="Arrivals" label="Just In" products={featured.slice(0, 6)} />
       <StatsDivider />
       <ProductCarousel titlePrefix="Bestselling" titleHighlight="Lights" label="Most Loved" products={featured} />

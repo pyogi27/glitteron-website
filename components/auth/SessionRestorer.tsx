@@ -11,6 +11,7 @@ import { useAuthStore } from '@/lib/stores/authStore';
  */
 export default function SessionRestorer() {
   const setAuth = useAuthStore(s => s.setAuth);
+  const setHydrated = useAuthStore(s => s.setHydrated);
 
   useEffect(() => {
     (async () => {
@@ -20,6 +21,8 @@ export default function SessionRestorer() {
         setAuth(accessToken, user);
       } catch {
         // Cookie absent or expired — user is logged out, nothing to do
+      } finally {
+        setHydrated();
       }
     })();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps

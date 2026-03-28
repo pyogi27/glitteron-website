@@ -87,16 +87,16 @@
 }
 
 /*
-  Cursor override — intentionally outside @layer so it sits in the unlayered
-  author origin and beats any layered utility or UA stylesheet rule.
-  !important is also needed to override browser-injected cursor: text/pointer
-  on inputs, anchors, and buttons.
+  Cursor override — only on pointer/mouse devices, not touch screens.
+  Intentionally outside @layer so it beats any layered utility or UA rule.
 */
-html,
-html *,
-html *::before,
-html *::after {
-  cursor: none !important;
+@media (hover: hover) and (pointer: fine) {
+  html,
+  html *,
+  html *::before,
+  html *::after {
+    cursor: none !important;
+  }
 }
 
 @layer utilities {
@@ -124,31 +124,33 @@ html *::after {
       border-radius 0.3s ease;
   }
 
-  /* When any sibling is hovered — defocus all */
-  .cards-track:has(.product-card:hover) .product-card {
-    transform: scale(0.93) translateY(4px);
-    opacity: 0.45;
-    filter: saturate(0.6);
-    border-color: transparent;
-    box-shadow: none;
+  /* When any sibling is hovered — defocus all (desktop/hover devices only) */
+  @media (hover: hover) {
+    .cards-track:has(.product-card:hover) .product-card {
+      transform: scale(0.93) translateY(4px);
+      opacity: 0.45;
+      filter: saturate(0.6);
+      border-color: transparent;
+      box-shadow: none;
+    }
+
+    /* Re-focus the hovered card */
+    .cards-track:has(.product-card:hover) .product-card:hover {
+      transform: scale(1.04) translateY(-10px);
+      opacity: 1;
+      filter: saturate(1);
+      border-color: rgba(196, 113, 74, 0.4);
+      border-radius: 24px;
+      box-shadow: 0 28px 70px rgba(196, 113, 74, 0.28), 0 10px 30px rgba(44, 40, 37, 0.18);
+    }
+
+    /* Image zoom on card hover */
+    .product-card:hover .product-card-img {
+      transform: scale(1.09);
+    }
   }
 
-  /* Re-focus the hovered card */
-  .cards-track:has(.product-card:hover) .product-card:hover {
-    transform: scale(1.04) translateY(-10px);
-    opacity: 1;
-    filter: saturate(1);
-    border-color: rgba(196, 113, 74, 0.4);
-    border-radius: 24px;
-    box-shadow: 0 28px 70px rgba(196, 113, 74, 0.28), 0 10px 30px rgba(44, 40, 37, 0.18);
-  }
-
-  /* Image zoom on card hover */
-  .product-card:hover .product-card-img {
-    transform: scale(1.09);
-  }
-
-  /* Overlay: hidden by default, slides up on hover */
+  /* Overlay: hidden by default on desktop, slides up on hover */
   .product-card-overlay {
     opacity: 0;
     transform: translateY(12px);
@@ -158,14 +160,24 @@ html *::after {
       transform 0.38s cubic-bezier(0.25, 1, 0.5, 1);
   }
 
-  .product-card:hover .product-card-overlay {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
+  @media (hover: hover) {
+    .product-card:hover .product-card-overlay {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+  }
+
+  /* On touch/mobile devices — overlay always visible */
+  @media (hover: none) {
+    .product-card-overlay {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
   }
 
   .room-grid {
-    display: grid;
     grid-template-columns: 1.7fr 1fr 0.85fr;
     grid-template-rows: 320px 260px;
     gap: 16px;
@@ -290,4 +302,145 @@ html *::after {
     opacity: 0.4;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
   }
+}
+
+/* ─── VISUALIZER ─────────────────────────────────────────────────────────── */
+
+/* Scan animation */
+@keyframes vizScan {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+@keyframes vizDot {
+  0%, 100% { opacity: 0.25; transform: scale(0.75); }
+  50%       { opacity: 1;    transform: scale(1); }
+}
+
+.viz-scan-line {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(196, 113, 74, 0.05) 47%,
+    rgba(196, 113, 74, 0.18) 50%,
+    rgba(196, 113, 74, 0.05) 53%,
+    transparent 100%
+  );
+  animation: vizScan 1.7s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Fixture drag element */
+.viz-fx {
+  position: absolute;
+  transform-origin: top center;
+  cursor: grab;
+  z-index: 20;
+  user-select: none;
+}
+.viz-fx:active { cursor: grabbing; }
+.viz-fx.dragging { z-index: 50; }
+
+/* Fixture hover controls */
+.viz-fx-ctrl {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.16s;
+}
+.viz-fx:hover .viz-fx-ctrl { opacity: 1; }
+
+/* Depth badge on hover */
+.viz-depth-badge {
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-mid-gray);
+  white-space: nowrap;
+  background: rgba(237, 232, 224, 0.92);
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 1px solid var(--color-warm-gray);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.16s;
+}
+.viz-fx:hover .viz-depth-badge { opacity: 1; }
+
+/* Vanishing-point crosshair */
+.viz-vp-mark {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  transform: translate(-50%, -50%);
+  z-index: 15;
+  pointer-events: none;
+}
+.viz-vp-mark::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: -30px; bottom: -30px;
+  transform: translateX(-50%);
+  width: 1px;
+  background: repeating-linear-gradient(
+    180deg,
+    var(--color-gold) 0, var(--color-gold) 3px,
+    transparent 3px, transparent 7px
+  );
+  opacity: 0.3;
+}
+.viz-vp-mark::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: -30px; right: -30px;
+  transform: translateY(-50%);
+  height: 1px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-gold) 0, var(--color-gold) 3px,
+    transparent 3px, transparent 7px
+  );
+  opacity: 0.3;
+}
+
+/* Range slider — visualizer theme */
+.viz-range {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 2px;
+  background: var(--color-warm-gray);
+  border-radius: 2px;
+  outline: none;
+}
+.viz-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--color-dark);
+  cursor: pointer;
+  border: 2px solid var(--color-white);
+  box-shadow: 0 1px 4px rgba(26, 18, 16, 0.18);
+}
+.viz-range::-moz-range-thumb {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--color-dark);
+  cursor: pointer;
+  border: 2px solid var(--color-white);
+  box-shadow: 0 1px 4px rgba(26, 18, 16, 0.18);
+}
+.viz-range::-moz-range-track {
+  height: 2px;
+  background: var(--color-warm-gray);
+  border-radius: 2px;
 }

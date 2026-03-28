@@ -4,48 +4,22 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/lib/stores/authStore';
-import { getMyOrders, updateMe } from '@/lib/auth/api';
+import { getWebsiteOrders, type WebsiteOrder, updateMe } from '@/lib/auth/api';
 import type { ApiError } from '@/lib/auth/types';
 
 // ─── Local types ──────────────────────────────────────────────────────────────
-
-interface OrderItem {
-  id: number;
-  productId: number;
-  variationId: number | null;
-  quantity: number;
-  price: number;
-  productName?: string;
-  variationName?: string;
-}
-
-interface Order {
-  id: number;
-  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  totalAmount: number;
-  subtotal?: number;
-  courierCharge?: number;
-  shippingAddress?: string;
-  notes?: string;
-  createdAt: string;
-  updatedAt?: string;
-  items?: OrderItem[];
-}
 
 type Tab = 'overview' | 'orders' | 'edit';
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
 
-const STATUS_STYLES: Record<Order['status'], { bg: string; text: string; label: string }> = {
-  pending:    { bg: 'rgba(234,179,8,0.12)',   text: '#92660A', label: 'Pending'    },
-  confirmed:  { bg: 'rgba(59,130,246,0.12)',  text: '#1D4ED8', label: 'Confirmed'  },
-  processing: { bg: 'rgba(168,85,247,0.12)',  text: '#7E22CE', label: 'Processing' },
-  shipped:    { bg: 'rgba(20,184,166,0.12)',  text: '#0F766E', label: 'Shipped'    },
-  delivered:  { bg: 'rgba(34,197,94,0.12)',   text: '#15803D', label: 'Delivered'  },
-  cancelled:  { bg: 'rgba(239,68,68,0.12)',   text: '#B91C1C', label: 'Cancelled'  },
+const STATUS_STYLES: Record<WebsiteOrder['status'], { bg: string; text: string; label: string }> = {
+  pending:   { bg: 'rgba(234,179,8,0.12)',  text: '#92660A', label: 'Pending'  },
+  approved:  { bg: 'rgba(34,197,94,0.12)',  text: '#15803D', label: 'Approved' },
+  declined:  { bg: 'rgba(239,68,68,0.12)',  text: '#B91C1C', label: 'Declined' },
 };
 
-function StatusBadge({ status }: { status: Order['status'] }) {
+function StatusBadge({ status }: { status: WebsiteOrder['status'] }) {
   const s = STATUS_STYLES[status] ?? STATUS_STYLES.pending;
   return (
     <span
@@ -59,8 +33,8 @@ function StatusBadge({ status }: { status: Order['status'] }) {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatPrice(n: number) {
-  return `₹${n.toLocaleString('en-IN')}`;
+function formatPrice(n: number | string) {
+  return `₹${parseFloat(String(n)).toLocaleString('en-IN')}`;
 }
 
 function formatDate(s: string) {
@@ -156,8 +130,8 @@ function Field({
 
 // ─── Order row ────────────────────────────────────────────────────────────────
 
-function OrderRow({ order }: { order: Order }) {
-  const itemCount = order.items?.reduce((s, i) => s + i.quantity, 0) ?? 0;
+function OrderRow({ order }: { order: WebsiteOrder }) {
+  const itemCount = order.OrderItems?.reduce((s, i) => s + i.quantity, 0) ?? 0;
   return (
     <article className="rounded-[18px] border border-[#D8D0C4] bg-[#FAF7F2] p-4 md:p-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -176,26 +150,26 @@ function OrderRow({ order }: { order: Order }) {
                 {itemCount} item{itemCount !== 1 ? 's' : ''}
               </>
             )}
-            {order.shippingAddress && (
+            {order.customerAddress && (
               <>
                 <span className="mx-2 opacity-40">•</span>
                 <span className="truncate max-w-[200px] inline-block align-bottom">
-                  {order.shippingAddress}
+                  {order.customerAddress}
                 </span>
               </>
             )}
           </div>
-          {order.items && order.items.length > 0 && (
+          {order.OrderItems && order.OrderItems.length > 0 && (
             <div className="mt-2 font-sans text-[11.5px]" style={{ color: '#A09488' }}>
-              {order.items.slice(0, 2).map(item => (
+              {order.OrderItems.slice(0, 2).map(item => (
                 <span key={item.id} className="mr-3">
-                  {item.productName ?? `Product #${item.productId}`}
-                  {item.variationName ? ` (${item.variationName})` : ''}
+                  {item.product.name}
+                  {item.productVariation ? ` (${item.productVariation.name})` : ''}
                   {' '}×{item.quantity}
                 </span>
               ))}
-              {order.items.length > 2 && (
-                <span>+{order.items.length - 2} more</span>
+              {order.OrderItems.length > 2 && (
+                <span>+{order.OrderItems.length - 2} more</span>
               )}
             </div>
           )}
@@ -203,7 +177,7 @@ function OrderRow({ order }: { order: Order }) {
         <div className="text-right flex-shrink-0">
           <div className="font-sans text-[11px] uppercase tracking-[0.08em]" style={{ color: '#A09488' }}>Total</div>
           <div className="font-sans text-[18px] font-medium" style={{ color: '#2C2825' }}>
-            {formatPrice(order.totalAmount)}
+            {formatPrice(order.finalTotal)}
           </div>
         </div>
       </div>
@@ -215,6 +189,7 @@ function OrderRow({ order }: { order: Order }) {
 
 export default function ProfilePageClient() {
   const user = useAuthStore(s => s.user);
+  const hydrated = useAuthStore(s => s.hydrated);
   const setAuth = useAuthStore(s => s.setAuth);
 
   const searchParams = useSearchParams();
@@ -223,7 +198,7 @@ export default function ProfilePageClient() {
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
 
   // Orders state
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<WebsiteOrder[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [ordersLoaded, setOrdersLoaded] = useState(false);
 
@@ -260,8 +235,8 @@ export default function ProfilePageClient() {
     if (ordersLoaded) return;
     setOrdersLoading(true);
     try {
-      const res = await getMyOrders();
-      setOrders(Array.isArray(res.data) ? res.data : []);
+      const res = await getWebsiteOrders(1, 50);
+      setOrders(res.orders ?? []);
     } catch {
       setOrders([]);
     } finally {
@@ -295,7 +270,7 @@ export default function ProfilePageClient() {
   }, [firstName, lastName, address, city, state, zipCode, setAuth]);
 
   // ── Loading skeleton ───────────────────────────────────────────────────────
-  if (!mounted) return <Skeleton />;
+  if (!mounted || !hydrated) return <Skeleton />;
 
   // ── Not logged in ──────────────────────────────────────────────────────────
   if (!user) {

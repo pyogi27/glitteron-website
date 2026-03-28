@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Logo from '@/components/ui/Logo';
 import AuthBrandPanel from '@/components/auth/AuthBrandPanel';
 import OtpInput from '@/components/auth/OtpInput';
@@ -46,8 +46,9 @@ interface CredentialErrors {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const setAuth = useAuthStore(s => s.setAuth);
 
   // Step 1 — credentials
@@ -116,7 +117,7 @@ export default function LoginPage() {
     try {
       const { accessToken, user } = await loginVerifyOtp(phone, otp);
       setAuth(accessToken, user);
-      router.replace('/');
+      router.replace(searchParams.get('return') ?? '/');
     } catch (err: unknown) {
       const e = err as ApiError;
       setOtpError(e.message ?? 'Invalid OTP. Please try again.');
@@ -391,5 +392,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

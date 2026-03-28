@@ -8,6 +8,8 @@ import QuantityControl from './QuantityControl'
 import ProductTabs from './ProductTabs'
 import { useCartStore } from '@/lib/stores/cartStore'
 import { useWishlistStore } from '@/lib/stores/wishlistStore'
+import { parseWhereUsed } from '@/lib/data/visualizer'
+import RoomVisualizerModal from './RoomVisualizerModal'
 
 const PERKS = [
   { icon: '🚚', label: 'Free Delivery', sub: 'Above ₹15,000' },
@@ -23,6 +25,11 @@ export default function ProductInfo({ product }: { product: Product }) {
 
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
+
+  const [vizOpen, setVizOpen] = useState(false)
+  const parsedRoomTypes = parseWhereUsed(product.whereUsed)
+  // Fall back to Living Room so the button always shows
+  const roomTypes: import('@/lib/data/visualizer').RoomType[] = parsedRoomTypes.length > 0 ? parsedRoomTypes : ['Living Room']
 
   const addItem = useCartStore(s => s.addItem)
   const { toggle, has } = useWishlistStore()
@@ -139,10 +146,23 @@ export default function ProductInfo({ product }: { product: Product }) {
       <button
         type="button"
         onClick={handleAddToCart}
-        className="w-full bg-[#C4714A] text-[#2C2825] border-none py-3 rounded-3xl font-sans text-[13px] font-semibold tracking-[0.08em] uppercase mb-7 transition-all hover:bg-[#E8A87C] hover:-translate-y-0.5"
+        className="w-full bg-[#C4714A] text-[#2C2825] border-none py-3 rounded-3xl font-sans text-[13px] font-semibold tracking-[0.08em] uppercase transition-all hover:bg-[#E8A87C] hover:-translate-y-0.5"
       >
         Buy Now
       </button>
+
+      {/* View in Room */}
+      <button
+          type="button"
+          onClick={() => setVizOpen(true)}
+          className="w-full flex items-center justify-center gap-2 border border-[#D8D0C4] text-[#2C2825] py-3 rounded-3xl font-sans text-[13px] font-medium tracking-[0.06em] mt-3 mb-7 transition-all hover:border-[#C4714A] hover:text-[#C4714A] hover:bg-[#FDF9F6]"
+        >
+          <svg viewBox="0 0 24 24" className="w-4 h-4 stroke-current fill-none" strokeWidth={1.6}>
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
+          View in Room
+        </button>
 
       {/* Perks */}
       <div className="flex gap-4 py-5 border-y border-[#D8D0C4] mb-7">
@@ -159,6 +179,26 @@ export default function ProductInfo({ product }: { product: Product }) {
 
       {/* Tabs */}
       <ProductTabs product={product} />
+
+      {/* Room visualizer modal */}
+      {vizOpen && roomTypes.length > 0 && (
+        <RoomVisualizerModal
+          product={{
+            id: Number(product.id) || 0,
+            name: product.name,
+            type: product.category,
+            price: `₹ ${product.price.toLocaleString('en-IN')}`,
+            priceValue: product.price,
+            match: 100,
+            thumb: product.images[0] ?? '',
+            full: product.arImage || (product.images[0] ?? ''),
+            iw: 90,
+            ih: 110,
+          }}
+          roomTypes={roomTypes}
+          onClose={() => setVizOpen(false)}
+        />
+      )}
     </div>
   )
 }

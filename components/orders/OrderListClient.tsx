@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useAuthStore } from '@/lib/stores/authStore'
-import { getWebsiteOrders, type WebsiteOrder, type WebsiteOrderPagination } from '@/lib/auth/api'
+import { getWebsiteOrders, type WebsiteOrder } from '@/lib/auth/api'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -45,39 +45,38 @@ function PaymentStatusBadge({ status }: { status: WebsiteOrder['payment']['statu
 export default function OrderListClient() {
   const router = useRouter()
   const pathname = usePathname()
+  const hydrated = useAuthStore(s => s.hydrated)
+  const accessToken = useAuthStore(s => s.accessToken)
   const [orders, setOrders] = useState<WebsiteOrder[]>([])
-  const [pagination, setPagination] = useState<WebsiteOrderPagination | null>(null)
+  const [totalCount, setTotalCount] = useState(0)
   const [page, setPage] = useState(1)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [authChecked, setAuthChecked] = useState(false)
 
-  // Auth gate
+  // Auth gate — wait for SessionRestorer to finish hydrating the store,
+  // then either proceed or redirect to login.
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (!useAuthStore.getState().accessToken) {
-        router.replace(`/login?return=${pathname}`)
-      } else {
-        setAuthChecked(true)
-      }
-    }, 600)
-    return () => clearTimeout(timeout)
-  }, [router, pathname])
+    if (!hydrated) return
+    if (!accessToken) router.replace(`/login?return=${pathname}`)
+  }, [hydrated, accessToken, router, pathname])
 
+  // Fetch orders once auth is confirmed
   useEffect(() => {
-    if (!authChecked) return
+    if (!hydrated || !accessToken) return
     setLoading(true)
     setError(null)
     getWebsiteOrders(page, 10)
       .then(res => {
-        setOrders(res.orders)
-        setPagination(res.pagination)
+        setOrders(res.orders ?? [])
+        setTotalCount(res.pagination?.total ?? 0)
       })
-      .catch((err: { message?: string }) => setError(err.message ?? 'Failed to load orders'))
+      .catch((err: { message?: string }) => {
+        setError(err.message ?? 'Failed to load orders')
+      })
       .finally(() => setLoading(false))
-  }, [authChecked, page])
+  }, [hydrated, accessToken, page])
 
-  if (!authChecked || loading) {
+  if (!hydrated || loading) {
     return (
       <div className="pt-[72px] bg-[#EDE8E0] min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 rounded-full border-2 border-[#C9A84C] border-t-transparent animate-spin" />
@@ -141,7 +140,7 @@ export default function OrderListClient() {
           )}
 
           {/* Pagination */}
-          {pagination && pagination.totalPages > 1 && (
+          {totalCount > 10 && (
             <div className="flex items-center justify-center gap-3 mt-6">
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
@@ -150,10 +149,10 @@ export default function OrderListClient() {
               >
                 Previous
               </button>
-              <span className="text-[12px] text-[#A09488]">Page {page} of {pagination.totalPages}</span>
+              <span className="text-[12px] text-[#A09488]">Page {page} of {Math.ceil(totalCount / 10)}</span>
               <button
-                onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
-                disabled={page === pagination.totalPages}
+                onClick={() => setPage(p => Math.min(Math.ceil(totalCount / 10), p + 1))}
+                disabled={page === Math.ceil(totalCount / 10)}
                 className="px-5 py-2 rounded-full border border-[#D8D0C4] text-[12px] uppercase tracking-[0.08em] text-[#A09488] hover:text-[#2C2825] hover:border-[#2C2825] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Next

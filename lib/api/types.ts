@@ -17,6 +17,7 @@ export interface ApiProduct {
   sku?: string;
   slug?: string;
   thumbnailImage?: string;
+  arImages?: string;
   imageUrls?: string[];
   images?: Array<string | { url: string }>;
   rating?: number;
@@ -52,6 +53,7 @@ export interface ApiProductDetail extends ApiProduct {
   variations?: ApiVariation[];
   specs?: Record<string, string>;
   reviews?: ApiReview[];
+  whereUsed?: string;
 }
 
 export interface ApiListResponse<T> {

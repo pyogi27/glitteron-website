@@ -22,6 +22,8 @@ export interface Product {
     crystalTones: { name: string; hex: string }[]
   }
   reviews: Review[]
+  whereUsed?: string   // e.g. "Living Room, Dining Room"
+  arImage?: string     // AR/room visualizer image URL
 }
 
 export interface Review {

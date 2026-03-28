@@ -71,6 +71,8 @@ export function mapApiProduct(p: ApiProduct, categoryName?: string): Product {
     specs: {},
     variants: { sizes: [], finishes: [], crystalTones: [] },
     reviews: [],
+    whereUsed: (p as ApiProductDetail).whereUsed,
+    arImage: p.arImages,
   };
 }
 
@@ -236,6 +238,7 @@ export async function fetchProductById(id: number): Promise<Product | null> {
       specs: productData.specs ?? {},
       variants: mappedVariants,
       reviews,
+      whereUsed: productData.whereUsed,
     };
   } catch (err) {
     console.error(`[fetchProductById] failed to reach ${url}:`, err);

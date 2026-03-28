@@ -215,7 +215,7 @@ export interface CustomerProfile {
 
 /** Get customer's own order history */
 export const getMyOrders = () =>
-  authedFetch<{ success: true; data: Order[] }>('/api/orders/my-orders');
+  authedReq<{ success: true; data: Order[] }>('/orders');
 
 /** Get customer's own profile */
 export const getCustomerProfile = () =>
