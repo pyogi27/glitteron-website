@@ -45,7 +45,5 @@ jobs:
 
       - name: Deploy to App Runner
         run: |
-          SERVICE_ARN=$(aws apprunner list-services \
-            --query "ServiceSummaryList[?ServiceName=='${{ env.APP_RUNNER_SERVICE }}'].ServiceArn" \
-            --output text)
-          aws apprunner start-deployment --service-arn $SERVICE_ARN
+          aws apprunner start-deployment \
+            --service-arn arn:aws:apprunner:us-east-1:025215344860:service/glitteron-frontend/24840966c52b4d6ab779174e32b059fa
