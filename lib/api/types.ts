@@ -54,6 +54,8 @@ export interface ApiProductDetail extends ApiProduct {
   specs?: Record<string, string>;
   reviews?: ApiReview[];
   whereUsed?: string;
+  additionalImages?: string[];
+  mainImage?: string;
 }
 
 export interface ApiListResponse<T> {

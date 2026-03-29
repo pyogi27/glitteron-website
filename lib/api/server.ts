@@ -233,8 +233,18 @@ export async function fetchProductById(id: number): Promise<Product | null> {
 
     const product = mapApiProduct(productData, productData.category?.name);
 
+    // Build images for detail page: mainImage first (full-res), then additionalImages
+    const mainImage = productData.mainImage;
+    const additionalImages = productData.additionalImages ?? [];
+    const detailImages = [
+      ...(mainImage ? [mainImage] : product.images),
+      ...additionalImages.filter((u) => u !== mainImage),
+    ];
+    const mergedImages = detailImages.length > 0 ? detailImages : product.images;
+
     return {
       ...product,
+      images: mergedImages,
       specs: productData.specs ?? {},
       variants: mappedVariants,
       reviews,

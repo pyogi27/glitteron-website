@@ -2,8 +2,9 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import type { Product } from '@/lib/types'
 import { getProductBySlug, getRelatedProducts, products } from '@/lib/data/products'
-import { fetchProducts, fetchRelatedProducts, findApiProductBySlug, fetchProductById } from '@/lib/api/server'
+import { fetchProducts, fetchRelatedProducts, findApiProductBySlug, fetchProductById, mapApiProduct } from '@/lib/api/server'
 import ProductGallery from '@/components/product/ProductGallery'
 import ProductInfo from '@/components/product/ProductInfo'
 import RelatedProducts from '@/components/product/RelatedProducts'
@@ -67,8 +68,19 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound()
 
   let related = getRelatedProducts(product.id)
-  if (apiProduct?.categoryId) {
-    const apiRelated = await fetchRelatedProducts(apiProduct.categoryId, apiProduct.id, 4)
+  if (apiProduct) {
+    let apiRelated: Product[] = []
+    if (apiProduct.categoryId) {
+      apiRelated = await fetchRelatedProducts(apiProduct.categoryId, apiProduct.id, 4)
+    }
+    if (apiRelated.length === 0) {
+      // Fallback: fetch any real products excluding the current one
+      const { products: allProducts } = await fetchProducts({ limit: 5 })
+      apiRelated = allProducts
+        .filter((p) => p.id !== apiProduct.id)
+        .slice(0, 4)
+        .map((p) => mapApiProduct(p))
+    }
     if (apiRelated.length > 0) {
       related = apiRelated
     }
