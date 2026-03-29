@@ -48,7 +48,7 @@ function FixtureOverlay({
   onRemove,
 }: {
   product: VisualizerProduct
-  wrapRef: React.RefObject<HTMLDivElement>
+  wrapRef: React.RefObject<HTMLDivElement | null>
   onRemove: () => void
 }) {
   const fxRef = useRef<HTMLDivElement>(null)
