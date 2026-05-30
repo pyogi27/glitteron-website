@@ -6,11 +6,12 @@ import { useFilterStore } from '@/lib/stores/filterStore'
 import ProductCard from '@/components/products/ProductCard'
 import { useScrollRestoration } from '@/hooks/useScrollRestoration'
 
+const BATCH_SIZE = 100
+
 interface Props {
   initialProducts: Product[]
   initialPage: number
   totalPages: number
-  limit: number
 }
 
 function dedupeById(products: Product[]): Product[] {
@@ -69,7 +70,6 @@ export default function InfiniteProductGrid({
   initialProducts,
   initialPage,
   totalPages,
-  limit,
 }: Props) {
   const searchParams = useSearchParams()
   const paramKey = searchParams.toString()
@@ -80,10 +80,11 @@ export default function InfiniteProductGrid({
   const [page, setPage] = useState(initialPage)
   const [loading, setLoading] = useState(false)
   const [serverTotalPages, setServerTotalPages] = useState(totalPages)
+  const [errorCount, setErrorCount] = useState(0)
 
   const pageRef = useRef(initialPage)
   const serverTotalPagesRef = useRef(totalPages)
-  const hasMore = page < serverTotalPages
+  const hasMore = page < serverTotalPages && errorCount < 3
 
   const sentinelRef = useRef<HTMLDivElement>(null)
   const loadingRef = useRef(false)
@@ -96,6 +97,7 @@ export default function InfiniteProductGrid({
     setServerTotalPages(totalPages)
     pageRef.current = initialPage
     loadingRef.current = false
+    setErrorCount(0)
   }, [paramKey, initialProducts, initialPage, totalPages])
 
   const fetchNextPage = useCallback(async () => {
@@ -105,9 +107,9 @@ export default function InfiniteProductGrid({
 
     try {
       const nextPage = pageRef.current + 1
-      const params = new URLSearchParams(searchParams.toString())
+      const params = new URLSearchParams(paramKey)
       params.set('page', String(nextPage))
-      params.set('limit', String(limit))
+      params.set('limit', String(BATCH_SIZE))
 
       const res = await fetch(`/api/products?${params.toString()}`)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -137,13 +139,14 @@ export default function InfiniteProductGrid({
       setProducts(prev => dedupeById([...prev, ...newProducts]))
       setPage(nextPage)
       pageRef.current = nextPage
+      setErrorCount(0)
     } catch {
-      // silent — loading stops, loadingRef resets, grid stays unchanged
+      setErrorCount(prev => prev + 1)
     } finally {
       setLoading(false)
       loadingRef.current = false
     }
-  }, [searchParams, limit])
+  }, [paramKey])
 
   useEffect(() => {
     const sentinel = sentinelRef.current
@@ -213,8 +216,17 @@ export default function InfiniteProductGrid({
 
       <div ref={sentinelRef} aria-hidden="true" />
 
-      {!hasMore && products.length > 0 && (
-        <div className="flex items-center justify-center py-12" aria-live="polite" aria-atomic="true">
+      {errorCount >= 3 && page < serverTotalPages && (
+        <div className="flex items-center justify-center py-12">
+          <div className="flex items-center gap-4">
+            <div className="h-px w-16 bg-[#D8D0C4]" />
+            <span className="text-[11px] text-[#A09488] tracking-[0.12em] uppercase">Failed to load — try refreshing</span>
+            <div className="h-px w-16 bg-[#D8D0C4]" />
+          </div>
+        </div>
+      )}
+      {!hasMore && errorCount < 3 && products.length > 0 && (
+        <div className="flex items-center justify-center py-12">
           <div className="flex items-center gap-4">
             <div className="h-px w-16 bg-[#D8D0C4]" />
             <span className="text-[11px] text-[#A09488] tracking-[0.12em] uppercase">All products loaded</span>

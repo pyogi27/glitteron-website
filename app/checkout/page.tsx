@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import CheckoutClient from '@/components/checkout/CheckoutClient'
 
 export const metadata: Metadata = {
-  title: 'Checkout — GlitterOn',
+  title: 'Checkout — LitmeUp',
   description: 'Complete your order securely.',
 }
 

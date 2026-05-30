@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 
-const STORAGE_KEY = 'glitteron_newsletter_dismissed'
+const STORAGE_KEY = 'litmeup_newsletter_dismissed'
 const RESHOW_DAYS = 30
 const TRIGGER_DELAY_MS = 8_000
 

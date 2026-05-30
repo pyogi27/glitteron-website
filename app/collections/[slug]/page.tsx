@@ -36,16 +36,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const apiProduct = await findApiProductBySlug(slug)
   if (apiProduct) {
     return {
-      title: `${apiProduct.name} — GlitterOn`,
+      title: `${apiProduct.name} — LitmeUp`,
       description: apiProduct.description ?? apiProduct.name,
     }
   }
   
   // Fallback to static
   const product = getProductBySlug(slug)
-  if (!product) return { title: 'Product Not Found — GlitterOn' }
+  if (!product) return { title: 'Product Not Found — LitmeUp' }
   return {
-    title: `${product.name} — GlitterOn`,
+    title: `${product.name} — LitmeUp`,
     description: product.subtitle,
   }
 }

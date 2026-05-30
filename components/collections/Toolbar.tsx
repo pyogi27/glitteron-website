@@ -9,8 +9,6 @@ const SORT_OPTIONS = [
   { value: 'rating', label: 'Top Rated' },
 ]
 
-const LIMIT_OPTIONS = [12, 24, 48]
-
 interface Category {
   id?: number
   name: string
@@ -27,7 +25,6 @@ export default function Toolbar({ categories = [], total }: Props) {
   const searchParams = useSearchParams()
 
   const activeCategory = searchParams.get('category') ?? 'All'
-  const currentLimit = Number(searchParams.get('limit')) || 12
 
   const tabs: Category[] = [{ name: 'All' }, ...categories]
 
@@ -38,14 +35,7 @@ export default function Toolbar({ categories = [], total }: Props) {
     } else {
       params.set('category', name)
     }
-    params.set('page', '1')
-    router.push(`/collections?${params.toString()}`)
-  }
-
-  function handleLimitChange(limit: number) {
-    const params = new URLSearchParams(searchParams.toString())
-    params.set('limit', String(limit))
-    params.set('page', '1')
+    params.delete('page')
     router.push(`/collections?${params.toString()}`)
   }
 
@@ -68,7 +58,7 @@ export default function Toolbar({ categories = [], total }: Props) {
         ))}
       </div>
 
-      {/* Sort + limit + view + count */}
+      {/* Sort + view + count */}
       <div className="flex items-center justify-between">
         <span className="text-[12px] text-[#A09488]">
           {total !== undefined
@@ -77,24 +67,6 @@ export default function Toolbar({ categories = [], total }: Props) {
           }
         </span>
         <div className="flex items-center gap-3">
-          {/* Per-page selector */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] text-[#A09488] whitespace-nowrap">Show:</span>
-            {LIMIT_OPTIONS.map(n => (
-              <button
-                key={n}
-                onClick={() => handleLimitChange(n)}
-                className={`w-8 h-7 rounded-md text-[11px] font-medium transition-all border
-                  ${currentLimit === n
-                    ? 'bg-[#2C2825] text-[#EDE8E0] border-[#2C2825]'
-                    : 'bg-transparent text-[#A09488] border-[#D8D0C4] hover:border-[#2C2825] hover:text-[#2C2825]'
-                  }`}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
-
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value)}

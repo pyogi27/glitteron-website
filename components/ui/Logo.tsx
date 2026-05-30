@@ -26,7 +26,7 @@ export default function Logo({ light = false }: LogoProps) {
         </svg>
       </div>
       <span className="font-serif text-[22px] font-medium tracking-[0.06em]">
-        Glitter<span className="text-gold">On</span>
+        Litme<span className="text-gold">Up</span>
       </span>
     </Link>
   )

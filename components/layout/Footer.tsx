@@ -76,7 +76,7 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div className="flex items-center justify-between text-[11.5px] text-white/28">
-        <span>© {new Date().getFullYear()} GlitterOn. All rights reserved.</span>
+        <span>© {new Date().getFullYear()} LitmeUp. All rights reserved.</span>
         <div className="flex gap-6">
           <Link href="/privacy" className="text-white/28 no-underline hover:text-gold/60 transition-colors">Privacy Policy</Link>
           <Link href="/terms" className="text-white/28 no-underline hover:text-gold/60 transition-colors">Terms of Service</Link>

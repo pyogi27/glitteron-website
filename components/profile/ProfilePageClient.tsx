@@ -392,7 +392,7 @@ export default function ProfilePageClient() {
                 +91 {user.phone}
               </p>
               <p className="mt-1.5 font-sans text-[10px] tracking-[0.1em] uppercase" style={{ color: '#A09488' }}>
-                GlitterOn Member
+                LitmeUp Member
               </p>
             </div>
 

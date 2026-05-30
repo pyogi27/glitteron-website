@@ -6,22 +6,21 @@ import InfiniteProductGrid from '@/components/collections/InfiniteProductGrid'
 import { fetchCategories, fetchProducts, mapApiProduct } from '@/lib/api/server'
 import { products as staticProducts } from '@/lib/data/products'
 
-const VALID_LIMITS = [12, 24, 48]
-const DEFAULT_LIMIT = 12
+const INITIAL_BATCH = 100
 
 export const metadata: Metadata = {
-  title: 'Collections — GlitterOn',
+  title: 'Collections — LitmeUp',
   description: '500+ handcrafted chandeliers & pendant lights for every space.',
 }
 
 interface Props {
-  searchParams: Promise<{ page?: string; limit?: string; category?: string; minPrice?: string; maxPrice?: string }>
+  searchParams: Promise<{ category?: string; minPrice?: string; maxPrice?: string }>
 }
 
 export default async function CollectionsPage({ searchParams }: Props) {
-  const { page: pageStr, limit: limitStr, category: categoryParam, minPrice: minPriceStr, maxPrice: maxPriceStr } = await searchParams
-  const page = Math.max(1, Number(pageStr) || 1)
-  const limit = VALID_LIMITS.includes(Number(limitStr)) ? Number(limitStr) : DEFAULT_LIMIT
+  const { category: categoryParam, minPrice: minPriceStr, maxPrice: maxPriceStr } = await searchParams
+  const page = 1
+  const limit = INITIAL_BATCH
   const minPrice = minPriceStr ? Number(minPriceStr) : undefined
   const maxPrice = maxPriceStr ? Number(maxPriceStr) : undefined
 
@@ -71,7 +70,6 @@ export default async function CollectionsPage({ searchParams }: Props) {
           initialProducts={products}
           initialPage={usingApi ? page : 1}
           totalPages={usingApi ? totalPages : 1}
-          limit={limit}
         />
       </div>
     </>

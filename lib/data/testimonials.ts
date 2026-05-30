@@ -22,7 +22,7 @@ export const testimonials: Testimonial[] = [
     author: 'Anika Patel',
     location: 'Ahmedabad, Gujarat',
     rating: 5,
-    text: 'The Milano Cascade pendant over our dining table is everything. It creates the most magical ambience for dinner parties. GlitterOn has a customer for life.',
+    text: 'The Milano Cascade pendant over our dining table is everything. It creates the most magical ambience for dinner parties. LitmeUp has a customer for life.',
     verified: true,
   },
 ]

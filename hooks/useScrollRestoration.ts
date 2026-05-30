@@ -10,10 +10,22 @@ export function useScrollRestoration(key: string): void {
     const y = Number(raw)
     if (!Number.isFinite(y) || y < 0) return
 
-    const id = requestAnimationFrame(() => {
-      window.scrollTo({ top: y, behavior: 'instant' })
-    })
-    return () => cancelAnimationFrame(id)
+    let rafId: number
+    let attempts = 0
+    const MAX_ATTEMPTS = 60 // ~1 second at 60fps
+
+    function tryScroll() {
+      attempts++
+      const maxScrollY = document.documentElement.scrollHeight - window.innerHeight
+      if (maxScrollY >= y || attempts >= MAX_ATTEMPTS) {
+        window.scrollTo({ top: y, behavior: 'instant' })
+        return
+      }
+      rafId = requestAnimationFrame(tryScroll)
+    }
+
+    rafId = requestAnimationFrame(tryScroll)
+    return () => cancelAnimationFrame(rafId)
   }, [key])
 
   // Save on unload / route change

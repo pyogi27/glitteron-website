@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import RoomVisualizerClient from '@/components/visualizer/RoomVisualizerClient'
 
 export const metadata: Metadata = {
-  title: 'Room Lighting Visualizer — GlitterOn',
+  title: 'Room Lighting Visualizer — LitmeUp',
   description: 'Select your room type, upload a photo, and see how our decorative lights look in your space.',
 }
 

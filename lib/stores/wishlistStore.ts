@@ -19,6 +19,6 @@ export const useWishlistStore = create<WishlistStore>()(
         })),
       has: (id) => get().ids.includes(id),
     }),
-    { name: 'glitteron-wishlist' }
+    { name: 'litmeup-wishlist' }
   )
 )

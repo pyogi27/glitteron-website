@@ -8,7 +8,7 @@ import NewsletterPopup from '@/components/ui/NewsletterPopup'
 import SessionRestorer from '@/components/auth/SessionRestorer'
 
 export const metadata: Metadata = {
-  title: 'GlitterOn — Illuminate Your World',
+  title: 'LitmeUp — Illuminate Your World',
   description: '500+ handcrafted chandeliers & pendant lights for spaces that deserve to glow.',
 }
 

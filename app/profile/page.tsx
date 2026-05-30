@@ -3,7 +3,7 @@ import { Suspense } from 'react'
 import ProfilePageClient from '@/components/profile/ProfilePageClient'
 
 export const metadata: Metadata = {
-  title: 'My Profile — GlitterOn',
+  title: 'My Profile — LitmeUp',
   description: 'View and update your profile details and track your order history.',
 }
 

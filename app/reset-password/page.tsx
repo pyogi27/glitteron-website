@@ -285,7 +285,7 @@ export default function ResetPasswordPage() {
             <em className="italic" style={{ color: '#E8A87C' }}>Password</em>
           </>
         }
-        subtext="Choose a strong password to keep your GlitterOn account secure."
+        subtext="Choose a strong password to keep your LitmeUp account secure."
         quote="Every chandelier tells a story of elegance and light."
       />
 
