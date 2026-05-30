@@ -2,8 +2,7 @@ import type { Metadata } from 'next'
 import PageBanner from '@/components/collections/PageBanner'
 import Toolbar from '@/components/collections/Toolbar'
 import FilterSidebar from '@/components/collections/FilterSidebar'
-import ProductGrid from '@/components/collections/ProductGrid'
-import Pagination from '@/components/collections/Pagination'
+import InfiniteProductGrid from '@/components/collections/InfiniteProductGrid'
 import { fetchCategories, fetchProducts, mapApiProduct } from '@/lib/api/server'
 import { products as staticProducts } from '@/lib/data/products'
 
@@ -28,7 +27,6 @@ export default async function CollectionsPage({ searchParams }: Props) {
 
   const categories = await fetchCategories()
 
-  // Map category name from URL → numeric ID for the API
   const selectedCategory = categoryParam
     ? categories.find(c => c.name === categoryParam)
     : undefined
@@ -69,10 +67,12 @@ export default async function CollectionsPage({ searchParams }: Props) {
         <div className="hidden lg:block">
           <FilterSidebar categories={sidebarCategories} />
         </div>
-        <div className="flex-1">
-          <ProductGrid products={products} />
-          {usingApi && <Pagination currentPage={page} totalPages={totalPages} />}
-        </div>
+        <InfiniteProductGrid
+          initialProducts={products}
+          initialPage={usingApi ? page : 1}
+          totalPages={usingApi ? totalPages : 1}
+          limit={limit}
+        />
       </div>
     </>
   )
