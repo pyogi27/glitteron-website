@@ -103,22 +103,22 @@ export default function ProductCard({ product, variant = 'grid' }: ProductCardPr
   }
 
   // ── Grid / Related variant ──
-  const imgHeight = variant === 'related' ? 'h-[300px]' : 'h-[380px]'
+  const imgHeight = variant === 'related' ? 'h-[300px]' : 'h-[240px] sm:h-[360px]'
 
   return (
     <Link
       href={`/collections/${product.slug}`}
-      className={`product-card relative no-underline cursor-none block ${imgHeight}`}
+      className="product-card relative no-underline cursor-none block"
     >
-      {/* Inner wrapper clips image to rounded corners independently */}
-      <div className="relative rounded-[inherit] overflow-hidden w-full h-full">
+      {/* Image block — fixed height, clips to rounded corners */}
+      <div className={`relative rounded-[20px] overflow-hidden w-full ${imgHeight}`}>
 
         <Image
           src={imgSrc}
           alt={product.name}
           fill
           className="product-card-img object-cover transition-transform duration-[650ms] [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]"
-          sizes={variant === 'related' ? '(max-width: 768px) 50vw, 25vw' : '(max-width: 768px) 100vw, 33vw'}
+          sizes={variant === 'related' ? '(max-width: 768px) 50vw, 25vw' : '(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw'}
           onError={() => setImgSrc(FALLBACK_IMAGE)}
         />
 
@@ -140,7 +140,7 @@ export default function ProductCard({ product, variant = 'grid' }: ProductCardPr
           </svg>
         </button>
 
-        {/* Hover info overlay — CSS-driven, see globals.css .product-card-overlay */}
+        {/* Desktop hover overlay — hidden by default, slides up on hover via CSS */}
         <div
           className="product-card-overlay absolute bottom-0 left-0 right-0 z-10 px-5 pt-9 pb-5"
           style={{
@@ -171,6 +171,35 @@ export default function ProductCard({ product, variant = 'grid' }: ProductCardPr
               </svg>
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Mobile info strip — visible only on touch devices, hidden on hover-capable screens */}
+      <div className="product-card-mobile-info pt-3 pb-1 px-1">
+        <div className="text-[9px] text-[#C4714A] tracking-[0.14em] uppercase font-medium mb-1">{product.category}</div>
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <div className="font-serif text-[15px] font-normal leading-[1.3] text-[#2C2825] truncate">{product.name}</div>
+            <div className="flex items-center gap-1 mt-1">
+              <StarRating rating={product.rating} size={10} />
+              <span className="text-[9px] text-[#A09488]">({product.reviewCount})</span>
+            </div>
+            <div className="text-[14px] font-medium text-[#2C2825] mt-1 flex items-baseline gap-1.5">
+              ₹{product.price.toLocaleString('en-IN')}
+              {product.discount && (
+                <span className="text-[10px] text-green-600 bg-green-600/10 px-1.5 py-0.5 rounded-md font-medium">–{product.discount}%</span>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={handleAddToCart}
+            className="flex-shrink-0 mt-0.5 bg-[#2C2825] text-white border-none w-[30px] h-[30px] rounded-full flex items-center justify-center cursor-none transition-[background,transform] duration-300 active:scale-95"
+            aria-label={`Add ${product.name} to cart`}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </button>
         </div>
       </div>
     </Link>

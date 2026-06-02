@@ -40,26 +40,43 @@ export default function Toolbar({ categories = [], total }: Props) {
   }
 
   return (
-    <div className="border-b border-[#D8D0C4] bg-[#EDE8E0] px-8 py-4 flex flex-col gap-3">
-      {/* Category tabs */}
-      <div className="flex items-center gap-2 flex-wrap">
-        {tabs.map(tab => (
-          <button
-            key={tab.name}
-            onClick={() => handleCategoryChange(tab.name)}
-            className={`px-4 py-1.5 rounded-2xl text-[12px] font-medium tracking-[0.06em] transition-all border
-              ${activeCategory === tab.name
-                ? 'bg-[#2C2825] text-[#EDE8E0] border-[#2C2825]'
-                : 'bg-transparent text-[#A09488] border-[#D8D0C4] hover:border-[#C4714A] hover:text-[#8B5E3C]'
-              }`}
-          >
-            {tab.name}
-          </button>
-        ))}
+    <div className="bg-[#EDE8E0] border-b border-[#D8D0C4]">
+      {/* Category tab rail */}
+      <div className="relative px-8 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex items-end gap-0 min-w-max">
+          {tabs.map(tab => {
+            const isActive = activeCategory === tab.name
+            return (
+              <button
+                key={tab.name}
+                onClick={() => handleCategoryChange(tab.name)}
+                aria-pressed={isActive}
+                className={`
+                  relative px-5 py-4 text-[13px] font-medium tracking-[0.04em] whitespace-nowrap
+                  transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-[#C4714A] focus-visible:ring-offset-1
+                  ${isActive
+                    ? 'text-[#2C2825]'
+                    : 'text-[#A09488] hover:text-[#5C4A3A]'
+                  }
+                `}
+              >
+                {tab.name}
+                {/* Active underline */}
+                <span
+                  className={`
+                    absolute bottom-0 left-0 right-0 h-[2.5px] rounded-t-full
+                    transition-all duration-200
+                    ${isActive ? 'bg-[#C4714A] opacity-100' : 'bg-transparent opacity-0'}
+                  `}
+                />
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* Sort + view + count */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between px-8 pb-3">
         <span className="text-[12px] text-[#A09488]">
           {total !== undefined
             ? <>Showing <strong className="text-[#2C2825]">{total}</strong> results</>

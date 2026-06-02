@@ -187,7 +187,7 @@ export default function InfiniteProductGrid({
   }, [products, materials, sortBy])
 
   return (
-    <div className="flex-1 p-8 overflow-visible">
+    <div className="flex-1 p-4 sm:p-8 overflow-visible">
       {sorted.length === 0 && !loading ? (
         <div className="flex flex-col items-center justify-center h-64 text-center">
           <div className="font-serif text-[24px] font-light text-[#2C2825] mb-3">No products found</div>
@@ -195,7 +195,7 @@ export default function InfiniteProductGrid({
         </div>
       ) : (
         <div className={viewMode === 'grid'
-          ? 'cards-track grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4'
+          ? 'cards-track grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 pt-4'
           : 'flex flex-col gap-4'
         }>
           {sorted.map(p => (

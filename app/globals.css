@@ -150,7 +150,7 @@
     }
   }
 
-  /* Overlay: hidden by default on desktop, slides up on hover */
+  /* Overlay: hidden by default, slides up on hover (desktop only) */
   .product-card-overlay {
     opacity: 0;
     transform: translateY(12px);
@@ -168,12 +168,14 @@
     }
   }
 
-  /* On touch/mobile devices — overlay always visible */
-  @media (hover: none) {
-    .product-card-overlay {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
+  /* Mobile info strip: visible on touch devices, hidden on hover-capable screens */
+  .product-card-mobile-info {
+    display: block;
+  }
+
+  @media (hover: hover) {
+    .product-card-mobile-info {
+      display: none;
     }
   }
 
