@@ -187,6 +187,7 @@ export default function ProductInfo({ product }: { product: Product }) {
             id: Number(product.id) || 0,
             name: product.name,
             type: product.category,
+            category: product.category,
             price: `₹ ${product.price.toLocaleString('en-IN')}`,
             priceValue: product.price,
             match: 100,

@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef, useCallback, useState } from 'react'
+import { useEffect, useRef, useCallback, useState, useMemo } from 'react'
 import { useVisualizerStore } from '@/lib/stores/visualizerStore'
 import type { VisualizerProduct } from '@/lib/data/visualizer'
 import { getAnalysisForRoom, getProductsForRoom, fetchProductsForRoom } from '@/lib/data/visualizer'
@@ -192,30 +192,32 @@ export default function CanvasArea() {
   const products   = useVisualizerStore((s) => s.products)
   const placedProductIds = useVisualizerStore((s) => s.placedProductIds)
   const analysisData     = useVisualizerStore((s) => s.analysisData)
-  const setAnalysis      = useVisualizerStore((s) => s.setAnalysis)
   const removePlacedProduct = useVisualizerStore((s) => s.removePlacedProduct)
 
   const placedProducts = placedProductIds
     .map((id) => products.find((p) => p.id === id))
     .filter((p): p is VisualizerProduct => p !== undefined)
 
-  // ── Simulate scan: step 3 → step 4 after 2.7s ──────────────────────────────
+  // ── Load products when entering step 4 ─────────────────────────────────────
+  const setAnalysis = useVisualizerStore((s) => s.setAnalysis)
+
   useEffect(() => {
-    if (step !== 3 || !roomType) return
+    if (step !== 4 || !roomType || products.length > 0) return
     let cancelled = false
-    const timer = setTimeout(async () => {
-      const data = getAnalysisForRoom(roomType)
+
+    async function loadProducts() {
       let prods
       try {
-        prods = await fetchProductsForRoom(roomType)
-      } catch (err) {
-        console.error('[visualizer] fetchProductsForRoom failed, using mock:', err)
-        prods = getProductsForRoom(roomType)
+        prods = await fetchProductsForRoom(roomType!)
+      } catch {
+        prods = getProductsForRoom(roomType!)
       }
-      if (!cancelled) setAnalysis(data, prods)
-    }, 2700)
-    return () => { cancelled = true; clearTimeout(timer) }
-  }, [step, roomType, setAnalysis])
+      if (!cancelled) setAnalysis(getAnalysisForRoom(roomType!), prods)
+    }
+
+    loadProducts()
+    return () => { cancelled = true }
+  }, [step, roomType, products.length, setAnalysis])
 
   // ── Position VP crosshair ───────────────────────────────────────────────────
   const posVP = useCallback(() => {
@@ -239,11 +241,91 @@ export default function CanvasArea() {
   }
   const [vpVisible, setVpVisible] = useState(false)
 
-  const showCanvas = step >= 3
-  const showScan   = step === 3
+  const generatedImageUrl = useVisualizerStore((s) => s.generatedImageUrl)
+  const isGenerating      = useVisualizerStore((s) => s.isGenerating)
+  const showCanvas = step >= 4
+  const showScan   = false
+
+  // Cycle through status messages while generating so the user knows it's working
+  const [msgIdx, setMsgIdx] = useState(0)
+  const GEN_MESSAGES = useMemo(() => [
+    'Analysing your room…',
+    'Placing the fixture…',
+    'Adjusting lighting…',
+    'Compositing layers…',
+    'Finalising result…',
+  ], [])
+
+  useEffect(() => {
+    if (!isGenerating) { setMsgIdx(0); return }
+    const id = setInterval(() => setMsgIdx((i) => (i + 1) % GEN_MESSAGES.length), 3500)
+    return () => clearInterval(id)
+  }, [isGenerating, GEN_MESSAGES.length])
 
   return (
     <div ref={wrapRef} className="relative flex-1 overflow-hidden bg-[#ebebe8]">
+
+      {/* AI generation loading overlay */}
+      {isGenerating && (
+        <div
+          role="status"
+          aria-live="polite"
+          aria-label="Generating AI preview"
+          style={{
+            position: 'absolute', inset: 0, zIndex: 9999,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(44,40,37,0.82)',
+            backdropFilter: 'blur(4px)',
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, maxWidth: 260, textAlign: 'center' }}>
+
+            {/* Concentric spinner rings */}
+            <div style={{ position: 'relative', width: 64, height: 64 }}>
+              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.1)' }} />
+              <div
+                className="animate-spin"
+                style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '2px solid transparent', borderTopColor: '#C4714A' }}
+              />
+              <div
+                className="animate-spin"
+                style={{ position: 'absolute', inset: 8, borderRadius: '50%', border: '1.5px solid transparent', borderTopColor: 'rgba(255,255,255,0.35)', animationDuration: '1.6s', animationDirection: 'reverse' }}
+              />
+              {/* Centre dot */}
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#C4714A' }} />
+              </div>
+            </div>
+
+            {/* Heading + rotating sub-message */}
+            <div>
+              <p style={{ color: '#fff', fontFamily: 'var(--font-cormorant, serif)', fontSize: 20, lineHeight: 1.2, margin: 0 }}>
+                Generating AI Preview
+              </p>
+              <p
+                key={msgIdx}
+                style={{
+                  color: 'rgba(255,255,255,0.55)', fontSize: 10, letterSpacing: '1.5px',
+                  textTransform: 'uppercase', marginTop: 8,
+                  fontFamily: 'var(--font-outfit, sans-serif)',
+                  transition: 'opacity 0.4s',
+                }}
+              >
+                {GEN_MESSAGES[msgIdx]}
+              </p>
+            </div>
+
+            {/* Indeterminate progress bar */}
+            <div style={{ width: 180, height: 2, background: 'rgba(255,255,255,0.12)', borderRadius: 999, overflow: 'hidden' }}>
+              <div className="viz-progress-bar" />
+            </div>
+
+            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 9, letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'var(--font-outfit, sans-serif)', marginTop: -8 }}>
+              This may take up to 60 seconds
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Demo CSS room */}
       {showCanvas && isDemo && (
@@ -267,17 +349,21 @@ export default function CanvasArea() {
         </div>
       )}
 
-      {/* Uploaded image */}
-      {showCanvas && !isDemo && imageUrl && (
+      {/* Uploaded image (steps 4–5) or generated composite (step 6) */}
+      {showCanvas && !isDemo && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={imageUrl} alt="Room" className="absolute inset-0 w-full h-full object-cover" />
+        <img
+          src={step === 6 && generatedImageUrl ? generatedImageUrl : (imageUrl ?? '')}
+          alt="Room"
+          className={`absolute inset-0 w-full h-full ${step === 6 && generatedImageUrl ? 'object-contain bg-[#2C2825]' : 'object-cover'}`}
+        />
       )}
 
       {/* Scan overlay */}
       {showScan && <ScanOverlay />}
 
       {/* Room type tag */}
-      {step >= 4 && (
+      {step >= 4 && step < 6 && (
         <div className="absolute top-2.5 left-2.5 z-30 bg-white/90 border border-warm-gray px-3 py-1 rounded-full text-[10px] tracking-[1.5px] uppercase text-mid-gray backdrop-blur-sm">
           {analysisData?.roomType} · {analysisData?.style}
         </div>
@@ -288,8 +374,8 @@ export default function CanvasArea() {
         <div ref={vpMarkRef} className="viz-vp-mark" style={{ display: vpVisible ? 'block' : 'none' }} />
       )}
 
-      {/* Draggable fixtures — one per placed product */}
-      {placedProducts.map((product) => (
+      {/* Draggable fixtures — hidden at step 6 where AI composite is shown */}
+      {step < 6 && placedProducts.map((product) => (
         <FixtureOverlay
           key={product.id}
           product={product}

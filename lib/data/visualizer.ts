@@ -4,6 +4,7 @@ export interface VisualizerProduct {
   id: number
   name: string
   type: string
+  category: string    // e.g. "Wall Light", "Pendant Light", "Crystal Chandelier"
   price: string       // display-only (e.g. '₹ 42,000')
   priceValue: number  // numeric value for cart integration
   match: number // 0-100 style match score
@@ -29,6 +30,7 @@ export const VISUALIZER_PRODUCTS: readonly VisualizerProduct[] = [
     id: 1,
     name: 'Lumière Cascade',
     type: 'Crystal Chandelier',
+    category: 'Crystal Chandelier',
     price: '₹ 42,000',
     priceValue: 42000,
     match: 97,
@@ -41,6 +43,7 @@ export const VISUALIZER_PRODUCTS: readonly VisualizerProduct[] = [
     id: 2,
     name: 'Aura Pendant Trio',
     type: 'Pendant Cluster',
+    category: 'Pendant Light',
     price: '₹ 28,500',
     priceValue: 28500,
     match: 91,
@@ -53,6 +56,7 @@ export const VISUALIZER_PRODUCTS: readonly VisualizerProduct[] = [
     id: 3,
     name: 'Solstice Orb',
     type: 'Globe Pendant',
+    category: 'Pendant Light',
     price: '₹ 18,000',
     priceValue: 18000,
     match: 85,
@@ -65,6 +69,7 @@ export const VISUALIZER_PRODUCTS: readonly VisualizerProduct[] = [
     id: 4,
     name: 'Celeste Flush',
     type: 'Flush Mount',
+    category: 'Dome Light',
     price: '₹ 14,200',
     priceValue: 14200,
     match: 77,
@@ -77,6 +82,7 @@ export const VISUALIZER_PRODUCTS: readonly VisualizerProduct[] = [
     id: 5,
     name: 'Arc Minimal',
     type: 'Single Pendant',
+    category: 'Pendant Light',
     price: '₹ 8,900',
     priceValue: 8900,
     match: 70,
@@ -136,13 +142,25 @@ export function getAnalysisForRoom(roomType: string): RoomAnalysis {
 
 // Fetch real products from the backend, filtered by room type
 export async function fetchProductsForRoom(roomType: string): Promise<VisualizerProduct[]> {
-  const res = await fetch(`/api/products?whereUsed=${encodeURIComponent(roomType)}`)
-  if (!res.ok) throw new Error(`Products API returned ${res.status}`)
-  const data = await res.json()
+  const [productsRes, categoriesRes] = await Promise.all([
+    fetch(`/api/products?whereUsed=${encodeURIComponent(roomType)}`),
+    fetch('/api/categories'),
+  ])
+  if (!productsRes.ok) throw new Error(`Products API returned ${productsRes.status}`)
+  const data = await productsRes.json()
+
+  // Build id → name map from categories response
+  const categoryMap: Record<string, string> = {}
+  if (categoriesRes.ok) {
+    const cats: Array<{ id: number; name: string }> = await categoriesRes.json()
+    for (const c of cats) categoryMap[String(c.id)] = c.name
+  }
+
   const raw: Array<{
     id: number
     name: string
     price: string
+    category: string
     mainImage: string
     thumbnailImage: string
     arImages: string
@@ -171,6 +189,7 @@ export async function fetchProductsForRoom(roomType: string): Promise<Visualizer
         id: p.id,
         name: p.name,
         type: [p.materials, p.lightSource].filter(Boolean).join(' · ') || 'Decorative Light',
+        category: categoryMap[p.category] ?? p.category ?? 'Pendant Lights',
         price: `₹ ${Math.round(parseFloat(p.price)).toLocaleString('en-IN')}`,
         priceValue: parseFloat(p.price),
         match,

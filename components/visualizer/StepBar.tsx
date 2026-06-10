@@ -5,9 +5,9 @@ import { useVisualizerStore, type VisualizerStep } from '@/lib/stores/visualizer
 const STEPS: { n: VisualizerStep; label: string }[] = [
   { n: 1, label: 'Room' },
   { n: 2, label: 'Upload' },
-  { n: 3, label: 'Analyse' },
   { n: 4, label: 'Select' },
   { n: 5, label: 'Visualise' },
+  { n: 6, label: 'Generate' },
 ]
 
 export default function StepBar() {

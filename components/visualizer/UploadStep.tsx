@@ -1,3 +1,4 @@
+// components/visualizer/UploadStep.tsx
 'use client'
 import { useRef } from 'react'
 import { useVisualizerStore } from '@/lib/stores/visualizerStore'
@@ -10,12 +11,17 @@ export default function UploadStep() {
 
   function handleFile(file: File) {
     if (!file.type.startsWith('image/')) return
-    if (prevUrlRef.current) {
-      URL.revokeObjectURL(prevUrlRef.current)
+
+    if (prevUrlRef.current) URL.revokeObjectURL(prevUrlRef.current)
+    const objectUrl = URL.createObjectURL(file)
+    prevUrlRef.current = objectUrl
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      const dataUrl = typeof reader.result === 'string' ? reader.result : null
+      setImage(objectUrl, dataUrl, false)
     }
-    const url = URL.createObjectURL(file)
-    prevUrlRef.current = url
-    setImage(url, false)
+    reader.readAsDataURL(file)
   }
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -31,16 +37,14 @@ export default function UploadStep() {
   }
 
   function runDemo() {
-    setImage('', true)
+    // Demo mode: no real image, dataUrl is null
+    setImage('', null, true)
   }
 
   return (
     <div className="flex flex-col items-center justify-center flex-1 px-6 bg-offwhite gap-4">
-      {/* Context chip */}
       <div className="flex items-center gap-2">
-        <span className="text-[9.5px] tracking-[2px] uppercase text-mid-gray">
-          Room selected:
-        </span>
+        <span className="text-[9.5px] tracking-[2px] uppercase text-mid-gray">Room selected:</span>
         <span className="text-[9.5px] tracking-[1.5px] uppercase text-gold font-medium border border-gold rounded-full px-3 py-0.5">
           {roomType}
         </span>
@@ -48,7 +52,6 @@ export default function UploadStep() {
 
       <h2 className="font-serif text-2xl text-dark">Upload your room photo</h2>
 
-      {/* Drop zone */}
       <div
         className="w-80 h-56 border-[1.5px] border-dashed border-warm-gray rounded-lg flex flex-col items-center justify-center gap-3 cursor-pointer transition-all duration-200 hover:border-gold hover:bg-[rgba(196,113,74,0.06)]"
         onClick={() => fileRef.current?.click()}

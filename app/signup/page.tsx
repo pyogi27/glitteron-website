@@ -41,10 +41,6 @@ function getPasswordStrength(password: string): 0 | 1 | 2 | 3 {
 const STRENGTH_LABELS = ['', 'Weak', 'Fair', 'Strong'];
 const STRENGTH_COLORS = ['', '#C4714A', '#E8A87C', '#6B9E6B'];
 
-function maskPhone(phone: string) {
-  return `+91 XXXXX ${phone.slice(-5)}`;
-}
-
 const MEMBER_PERKS = [
   'Free shipping on orders over $200',
   'Exclusive member-only collections',
@@ -128,7 +124,8 @@ export default function SignupPage() {
       const newErrors: FormErrors = {};
       if (!form.firstName.trim()) newErrors.firstName = 'Required';
       if (!form.lastName.trim()) newErrors.lastName = 'Required';
-      if (form.email && !form.email.includes('@')) newErrors.email = 'Enter a valid email address';
+      if (!form.email.trim()) newErrors.email = 'Email address is required';
+      else if (!form.email.includes('@')) newErrors.email = 'Enter a valid email address';
       if (!/^\d{10}$/.test(form.phone)) newErrors.phone = 'Enter a valid 10-digit number';
       if (form.password.length < 8) newErrors.password = 'Password must be at least 8 characters';
       if (form.password !== form.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
@@ -138,7 +135,7 @@ export default function SignupPage() {
 
       setDetailsLoading(true);
       try {
-        await sendOtp(form.phone);
+        await sendOtp(form.email);
         setStep('otp');
         setCountdown(60);
         setOtp('');
@@ -165,11 +162,11 @@ export default function SignupPage() {
     setOtpError('');
     try {
       const { accessToken, user } = await verifyOtp({
+        email: form.email,
         phone: form.phone,
         otp,
         firstName: form.firstName,
         lastName: form.lastName,
-        ...(form.email ? { email: form.email } : {}),
         password: form.password,
       });
       setAuth(accessToken, user);
@@ -200,7 +197,7 @@ export default function SignupPage() {
     setResendLoading(true);
     setOtpError('');
     try {
-      await sendOtp(form.phone);
+      await sendOtp(form.email);
       setCountdown(60);
       setOtp('');
     } catch (err: unknown) {
@@ -321,9 +318,6 @@ export default function SignupPage() {
                       className="block font-sans text-[10px] font-medium tracking-[0.12em] uppercase mb-2"
                       style={{ color: '#2C2825' }}>
                       Email Address
-                      <span className="ml-1 normal-case font-light tracking-normal" style={{ color: '#A09488' }}>
-                        (optional)
-                      </span>
                     </label>
                     <input
                       id="signup-email" type="email" value={form.email}
@@ -564,7 +558,7 @@ export default function SignupPage() {
                   </h1>
                   <p className="font-sans text-[12.5px] font-light leading-[1.7]" style={{ color: '#A09488' }}>
                     We sent a 6-digit code to{' '}
-                    <span className="font-medium" style={{ color: '#2C2825' }}>{maskPhone(form.phone)}</span>
+                    <span className="font-medium" style={{ color: '#2C2825' }}>{form.email}</span>
                   </p>
                 </div>
 

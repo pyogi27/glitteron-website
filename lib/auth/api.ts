@@ -59,20 +59,20 @@ async function authedReq<T>(path: string, opts: RequestInit = {}): Promise<T> {
 
 // ─── Public endpoints ─────────────────────────────────────────────────────────
 
-/** Signup step 1 — sends OTP to phone */
-export const sendOtp = (phone: string) =>
+/** Signup step 1 — sends OTP to email */
+export const sendOtp = (email: string) =>
   req<OtpSentResponse>('/send-otp', {
     method: 'POST',
-    body: JSON.stringify({ phone }),
+    body: JSON.stringify({ email }),
   });
 
 /** Signup step 2 — verify OTP + create account */
 export const verifyOtp = (payload: {
+  email: string;
   phone: string;
   otp: string;
   firstName: string;
   lastName: string;
-  email?: string;
   password: string;
 }) =>
   req<AuthSuccessResponse>('/verify-otp', {
