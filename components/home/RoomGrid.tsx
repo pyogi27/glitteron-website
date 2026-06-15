@@ -32,7 +32,7 @@ export default function RoomGrid() {
         {rooms.map((room, i) => (
           <Link
             key={room.id}
-            href={`/collections?room=${room.slug}`}
+            href={`/rooms/${room.slug}`}
             className="rg-card no-underline block"
           >
             {/* Image */}
@@ -103,7 +103,7 @@ export default function RoomGrid() {
         {rooms.map((room, i) => (
           <Link
             key={room.id}
-            href={`/collections?room=${room.slug}`}
+            href={`/rooms/${room.slug}`}
             className={`relative rounded-2xl overflow-hidden no-underline block ${i === 0 ? 'col-span-2 h-[220px]' : 'h-[160px]'}`}
           >
             <Image

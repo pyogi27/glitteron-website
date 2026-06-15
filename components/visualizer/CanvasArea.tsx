@@ -241,8 +241,14 @@ export default function CanvasArea() {
   }
   const [vpVisible, setVpVisible] = useState(false)
 
-  const generatedImageUrl = useVisualizerStore((s) => s.generatedImageUrl)
-  const isGenerating      = useVisualizerStore((s) => s.isGenerating)
+  const generatedImageUrl  = useVisualizerStore((s) => s.generatedImageUrl)
+  const isGenerating       = useVisualizerStore((s) => s.isGenerating)
+  const generationProgress = useVisualizerStore((s) => s.generationProgress)
+
+  // Hold-to-compare: temporarily show the original photo instead of the render
+  const [comparing, setComparing] = useState(false)
+  const canCompare = generatedImageUrl !== null && imageUrl !== null && !isDemo && !isGenerating
+
   const showCanvas = step >= 4
   const showScan   = false
 
@@ -263,7 +269,7 @@ export default function CanvasArea() {
   }, [isGenerating, GEN_MESSAGES.length])
 
   return (
-    <div ref={wrapRef} className="relative flex-1 overflow-hidden bg-[#ebebe8]">
+    <div ref={wrapRef} className="relative isolate flex-1 overflow-hidden bg-[#ebebe8]">
 
       {/* AI generation loading overlay */}
       {isGenerating && (
@@ -272,7 +278,7 @@ export default function CanvasArea() {
           aria-live="polite"
           aria-label="Generating AI preview"
           style={{
-            position: 'absolute', inset: 0, zIndex: 9999,
+            position: 'absolute', inset: 0, zIndex: 50,
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
             background: 'rgba(44,40,37,0.82)',
             backdropFilter: 'blur(4px)',
@@ -297,11 +303,21 @@ export default function CanvasArea() {
               </div>
             </div>
 
-            {/* Heading + rotating sub-message */}
+            {/* Heading + per-fixture progress + rotating sub-message */}
             <div>
               <p style={{ color: '#fff', fontFamily: 'var(--font-cormorant, serif)', fontSize: 20, lineHeight: 1.2, margin: 0 }}>
                 Generating AI Preview
               </p>
+              {generationProgress && (
+                <p style={{
+                  color: '#C4714A', fontSize: 11, letterSpacing: '1px', marginTop: 8,
+                  fontFamily: 'var(--font-outfit, sans-serif)',
+                }}>
+                  {generationProgress.productName}
+                  {generationProgress.total > 1 &&
+                    ` · ${generationProgress.current} of ${generationProgress.total}`}
+                </p>
+              )}
               <p
                 key={msgIdx}
                 style={{
@@ -349,14 +365,35 @@ export default function CanvasArea() {
         </div>
       )}
 
-      {/* Uploaded image (steps 4–5) or generated composite (step 6) */}
+      {/* Base image: latest AI render when one exists (so newly placed fixtures
+          stack on top of it), otherwise the uploaded room photo. While the
+          compare button is held, the original photo is shown instead. */}
       {showCanvas && !isDemo && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={step === 6 && generatedImageUrl ? generatedImageUrl : (imageUrl ?? '')}
-          alt="Room"
-          className={`absolute inset-0 w-full h-full ${step === 6 && generatedImageUrl ? 'object-contain bg-[#2C2825]' : 'object-cover'}`}
+          src={comparing && imageUrl ? imageUrl : (generatedImageUrl ?? imageUrl ?? '')}
+          alt={comparing ? 'Original room photo' : 'Room'}
+          className={`absolute inset-0 w-full h-full ${generatedImageUrl ? 'object-contain bg-[#2C2825]' : 'object-cover'}`}
         />
+      )}
+
+      {/* Before / after compare */}
+      {canCompare && (
+        <button
+          type="button"
+          aria-pressed={comparing}
+          onPointerDown={() => setComparing(true)}
+          onPointerUp={() => setComparing(false)}
+          onPointerLeave={() => setComparing(false)}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setComparing((v) => !v) } }}
+          className={`absolute top-2.5 right-2.5 z-40 select-none px-3 py-1.5 rounded-full text-[10px] tracking-[1.5px] uppercase border backdrop-blur-sm transition-colors cursor-pointer font-sans ${
+            comparing
+              ? 'bg-gold text-white border-gold'
+              : 'bg-white/90 text-mid-gray border-warm-gray hover:border-gold hover:text-gold'
+          }`}
+        >
+          {comparing ? 'Original Photo' : 'Hold to Compare'}
+        </button>
       )}
 
       {/* Scan overlay */}

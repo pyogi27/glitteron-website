@@ -5,26 +5,30 @@ export interface ApiCategory {
   productCount?: number;
 }
 
+// NOTE: The backend serializes numeric columns as strings (e.g. price "7800.00",
+// stock via totalStock/quantity). Fields are widened to `number | string` and must
+// be coerced with toNumber() before use. See mapApiProduct / mapRawProduct.
 export interface ApiProduct {
   id: number;
   name: string;
   description?: string;
-  price: number;
+  price: number | string;
   categoryId: number;
   category?: ApiCategory;
-  stock: number;
+  stock: number | string;
   hasVariations: boolean;
   sku?: string;
   slug?: string;
   thumbnailImage?: string;
+  mainImage?: string;
   arImages?: string;
   imageUrls?: string[];
   images?: Array<string | { url: string }>;
-  rating?: number;
-  reviewCount?: number;
+  rating?: number | string;
+  reviewCount?: number | string;
   badge?: "new" | "sale" | "best";
-  originalPrice?: number;
-  discount?: number;
+  originalPrice?: number | string;
+  discount?: number | string;
 }
 
 export interface ApiVariation {

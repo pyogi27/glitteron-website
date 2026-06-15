@@ -22,8 +22,8 @@ export default function RoomVisualizerClient() {
 
   return (
     <div
-      className="flex flex-col overflow-hidden"
-      style={{ height: 'calc(100dvh - 64px)' }}
+      className="flex flex-col overflow-hidden pt-[72px]"
+      style={{ height: '100dvh' }}
     >
       <StepBar />
 

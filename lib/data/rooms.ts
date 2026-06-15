@@ -4,6 +4,7 @@ export const rooms: Room[] = [
   {
     id: '1',
     slug: 'living-room',
+    whereUsed: 'Living Room',
     name: 'Living Room',
     tag: 'Statement Lighting',
     subtitle: 'Chandeliers · Pendants · Clusters',
@@ -13,6 +14,7 @@ export const rooms: Room[] = [
   {
     id: '2',
     slug: 'dining-room',
+    whereUsed: 'Dining Room',
     name: 'Dining Room',
     tag: 'Pendant Clusters',
     subtitle: 'Pendants · Clusters',
@@ -22,6 +24,7 @@ export const rooms: Room[] = [
   {
     id: '3',
     slug: 'bedroom',
+    whereUsed: 'Bedroom',
     name: 'Bedroom',
     tag: 'Soft Ambience',
     subtitle: 'Domes · Teardrops',
@@ -31,6 +34,7 @@ export const rooms: Room[] = [
   {
     id: '4',
     slug: 'kitchen',
+    whereUsed: 'Kitchen',
     name: 'Kitchen & Island',
     tag: 'Kitchen',
     subtitle: 'Linear · Bar Pendants',
@@ -40,6 +44,7 @@ export const rooms: Room[] = [
   {
     id: '5',
     slug: 'home-office',
+    whereUsed: 'Home Office',
     name: 'Home Office',
     tag: 'Focus Lighting',
     subtitle: 'Track · Directional',

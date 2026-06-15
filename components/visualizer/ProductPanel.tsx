@@ -8,6 +8,7 @@ export default function ProductPanel() {
   const products = useVisualizerStore((s) => s.products)
   const selectedProduct = useVisualizerStore((s) => s.selectedProduct)
   const placedProductIds = useVisualizerStore((s) => s.placedProductIds)
+  const compositedProductIds = useVisualizerStore((s) => s.compositedProductIds)
   const setSelectedProduct = useVisualizerStore((s) => s.setSelectedProduct)
 
   return (
@@ -66,6 +67,7 @@ export default function ProductPanel() {
               isFirst={i === 0}
               isSelected={selectedProduct?.id === p.id}
               isPlaced={placedProductIds.includes(p.id)}
+              isInRender={compositedProductIds.includes(p.id)}
               onClick={() => setSelectedProduct(p)}
             />
           ))
@@ -83,12 +85,14 @@ function ProductItem({
   isFirst,
   isSelected,
   isPlaced,
+  isInRender,
   onClick,
 }: {
   product: VisualizerProduct
   isFirst: boolean
   isSelected: boolean
   isPlaced: boolean
+  isInRender: boolean
   onClick: () => void
 }) {
   const dotCount = Math.round(p.match / 20) // 0-5 dots filled
@@ -110,9 +114,9 @@ function ProductItem({
           Best
         </span>
       )}
-      {isPlaced && (
-        <span className="absolute top-1.5 left-1.5 text-[7.5px] tracking-[1px] uppercase bg-dark text-white px-1.5 py-0.5 rounded-full font-medium">
-          On canvas
+      {(isPlaced || isInRender) && (
+        <span className={`absolute top-1.5 left-1.5 text-[7.5px] tracking-[1px] uppercase px-1.5 py-0.5 rounded-full font-medium text-white ${isInRender ? 'bg-gold' : 'bg-dark'}`}>
+          {isInRender ? 'In preview' : 'On canvas'}
         </span>
       )}
       <div className="w-[52px] h-[52px] shrink-0 rounded-[5px] overflow-hidden bg-offwhite border border-warm-gray">
@@ -146,16 +150,22 @@ function ProductItem({
 function PlaceButton() {
   const selectedProduct  = useVisualizerStore((s) => s.selectedProduct)
   const placedProductIds = useVisualizerStore((s) => s.placedProductIds)
+  const compositedProductIds = useVisualizerStore((s) => s.compositedProductIds)
   const step             = useVisualizerStore((s) => s.step)
   const setStep          = useVisualizerStore((s) => s.setStep)
   const addPlacedProduct = useVisualizerStore((s) => s.addPlacedProduct)
 
-  const isPlaced = selectedProduct !== null && placedProductIds.includes(selectedProduct.id)
+  const isPlaced =
+    selectedProduct !== null &&
+    (placedProductIds.includes(selectedProduct.id) ||
+      compositedProductIds.includes(selectedProduct.id))
 
   function handlePlace() {
     if (!selectedProduct || isPlaced) return
     addPlacedProduct(selectedProduct.id)
-    if (step < 5) setStep(5)
+    // From the result view (step 6) this returns to placement mode on top of
+    // the generated render; from step 4 it advances to Visualise as before.
+    if (step !== 5) setStep(5)
   }
 
   return (

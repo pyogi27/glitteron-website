@@ -27,12 +27,12 @@ const FOOTER_LINKS = {
 
 export default function Footer() {
   return (
-    <footer className="bg-black text-white/60 pt-[72px] pb-9 px-4 md:px-12">
-      <div className="grid grid-cols-2 md:grid-cols-[2fr_1fr_1fr_1fr] gap-8 md:gap-14 mb-14 pb-14 border-b border-white/[0.07]">
+    <footer className="bg-black text-white/60 pt-12 pb-6 px-4 md:px-12">
+      <div className="grid grid-cols-2 md:grid-cols-[2fr_1fr_1fr_1fr] gap-6 md:gap-10 mb-8 pb-8 border-b border-white/[0.07]">
         {/* Brand column */}
         <div>
           <Logo light />
-          <p className="font-serif text-[17px] text-white/38 italic mt-3.5 mb-5 leading-[1.55]">
+          <p className="font-serif text-[17px] text-white/38 italic mt-2.5 mb-4 leading-[1.55]">
             Illuminate every corner<br />of your story.
           </p>
           {/* Social icons */}
@@ -55,10 +55,10 @@ export default function Footer() {
         {/* Link columns */}
         {Object.entries(FOOTER_LINKS).map(([title, links]) => (
           <div key={title}>
-            <h3 className="text-[11px] font-semibold tracking-[0.15em] uppercase text-white mb-5">
+            <h3 className="text-[11px] font-semibold tracking-[0.15em] uppercase text-white mb-3.5">
               {title}
             </h3>
-            <ul className="list-none flex flex-col gap-3">
+            <ul className="list-none flex flex-col gap-2">
               {links.map(({ label, href }) => (
                 <li key={label}>
                   <Link

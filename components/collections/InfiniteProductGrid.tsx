@@ -12,6 +12,8 @@ interface Props {
   initialProducts: Product[]
   initialPage: number
   totalPages: number
+  /** Query params merged into every load-more request (e.g. { whereUsed: 'Living Room' }) */
+  extraParams?: Record<string, string>
 }
 
 function dedupeById(products: Product[]): Product[] {
@@ -27,17 +29,37 @@ function slugify(name: string): string {
   return name.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim()
 }
 
+const PLACEHOLDER_IMAGE =
+  'https://images.pexels.com/photos/1123262/pexels-photo-1123262.jpeg?auto=compress&cs=tinysrgb&w=800&h=900&fit=crop'
+
 type RawProduct = Record<string, unknown>
 
+/** Backend returns numbers as JSON strings (e.g. price "7800.00"); coerce safely. */
+function toNumber(value: unknown, fallback = 0): number {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : fallback
+  if (typeof value === 'string') {
+    const n = Number(value)
+    return Number.isFinite(n) ? n : fallback
+  }
+  return fallback
+}
+
 function mapRawProduct(p: RawProduct): Product {
+  // Image sources, in priority order, matching the backend shape:
+  // imageUrls[] / images[] (legacy) → thumbnailImage → mainImage → arImages
   const imageUrls = Array.isArray(p.imageUrls) ? (p.imageUrls as string[]) : []
   const images_ = Array.isArray(p.images)
     ? (p.images as Array<string | { url: string }>).map(img =>
         typeof img === 'string' ? img : (img as { url: string }).url
       ).filter(Boolean)
     : []
-  const images = imageUrls.length > 0 ? imageUrls : images_.length > 0 ? images_ :
-    ['https://images.pexels.com/photos/1123262/pexels-photo-1123262.jpeg?auto=compress&cs=tinysrgb&w=800&h=900&fit=crop']
+  const singleImages = [p.thumbnailImage, p.mainImage, p.arImages]
+    .filter((u): u is string => typeof u === 'string' && u.length > 0)
+
+  const candidates = imageUrls.length > 0 ? imageUrls
+    : images_.length > 0 ? images_
+    : singleImages
+  const images = candidates.length > 0 ? Array.from(new Set(candidates)) : [PLACEHOLDER_IMAGE]
 
   const categoryName = typeof p.category === 'object' && p.category !== null
     ? ((p.category as { name?: string }).name ?? '')
@@ -51,13 +73,13 @@ function mapRawProduct(p: RawProduct): Product {
     subtitle: typeof p.description === 'string' ? p.description : '',
     category: categoryName,
     badge: (p.badge === 'new' || p.badge === 'sale' || p.badge === 'best') ? p.badge : undefined,
-    price: typeof p.price === 'number' ? p.price : 0,
-    originalPrice: typeof p.originalPrice === 'number' ? p.originalPrice : undefined,
-    discount: typeof p.discount === 'number' ? p.discount : undefined,
-    rating: Number(p.rating ?? 0),
-    reviewCount: typeof p.reviewCount === 'number' ? p.reviewCount : 0,
+    price: toNumber(p.price),
+    originalPrice: p.originalPrice != null ? toNumber(p.originalPrice) : undefined,
+    discount: p.discount != null ? toNumber(p.discount) : undefined,
+    rating: toNumber(p.rating),
+    reviewCount: toNumber(p.reviewCount),
     sku: typeof p.sku === 'string' ? p.sku : '',
-    stock: Number(p.stock ?? 0),
+    stock: toNumber(p.stock ?? p.totalStock ?? p.quantity),
     images,
     description: typeof p.description === 'string' ? p.description : '',
     specs: {},
@@ -70,9 +92,18 @@ export default function InfiniteProductGrid({
   initialProducts,
   initialPage,
   totalPages,
+  extraParams,
 }: Props) {
   const searchParams = useSearchParams()
-  const paramKey = searchParams.toString()
+  const extraKey = useMemo(
+    () => new URLSearchParams(extraParams ?? {}).toString(),
+    [extraParams],
+  )
+  const paramKey = useMemo(() => {
+    const merged = new URLSearchParams(searchParams.toString())
+    new URLSearchParams(extraKey).forEach((value, key) => merged.set(key, value))
+    return merged.toString()
+  }, [searchParams, extraKey])
 
   useScrollRestoration(paramKey)
 

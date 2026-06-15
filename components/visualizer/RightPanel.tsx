@@ -1,5 +1,6 @@
 // components/visualizer/RightPanel.tsx
 'use client'
+import { useEffect, useState } from 'react'
 import { useVisualizerStore } from '@/lib/stores/visualizerStore'
 import { useCartStore } from '@/lib/stores/cartStore'
 import type { VisualizerProduct } from '@/lib/data/visualizer'
@@ -8,74 +9,25 @@ import type { AIGenerateResponse, ShareResult } from '@/lib/ai/types'
 export default function RightPanel() {
   const perspData        = useVisualizerStore((s) => s.perspData)
   const placedProductIds = useVisualizerStore((s) => s.placedProductIds)
+  const compositedProductIds = useVisualizerStore((s) => s.compositedProductIds)
   const products         = useVisualizerStore((s) => s.products)
   const opVal            = useVisualizerStore((s) => s.opVal)
   const manVal           = useVisualizerStore((s) => s.manVal)
   const setOpVal         = useVisualizerStore((s) => s.setOpVal)
   const setManVal        = useVisualizerStore((s) => s.setManVal)
 
-  // Show CTA for the most recently placed product
-  const lastId = placedProductIds[placedProductIds.length - 1] ?? null
+  // Show CTA for the most recently placed product; after a generation the
+  // pending list is empty, so fall back to the last product in the render.
+  const lastId =
+    placedProductIds[placedProductIds.length - 1] ??
+    compositedProductIds[compositedProductIds.length - 1] ??
+    null
   const placedProduct = lastId !== null
     ? products.find((p) => p.id === lastId) ?? null
     : null
 
   return (
     <div className="w-[224px] shrink-0 bg-white border-l border-warm-gray overflow-y-auto flex flex-col gap-[18px] px-3.5 py-4">
-
-      {/* Perspective Engine */}
-      <div>
-        <p className="text-[9.5px] tracking-[2px] uppercase text-mid-gray mb-2.5">
-          Perspective Engine
-        </p>
-        <div className="bg-offwhite rounded-md p-3 border border-warm-gray">
-          {/* SVG diagram */}
-          <svg viewBox="0 0 196 72" width="100%" style={{ display: 'block', marginBottom: 4 }}>
-            <line x1="98" y1="14" x2="16"  y2="66" stroke="#E0DCD6" strokeWidth="1" />
-            <line x1="98" y1="14" x2="180" y2="66" stroke="#E0DCD6" strokeWidth="1" />
-            <line x1="16" y1="66" x2="180" y2="66" stroke="#E0DCD6" strokeWidth="1" />
-            <circle cx="98" cy="14" r="3" fill="#C4714A" opacity=".75" />
-            <text x="98" y="9" textAnchor="middle" fontSize="7" fill="#C4714A" fontFamily="Outfit" letterSpacing="1">VP</text>
-            <circle cx="98" cy="23" r="4" fill="none" stroke="#C4714A" strokeWidth="1" />
-            <line x1="98" y1="14" x2="98" y2="19" stroke="#C4714A" strokeWidth="1" />
-            <text x="98" y="34" textAnchor="middle" fontSize="6" fill="#C4714A" fontFamily="Outfit">
-              {perspData ? `${perspData.dScale.toFixed(2)}×` : '0.45×'}
-            </text>
-            <circle cx="98" cy="56" r="7.5" fill="none" stroke="#C4714A" strokeWidth="1.2" />
-            <line x1="98" y1="14" x2="98" y2="48" stroke="#C4714A" strokeWidth="1" strokeDasharray="3,2" />
-            <text x="98" y="70" textAnchor="middle" fontSize="6" fill="#C4714A" fontFamily="Outfit">1.0×</text>
-          </svg>
-
-          {/* Stats */}
-          <div className="flex flex-col gap-[7px] mt-2">
-            {[
-              {
-                label: 'Depth Scale',
-                value: perspData ? `${perspData.dScale.toFixed(2)}×` : null,
-              },
-              {
-                label: 'Ceiling Dist',
-                value: perspData ? `${Math.round((1 - perspData.dr) * 100)}% from VP` : null,
-              },
-              {
-                label: 'Convergence',
-                value: perspData ? `${Math.round(perspData.conv * 100)}%` : null,
-              },
-            ].map(({ label, value }) => (
-              <div key={label} className="flex justify-between">
-                <span className="text-[10px] text-mid-gray">{label}</span>
-                <span className="text-[11px] font-normal">
-                  {value ? (
-                    <span className="text-gold">{value}</span>
-                  ) : (
-                    <span className="text-warm-gray">—</span>
-                  )}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* Fine-Tune sliders */}
       <div>
@@ -139,9 +91,46 @@ function Slider({
   )
 }
 
+// Only data URLs can be fed back into the generate API as the next base image
+function isChainableDataUrl(url: string): boolean {
+  return /^data:image\/(jpeg|png|webp);base64,/.test(url)
+}
+
+// Composite a list of fixtures onto a base image, one API call per fixture,
+// feeding each result into the next call. Returns the final composite.
+async function generateChain(
+  baseImage: string,
+  items: VisualizerProduct[],
+  onProgress: (progress: { current: number; total: number; productName: string }) => void,
+): Promise<string> {
+  let current = baseImage
+  for (let i = 0; i < items.length; i++) {
+    const product = items[i]
+    onProgress({ current: i + 1, total: items.length, productName: product.name })
+    const res = await fetch('/api/visualizer/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        imageDataUrl: current,
+        productImageUrl: product.full,
+        productName: product.name,
+        productCategory: product.category,
+      }),
+    })
+    if (!res.ok) throw new Error(`Could not add ${product.name} (API ${res.status})`)
+    const data = await res.json() as AIGenerateResponse
+    if (!isChainableDataUrl(data.compositeImageUrl) && i < items.length - 1) {
+      throw new Error('Provider returned a non-chainable image; cannot add further fixtures')
+    }
+    current = data.compositeImageUrl
+  }
+  return current
+}
+
 function GenerateBlock() {
   const imageDataUrl       = useVisualizerStore((s) => s.imageDataUrl)
   const placedProductIds   = useVisualizerStore((s) => s.placedProductIds)
+  const compositedProductIds = useVisualizerStore((s) => s.compositedProductIds)
   const products           = useVisualizerStore((s) => s.products)
   const isGenerating       = useVisualizerStore((s) => s.isGenerating)
   const generationError    = useVisualizerStore((s) => s.generationError)
@@ -152,39 +141,107 @@ function GenerateBlock() {
   const isSharing          = useVisualizerStore((s) => s.isSharing)
   const shareError         = useVisualizerStore((s) => s.shareError)
   const setIsGenerating    = useVisualizerStore((s) => s.setIsGenerating)
-  const setGeneratedImage  = useVisualizerStore((s) => s.setGeneratedImage)
+  const applyRender        = useVisualizerStore((s) => s.applyRender)
+  const restoreRender      = useVisualizerStore((s) => s.restoreRender)
+  const renderHistory      = useVisualizerStore((s) => s.renderHistory)
   const setGenerationError = useVisualizerStore((s) => s.setGenerationError)
+  const setGenerationProgress = useVisualizerStore((s) => s.setGenerationProgress)
   const setIsSharing       = useVisualizerStore((s) => s.setIsSharing)
   const setShareResult     = useVisualizerStore((s) => s.setShareResult)
   const setShareError      = useVisualizerStore((s) => s.setShareError)
+  const discardGenerated   = useVisualizerStore((s) => s.discardGenerated)
+  const removePlacedProduct = useVisualizerStore((s) => s.removePlacedProduct)
+  const resetAll           = useVisualizerStore((s) => s.resetAll)
+  const addCartItem        = useCartStore((s) => s.addItem)
 
-  const lastId = placedProductIds[placedProductIds.length - 1] ?? null
-  const lastProduct = lastId !== null ? products.find((p) => p.id === lastId) ?? null : null
+  const [bulkAdded, setBulkAdded] = useState(false)
 
-  // Only show when a real image is available (not demo mode) and a product is placed
-  if (!imageDataUrl || !lastProduct) return null
+  // A new render means a new set of fixtures — re-enable "Add All to Cart"
+  useEffect(() => {
+    setBulkAdded(false)
+  }, [generatedImageUrl])
 
-  async function handleGenerate() {
-    if (isGenerating || !lastProduct) return
+  // Fixtures placed on the canvas but not yet baked into the AI render
+  const pendingProducts = placedProductIds
+    .map((id) => products.find((p) => p.id === id))
+    .filter((p): p is VisualizerProduct => p !== undefined)
+
+  // Fixtures already baked into the current render
+  const compositedProducts = compositedProductIds
+    .map((id) => products.find((p) => p.id === id))
+    .filter((p): p is VisualizerProduct => p !== undefined)
+
+  const hasResult = step === 6 && generatedImageUrl !== null
+
+  // Only show when a real image is available (not demo mode)
+  if (!imageDataUrl) return null
+  if (pendingProducts.length === 0 && !hasResult && !generatedImageUrl) return null
+
+  async function runChain(baseImage: string, items: VisualizerProduct[], resultIds: number[]) {
     setIsGenerating(true)
     setGenerationError(null)
-
     try {
-      const res = await fetch('/api/visualizer/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          imageDataUrl,
-          productImageUrl: lastProduct.full,
-          productName: lastProduct.name,
-          productCategory: lastProduct.category,
-        }),
-      })
-      if (!res.ok) throw new Error(`generate API returned ${res.status}`)
-      const data = await res.json() as AIGenerateResponse
-      setGeneratedImage(data.compositeImageUrl)
+      const url = await generateChain(baseImage, items, setGenerationProgress)
+      applyRender(url, resultIds)
     } catch (err) {
       setGenerationError(err instanceof Error ? err.message : 'Generation failed')
+    }
+  }
+
+  async function handleGenerate() {
+    if (isGenerating || pendingProducts.length === 0) return
+    // Chain onto the previous render when one exists so earlier fixtures are
+    // kept; each pending fixture is composited in its own API call.
+    const base =
+      generatedImageUrl && isChainableDataUrl(generatedImageUrl)
+        ? generatedImageUrl
+        : imageDataUrl!
+    const resultIds = [
+      ...compositedProductIds,
+      ...placedProductIds.filter((id) => !compositedProductIds.includes(id)),
+    ]
+    await runChain(base, pendingProducts, resultIds)
+  }
+
+  // Rebuild the render from the original photo with one fixture taken out
+  async function handleRemoveFromRender(product: VisualizerProduct) {
+    if (isGenerating || !imageDataUrl) return
+    if (!window.confirm(`Remove ${product.name} from this preview? The preview will be regenerated.`)) return
+
+    const remaining = compositedProducts.filter((p) => p.id !== product.id)
+    if (remaining.length === 0) {
+      // Nothing left to render — fall back to the original photo
+      discardGenerated()
+      removePlacedProduct(product.id)
+      return
+    }
+    await runChain(imageDataUrl, remaining, remaining.map((p) => p.id))
+  }
+
+  function handleAddAllToCart() {
+    compositedProducts.forEach((p) =>
+      addCartItem({
+        productId: String(p.id),
+        name: p.name,
+        price: p.priceValue,
+        image: p.thumb,
+        size: 'Standard',
+        finish: 'Default',
+        quantity: 1,
+      }),
+    )
+    setBulkAdded(true)
+  }
+
+  function handleDiscard() {
+    if (window.confirm('Discard this AI preview? Your fixtures will go back on the canvas so you can adjust and regenerate.')) {
+      discardGenerated()
+    }
+  }
+
+  function handleStartOver() {
+    if (window.confirm('Start over? This removes your photo, fixtures, and AI preview.')) {
+      resetAll()
     }
   }
 
@@ -197,7 +254,7 @@ function GenerateBlock() {
       roomType: roomType ?? 'Room',
       compositeImageUrl: generatedImageUrl,
       products: products
-        .filter((p) => placedProductIds.includes(p.id))
+        .filter((p) => compositedProductIds.includes(p.id))
         .map((p) => ({ id: p.id, name: p.name, price: p.price, thumb: p.thumb })),
       createdAt: new Date().toISOString(),
     }
@@ -224,7 +281,7 @@ function GenerateBlock() {
     <div className="border-t border-warm-gray pt-4">
       <p className="text-[9.5px] tracking-[2px] uppercase text-mid-gray mb-2.5">AI Preview</p>
 
-      {step < 6 && (
+      {pendingProducts.length > 0 && (
         <button
           type="button"
           onClick={handleGenerate}
@@ -241,7 +298,9 @@ function GenerateBlock() {
               Generating…
             </span>
           ) : (
-            'Generate AI Preview'
+            `${generatedImageUrl ? 'Update AI Preview' : 'Generate AI Preview'}${
+              pendingProducts.length > 1 ? ` (${pendingProducts.length})` : ''
+            }`
           )}
         </button>
       )}
@@ -250,14 +309,63 @@ function GenerateBlock() {
         <p className="text-[10px] text-red-400 mt-1">{generationError}</p>
       )}
 
-      {step === 6 && generatedImageUrl && (
+      {hasResult && generatedImageUrl && (
         <div className="mt-1">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={generatedImageUrl}
             alt="AI-generated composite"
-            className="w-full rounded-md border border-warm-gray mb-3"
+            className="w-full rounded-md border border-warm-gray mb-2"
           />
+
+          <p className="text-[10px] text-mid-gray leading-relaxed mb-3">
+            Like it? Add to cart or share. Want more? Select another fixture on
+            the left and place it — it will be added to this preview.
+          </p>
+
+          {/* Fixtures in this render, each individually removable */}
+          {compositedProducts.length > 0 && (
+            <div className="mb-3">
+              <p className="text-[9px] tracking-[1.5px] uppercase text-mid-gray mb-1.5">
+                In this preview
+              </p>
+              {compositedProducts.map((p) => (
+                <div key={p.id} className="flex items-center gap-2 py-1">
+                  <div className="w-7 h-7 shrink-0 rounded-[4px] overflow-hidden bg-offwhite border border-warm-gray">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={p.thumb} alt={p.name} className="w-full h-full object-cover" />
+                  </div>
+                  <span className="flex-1 min-w-0 text-[10.5px] truncate">{p.name}</span>
+                  <button
+                    type="button"
+                    title={`Remove ${p.name} from preview`}
+                    aria-label={`Remove ${p.name} from preview`}
+                    onClick={() => handleRemoveFromRender(p)}
+                    disabled={isGenerating}
+                    className="w-[18px] h-[18px] shrink-0 rounded-full border border-warm-gray text-[8px] text-mid-gray flex items-center justify-center hover:border-red-400 hover:text-red-400 transition-colors cursor-pointer disabled:opacity-40"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Bulk add — worth showing once more than one fixture is in the render */}
+          {compositedProducts.length > 1 && (
+            <button
+              type="button"
+              onClick={handleAddAllToCart}
+              disabled={bulkAdded}
+              className={`w-full py-[9px] text-[10px] tracking-[1.2px] uppercase rounded-[5px] transition-colors font-sans mb-1.5 ${
+                bulkAdded
+                  ? 'bg-offwhite text-gold border border-gold cursor-default'
+                  : 'bg-dark text-white hover:bg-[#2e2c2a] cursor-pointer'
+              }`}
+            >
+              {bulkAdded ? '✓ All Added to Cart' : `Add All to Cart (${compositedProducts.length})`}
+            </button>
+          )}
 
           {!shareUrl ? (
             <button
@@ -293,6 +401,60 @@ function GenerateBlock() {
           {shareError && (
             <p className="text-[10px] text-red-400 mt-1">{shareError}</p>
           )}
+        </div>
+      )}
+
+      {/* Version history — flip between previous renders without regenerating */}
+      {renderHistory.length > 1 && !isGenerating && (
+        <div className="mt-3">
+          <p className="text-[9px] tracking-[1.5px] uppercase text-mid-gray mb-1.5">
+            Versions
+          </p>
+          <div className="flex gap-1.5 overflow-x-auto pb-1">
+            {renderHistory.map((r, i) => (
+              <button
+                key={r.createdAt}
+                type="button"
+                title={`Version ${i + 1} — ${r.productIds.length} fixture${r.productIds.length === 1 ? '' : 's'}`}
+                onClick={() => restoreRender(i)}
+                className={`shrink-0 rounded-[4px] overflow-hidden border-2 transition-colors cursor-pointer ${
+                  r.url === generatedImageUrl ? 'border-gold' : 'border-warm-gray hover:border-mid-gray'
+                }`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={r.url} alt={`Render version ${i + 1}`} className="w-[52px] h-[39px] object-cover" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Render management — available whenever an AI render exists */}
+      {generatedImageUrl && !isGenerating && (
+        <div className="flex flex-col gap-1.5 mt-3">
+          {isChainableDataUrl(generatedImageUrl) && (
+            <a
+              href={generatedImageUrl}
+              download="glitteron-room-preview.png"
+              className="w-full py-2 text-center text-[10px] tracking-[1.2px] uppercase rounded-[5px] border border-warm-gray text-mid-gray hover:border-gold hover:text-gold transition-colors cursor-pointer font-sans"
+            >
+              ⤓ Download Image
+            </a>
+          )}
+          <button
+            type="button"
+            onClick={handleDiscard}
+            className="w-full py-2 text-[10px] tracking-[1.2px] uppercase rounded-[5px] border border-warm-gray text-mid-gray hover:border-red-400 hover:text-red-400 transition-colors cursor-pointer font-sans"
+          >
+            Discard &amp; Re-Edit
+          </button>
+          <button
+            type="button"
+            onClick={handleStartOver}
+            className="w-full py-1.5 text-[10px] tracking-[1.2px] uppercase text-mid-gray hover:text-dark transition-colors cursor-pointer font-sans"
+          >
+            ↺ Start Over
+          </button>
         </div>
       )}
     </div>

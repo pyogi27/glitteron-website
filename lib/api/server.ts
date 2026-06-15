@@ -24,6 +24,17 @@ function extractImageUrl(img: string | { url: string }): string {
   return typeof img === "string" ? img : (img?.url ?? "");
 }
 
+// Backend serializes numeric columns as strings (e.g. price "7800.00").
+// Coerce defensively so downstream arithmetic and toLocaleString work.
+function toNumber(value: unknown, fallback = 0): number {
+  if (typeof value === "number") return Number.isFinite(value) ? value : fallback;
+  if (typeof value === "string") {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : fallback;
+  }
+  return fallback;
+}
+
 // Extracts an array from any common API response shape:
 // { data: [...] } | { products: [...] } | { categories: [...] } | [...] directly
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,9 +55,11 @@ export function mapApiProduct(p: ApiProduct, categoryName?: string): Product {
           .filter(Boolean)
       : [];
 
-  // thumbnailImage is always the first — used by ProductCard for the listing view
-  const merged = p.thumbnailImage
-    ? [p.thumbnailImage, ...rest.filter((u) => u !== p.thumbnailImage)]
+  // thumbnailImage is always the first — used by ProductCard for the listing view.
+  // Fall back to mainImage / arImages when neither imageUrls nor images is present.
+  const lead = p.thumbnailImage ?? p.mainImage ?? p.arImages;
+  const merged = lead
+    ? [lead, ...rest.filter((u) => u !== lead)]
     : rest;
 
   const images = merged.length > 0 ? merged : [PLACEHOLDER_IMAGE];
@@ -59,13 +72,13 @@ export function mapApiProduct(p: ApiProduct, categoryName?: string): Product {
     subtitle: p.description ?? "",
     category: categoryName ?? p.category?.name ?? "",
     badge: p.badge,
-    price: p.price,
-    originalPrice: p.originalPrice,
-    discount: p.discount,
-    rating: p.rating ?? 0,
-    reviewCount: p.reviewCount ?? 0,
+    price: toNumber(p.price),
+    originalPrice: p.originalPrice != null ? toNumber(p.originalPrice) : undefined,
+    discount: p.discount != null ? toNumber(p.discount) : undefined,
+    rating: toNumber(p.rating),
+    reviewCount: toNumber(p.reviewCount),
     sku: p.sku ?? "",
-    stock: p.stock,
+    stock: toNumber(p.stock),
     images,
     description: p.description ?? "",
     specs: {},
@@ -103,10 +116,12 @@ export async function fetchProducts(params?: {
   limit?: number;
   minPrice?: number;
   maxPrice?: number;
+  whereUsed?: string;
 }): Promise<{ products: ApiProduct[]; total: number; totalPages: number }> {
   const qs = new URLSearchParams();
   if (params?.categoryId) qs.set("category", String(params.categoryId));
   if (params?.search) qs.set("search", params.search);
+  if (params?.whereUsed) qs.set("whereUsed", params.whereUsed);
   if (params?.page) qs.set("page", String(params.page));
   if (params?.minPrice !== undefined)
     qs.set("minPrice", String(params.minPrice));

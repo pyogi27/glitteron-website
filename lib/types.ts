@@ -44,6 +44,8 @@ export interface Room {
   count: number
   image: string
   slug: string
+  /** Exact label the backend stores in a product's where_used array */
+  whereUsed: string
 }
 
 export interface Testimonial {
