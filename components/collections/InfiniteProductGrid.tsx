@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
+import { Suspense, useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Product } from '@/lib/types'
 import { useFilterStore } from '@/lib/stores/filterStore'
@@ -88,7 +88,7 @@ function mapRawProduct(p: RawProduct): Product {
   }
 }
 
-export default function InfiniteProductGrid({
+function InfiniteProductGridInner({
   initialProducts,
   initialPage,
   totalPages,
@@ -266,5 +266,28 @@ export default function InfiniteProductGrid({
         </div>
       )}
     </div>
+  )
+}
+
+/** Static fallback (no useSearchParams): renders the server-fetched products. */
+function InitialGrid({ initialProducts }: Pick<Props, 'initialProducts'>) {
+  return (
+    <div className="flex-1 p-4 sm:p-8 overflow-visible">
+      <div className="cards-track grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 pt-4">
+        {initialProducts.map(p => (
+          <ProductCard key={p.id} product={p} variant="grid" />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// useSearchParams() requires a Suspense boundary on statically prerendered
+// pages (e.g. /rooms/[slug]); wrapping here protects every call site.
+export default function InfiniteProductGrid(props: Props) {
+  return (
+    <Suspense fallback={<InitialGrid initialProducts={props.initialProducts} />}>
+      <InfiniteProductGridInner {...props} />
+    </Suspense>
   )
 }
