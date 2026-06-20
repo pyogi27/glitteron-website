@@ -1130,6 +1130,7 @@ curl http://localhost:3000/
 | `vendor` | Products, variations, sales orders |
 | `customer` | Own profile and orders only |
 
+##test
 ## Pricing Formula
 
 ```
