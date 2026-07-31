@@ -9,7 +9,7 @@ import { products as staticProducts } from '@/lib/data/products'
 const INITIAL_BATCH = 100
 
 export const metadata: Metadata = {
-  title: 'Collections — LitmeUp',
+  title: 'Collections — LitMeUp',
   description: '500+ handcrafted chandeliers & pendant lights for every space.',
 }
 

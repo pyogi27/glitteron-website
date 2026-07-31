@@ -21,9 +21,9 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const room = rooms.find(r => r.slug === slug)
-  if (!room) return { title: 'Rooms — LitmeUp' }
+  if (!room) return { title: 'Rooms — LitMeUp' }
   return {
-    title: `${room.name} Lighting — LitmeUp`,
+    title: `${room.name} Lighting — LitMeUp`,
     description: `${room.tag}: handcrafted ${room.subtitle.toLowerCase()} curated for your ${room.name.toLowerCase()}.`,
   }
 }

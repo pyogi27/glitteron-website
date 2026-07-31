@@ -3,7 +3,7 @@ import { Suspense } from 'react'
 import OrderDetailClient from '@/components/orders/OrderDetailClient'
 
 export const metadata: Metadata = {
-  title: 'Order Detail — LitmeUp',
+  title: 'Order Detail — LitMeUp',
 }
 
 export default function OrderDetailPage() {

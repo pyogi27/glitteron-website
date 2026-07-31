@@ -186,7 +186,7 @@ export default function CheckoutClient() {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
         amount: Math.round(checkout.amount * 100),
         currency: checkout.currency,
-        name: 'LitmeUp',
+        name: 'LitMeUp',
         description: 'Order Payment',
         order_id: checkout.razorpayOrderId,
         prefill: {

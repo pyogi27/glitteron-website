@@ -14,11 +14,11 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
   return {
-    title: 'Room Visualization — LitmeUp',
-    description: `See how LitmeUp fixtures look in a real room. Share ID: ${id}`,
+    title: 'Room Visualization — LitMeUp',
+    description: `See how LitMeUp fixtures look in a real room. Share ID: ${id}`,
     openGraph: {
-      title: 'My Room Lighting Preview — LitmeUp',
-      description: 'I used the LitmeUp AI visualizer to preview lighting in my room.',
+      title: 'My Room Lighting Preview — LitMeUp',
+      description: 'I used the LitMeUp AI visualizer to preview lighting in my room.',
     },
   }
 }

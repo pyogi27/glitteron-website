@@ -61,7 +61,7 @@ export default function CollectionsSection({ categories = STATIC_CATEGORIES }: P
   }, [])
 
   return (
-    <section ref={sectionRef} className="py-24 bg-[#F9F6F2]">
+    <section ref={sectionRef} className="py-24 bg-white">
       <div className="max-w-[1280px] mx-auto px-6">
         {/* Heading */}
         <div ref={headingRef} className="text-center mb-14 opacity-0">

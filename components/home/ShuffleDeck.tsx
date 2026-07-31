@@ -216,18 +216,18 @@ export default function ShuffleDeck({ products }: Props) {
   if (isMobile) {
     const product = deck[mobileIdx]
     return (
-      <section className="bg-[#241E1B] py-16 px-6 relative overflow-hidden">
+      <section className="bg-[#EDE8E0] py-16 px-6 relative overflow-hidden">
         {/* Ambient glow */}
         <div className="absolute inset-0 pointer-events-none"
           style={{ background: 'radial-gradient(ellipse at 70% 30%, rgba(196,113,74,.1) 0%, transparent 65%)' }} />
 
         {/* Heading */}
         <div className="text-center mb-8 relative z-10">
-          <div className="text-[10px] font-medium tracking-[0.22em] uppercase text-[#C4714A] mb-3">Curated For You</div>
-          <h2 className="font-serif text-[36px] font-light text-white leading-[1.05]">
-            Find your <em className="italic text-[#C4714A]">light</em>
+          <div className="text-[10px] font-medium tracking-[0.22em] uppercase text-[#A8552C] mb-3">Curated For You</div>
+          <h2 className="font-serif text-[36px] font-light text-[#2C2825] leading-[1.05]">
+            Find your <em className="italic text-[#A8552C]">light</em>
           </h2>
-          <p className="text-[13px] font-light text-white/50 leading-[1.8] mt-3 max-w-[300px] mx-auto">
+          <p className="text-[13px] font-light text-[#2C2825]/65 leading-[1.8] mt-3 max-w-[300px] mx-auto">
             Tap through our curated picks to find the perfect light for your space.
           </p>
         </div>
@@ -237,7 +237,7 @@ export default function ShuffleDeck({ products }: Props) {
           {/* Prev */}
           <button
             onClick={mobilePrev}
-            className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/50 transition-colors hover:border-[#C4714A] hover:text-[#C4714A] flex-shrink-0"
+            className="w-9 h-9 rounded-full border border-[#D8D0C4] flex items-center justify-center text-[#8B7D6E] transition-colors hover:border-[#A8552C] hover:text-[#A8552C] flex-shrink-0"
             aria-label="Previous"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -281,7 +281,7 @@ export default function ShuffleDeck({ products }: Props) {
           {/* Next */}
           <button
             onClick={mobileNext}
-            className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/50 transition-colors hover:border-[#C4714A] hover:text-[#C4714A] flex-shrink-0"
+            className="w-9 h-9 rounded-full border border-[#D8D0C4] flex items-center justify-center text-[#8B7D6E] transition-colors hover:border-[#A8552C] hover:text-[#A8552C] flex-shrink-0"
             aria-label="Next"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -298,20 +298,20 @@ export default function ShuffleDeck({ products }: Props) {
               onClick={() => setMobileIdx(i)}
               className="w-1.5 h-1.5 rounded-full transition-all duration-300"
               style={{
-                background: i === mobileIdx ? '#C4714A' : 'rgba(196,113,74,.25)',
+                background: i === mobileIdx ? '#A8552C' : 'rgba(44,40,37,.22)',
                 transform: i === mobileIdx ? 'scale(1.4)' : 'scale(1)',
               }}
               aria-label={`Go to card ${i + 1}`}
             />
           ))}
-          <span className="text-[11px] text-white/30 ml-1">{mobileIdx + 1} / {deck.length}</span>
+          <span className="text-[11px] text-[#8B7D6E] ml-1">{mobileIdx + 1} / {deck.length}</span>
         </div>
 
         {/* CTA */}
         <div className="flex flex-col items-center gap-4 mt-8">
           <button
             onClick={mobileNext}
-            className="inline-flex items-center gap-2.5 bg-transparent border border-[rgba(196,113,74,.5)] text-[#C4714A] px-7 py-3 rounded-[40px] font-sans text-[11px] font-semibold tracking-[0.12em] uppercase"
+            className="inline-flex items-center gap-2.5 bg-transparent border border-[#A8552C] text-[#A8552C] px-7 py-3 rounded-[40px] font-sans text-[11px] font-semibold tracking-[0.12em] uppercase"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
               <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
@@ -320,7 +320,7 @@ export default function ShuffleDeck({ products }: Props) {
           </button>
           <Link
             href="/collections"
-            className="text-[12px] font-light tracking-[0.1em] uppercase text-white/40 no-underline"
+            className="text-[12px] font-light tracking-[0.1em] uppercase text-[#8B7D6E] no-underline"
           >
             Browse All →
           </Link>
@@ -333,7 +333,7 @@ export default function ShuffleDeck({ products }: Props) {
   // DESKTOP LAYOUT
   // ─────────────────────────────────────────
   return (
-    <section className="bg-[#241E1B] py-[110px] px-6 md:px-20 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20 relative overflow-hidden">
+    <section className="bg-[#EDE8E0] py-[110px] px-6 md:px-20 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20 relative overflow-hidden">
       {/* Ambient glow */}
       <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[60%] h-[140%] pointer-events-none"
         style={{ background: 'radial-gradient(ellipse at 60% 50%, rgba(196,113,74,.11) 0%, transparent 65%)' }} />
@@ -342,25 +342,25 @@ export default function ShuffleDeck({ products }: Props) {
 
       {/* Left text */}
       <div className="flex-1 max-w-[500px] text-center lg:text-left relative z-10">
-        <div className="text-[11px] font-medium tracking-[0.22em] uppercase text-[#C4714A] mb-5">Curated For You</div>
-        <h2 className="font-serif text-[clamp(34px,4.2vw,58px)] font-light text-white leading-[1.05] mb-6">
-          Find your <em className="italic text-[#C4714A]">light</em>
+        <div className="text-[11px] font-medium tracking-[0.22em] uppercase text-[#A8552C] mb-5">Curated For You</div>
+        <h2 className="font-serif text-[clamp(34px,4.2vw,58px)] font-light text-[#2C2825] leading-[1.05] mb-6">
+          Find your <em className="italic text-[#A8552C]">light</em>
         </h2>
-        <p className="text-[14px] font-light text-white/55 leading-[1.85] mb-8 max-w-[380px] mx-auto lg:mx-0">
+        <p className="text-[14px] font-light text-[#2C2825]/70 leading-[1.85] mb-8 max-w-[380px] mx-auto lg:mx-0">
           From grand crystal chandeliers to minimal pendants — our collection holds a light for every taste. Hover the deck to fan out, or shuffle to discover something unexpected.
         </p>
 
         <div className="flex flex-wrap gap-4 justify-center lg:justify-start items-center">
           <button
             onClick={shuffle}
-            className="inline-flex items-center gap-2.5 bg-transparent border border-[rgba(196,113,74,.5)] text-[#C4714A] px-7 py-3 rounded-[40px] font-sans text-[11px] font-semibold tracking-[0.12em] uppercase transition-all duration-300 hover:bg-[#C4714A] hover:border-[#C4714A] hover:text-[#241E1B] hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2.5 bg-transparent border border-[#A8552C] text-[#A8552C] px-7 py-3 rounded-[40px] font-sans text-[11px] font-semibold tracking-[0.12em] uppercase transition-all duration-300 hover:bg-[#A8552C] hover:border-[#A8552C] hover:text-white hover:-translate-y-0.5"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
               <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
             </svg>
             Shuffle Cards
           </button>
-          <span className="text-[12px] text-white/30 font-light tracking-wide">or hover to fan out</span>
+          <span className="text-[12px] text-[#8B7D6E] font-light tracking-wide">or hover to fan out</span>
         </div>
 
         {/* Counter dots */}
@@ -370,18 +370,18 @@ export default function ShuffleDeck({ products }: Props) {
               key={i}
               className="w-1.5 h-1.5 rounded-full transition-all duration-300"
               style={{
-                background: i === activeIdx ? '#C4714A' : 'rgba(196,113,74,.25)',
+                background: i === activeIdx ? '#A8552C' : 'rgba(44,40,37,.22)',
                 transform: i === activeIdx ? 'scale(1.35)' : 'scale(1)',
               }}
             />
           ))}
-          <span className="text-[11px] text-white/30 ml-1">{activeIdx + 1} / {deck.length}</span>
+          <span className="text-[11px] text-[#8B7D6E] ml-1">{activeIdx + 1} / {deck.length}</span>
         </div>
 
         <div className="mt-8">
           <Link
             href="/collections"
-            className="text-[12px] font-light tracking-[0.1em] uppercase text-white/40 no-underline transition-colors hover:text-[#C4714A]"
+            className="text-[12px] font-light tracking-[0.1em] uppercase text-[#8B7D6E] no-underline transition-colors hover:text-[#A8552C]"
           >
             Browse All →
           </Link>

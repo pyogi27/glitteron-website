@@ -7,9 +7,19 @@ import GrainOverlay from '@/components/ui/GrainOverlay'
 import NewsletterPopup from '@/components/ui/NewsletterPopup'
 import SessionRestorer from '@/components/auth/SessionRestorer'
 
+const DESCRIPTION =
+  '500+ handcrafted chandeliers & pendant lights for spaces that deserve to glow.'
+
 export const metadata: Metadata = {
-  title: 'LitmeUp — Illuminate Your World',
-  description: '500+ handcrafted chandeliers & pendant lights for spaces that deserve to glow.',
+  title: 'LitMeUp — Illuminate Your World',
+  description: DESCRIPTION,
+  openGraph: {
+    title: 'LitMeUp — Illuminate Your World',
+    description: DESCRIPTION,
+    siteName: 'LitMeUp',
+    type: 'website',
+  },
+  twitter: { card: 'summary_large_image' },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

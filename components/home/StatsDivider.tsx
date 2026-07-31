@@ -9,12 +9,12 @@ const stats = [
 
 export default function StatsDivider() {
   return (
-    <div className="bg-[#D8D0C4] py-14 px-4 md:px-12">
-      <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+    <div className="bg-[#EDE8E0] py-14 px-4 md:px-12">
+      <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-7">
         {stats.map((s, i) => (
-          <RevealOnScroll key={s.num} delay={i * 0.1} className="text-center">
+          <RevealOnScroll key={s.num} delay={i * 0.1} className="bg-[#E2DAD0] rounded-2xl p-8 text-center">
             <div className="font-serif text-[clamp(36px,4vw,52px)] font-light text-[#2C2825] leading-none mb-2">{s.num}</div>
-            <div className="text-[11px] font-medium tracking-[0.16em] uppercase text-[#A09488]">{s.label}</div>
+            <div className="text-[11px] font-medium tracking-[0.16em] uppercase text-[#8B7D6E]">{s.label}</div>
           </RevealOnScroll>
         ))}
       </div>

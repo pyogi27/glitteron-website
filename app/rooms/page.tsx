@@ -6,7 +6,7 @@ import { fetchProducts } from '@/lib/api/server'
 import { rooms } from '@/lib/data'
 
 export const metadata: Metadata = {
-  title: 'Shop by Room — LitmeUp',
+  title: 'Shop by Room — LitMeUp',
   description:
     'Find the right light for every space — living room, dining, bedroom, kitchen and home office.',
 }

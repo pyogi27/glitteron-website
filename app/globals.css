@@ -16,6 +16,13 @@
   --color-gold-terra-light: #E8A87C;
   --color-gold-terra-dark: #8B5E3C;
 
+  /* Official LitMeUp brand palette — see LitMeUp brand-assets/README.txt */
+  --color-brand-umber: #2E2620; /* text, plates, fixtures */
+  --color-brand-clay: #A85B3B;  /* primary brand tone */
+  --color-brand-ochre: #C08A3E; /* light, accents on dark */
+  --color-brand-olive: #5F6650; /* descriptors, secondary */
+  --color-brand-sand: #E8E0D4;  /* surfaces, backgrounds */
+
   /* Fonts */
   --font-serif: "Cormorant Garamond", serif;
   --font-sans: "Outfit", sans-serif;
