@@ -3,8 +3,16 @@
 import { useEffect, useState } from 'react'
 import { useVisualizerStore } from '@/lib/stores/visualizerStore'
 import { useCartStore } from '@/lib/stores/cartStore'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import type { VisualizerProduct } from '@/lib/data/visualizer'
 import type { AIGenerateResponse, ShareResult } from '@/lib/ai/types'
+
+interface ConfirmRequest {
+  title: string
+  message: string
+  confirmLabel: string
+  onConfirm: () => void
+}
 
 export default function RightPanel() {
   const perspData        = useVisualizerStore((s) => s.perspData)
@@ -155,6 +163,7 @@ function GenerateBlock() {
   const addCartItem        = useCartStore((s) => s.addItem)
 
   const [bulkAdded, setBulkAdded] = useState(false)
+  const [confirm, setConfirm] = useState<ConfirmRequest | null>(null)
 
   // A new render means a new set of fixtures — re-enable "Add All to Cart"
   useEffect(() => {
@@ -204,18 +213,23 @@ function GenerateBlock() {
   }
 
   // Rebuild the render from the original photo with one fixture taken out
-  async function handleRemoveFromRender(product: VisualizerProduct) {
+  function handleRemoveFromRender(product: VisualizerProduct) {
     if (isGenerating || !imageDataUrl) return
-    if (!window.confirm(`Remove ${product.name} from this preview? The preview will be regenerated.`)) return
-
-    const remaining = compositedProducts.filter((p) => p.id !== product.id)
-    if (remaining.length === 0) {
-      // Nothing left to render — fall back to the original photo
-      discardGenerated()
-      removePlacedProduct(product.id)
-      return
-    }
-    await runChain(imageDataUrl, remaining, remaining.map((p) => p.id))
+    setConfirm({
+      title: `Remove ${product.name}?`,
+      message: 'It will be taken out of this preview and the preview regenerated.',
+      confirmLabel: 'Remove',
+      onConfirm: () => {
+        const remaining = compositedProducts.filter((p) => p.id !== product.id)
+        if (remaining.length === 0) {
+          // Nothing left to render — fall back to the original photo
+          discardGenerated()
+          removePlacedProduct(product.id)
+          return
+        }
+        void runChain(imageDataUrl, remaining, remaining.map((p) => p.id))
+      },
+    })
   }
 
   function handleAddAllToCart() {
@@ -234,15 +248,22 @@ function GenerateBlock() {
   }
 
   function handleDiscard() {
-    if (window.confirm('Discard this AI preview? Your fixtures will go back on the canvas so you can adjust and regenerate.')) {
-      discardGenerated()
-    }
+    setConfirm({
+      title: 'Discard this AI preview?',
+      message:
+        'Your fixtures will go back on the canvas so you can adjust and regenerate.',
+      confirmLabel: 'Discard',
+      onConfirm: discardGenerated,
+    })
   }
 
   function handleStartOver() {
-    if (window.confirm('Start over? This removes your photo, fixtures, and AI preview.')) {
-      resetAll()
-    }
+    setConfirm({
+      title: 'Start over?',
+      message: 'This removes your photo, fixtures, and AI preview.',
+      confirmLabel: 'Start Over',
+      onConfirm: resetAll,
+    })
   }
 
   async function handleShare() {
@@ -457,6 +478,19 @@ function GenerateBlock() {
           </button>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirm !== null}
+        title={confirm?.title ?? ''}
+        message={confirm?.message ?? ''}
+        confirmLabel={confirm?.confirmLabel}
+        destructive
+        onConfirm={() => {
+          confirm?.onConfirm()
+          setConfirm(null)
+        }}
+        onCancel={() => setConfirm(null)}
+      />
     </div>
   )
 }
