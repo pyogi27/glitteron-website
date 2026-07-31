@@ -24,6 +24,7 @@ export interface Product {
   reviews: Review[]
   whereUsed?: string   // e.g. "Living Room, Dining Room"
   arImage?: string     // AR/room visualizer image URL
+  lightOnImage?: string // same product photographed with the light switched on
 }
 
 export interface Review {

@@ -58,7 +58,12 @@ export default async function ProductPage({ params }: Props) {
 
   if (apiProduct) {
     product = await fetchProductById(apiProduct.id)
-    if (product) product = { ...product, apiProductId: apiProduct.id }
+    // GET /api/products/:id omits lightOnImage; the listing record carries it.
+    if (product) product = {
+      ...product,
+      apiProductId: apiProduct.id,
+      lightOnImage: product.lightOnImage ?? apiProduct.lightOnImage ?? undefined,
+    }
   }
 
   if (!product) {
@@ -101,7 +106,7 @@ export default async function ProductPage({ params }: Props) {
 
       {/* Split layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[calc(100vh-110px)]">
-        <ProductGallery images={product.images} name={product.name} />
+        <ProductGallery images={product.images} name={product.name} lightOnImage={product.lightOnImage} />
         <ProductInfo product={product} />
       </div>
 

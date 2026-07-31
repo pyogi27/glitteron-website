@@ -86,6 +86,7 @@ export function mapApiProduct(p: ApiProduct, categoryName?: string): Product {
     reviews: [],
     whereUsed: (p as ApiProductDetail).whereUsed,
     arImage: p.arImages,
+    lightOnImage: p.lightOnImage || undefined,
   };
 }
 

@@ -2,13 +2,22 @@
 'use client'
 import { useState, useCallback } from 'react'
 import Image from 'next/image'
+import LightToggle from '@/components/ui/LightToggle'
 
-interface Props { images: string[]; name: string }
+interface Props { images: string[]; name: string; lightOnImage?: string }
 
-export default function ProductGallery({ images, name }: Props) {
+export default function ProductGallery({ images, name, lightOnImage }: Props) {
   const [active, setActive] = useState(0)
   const [lightbox, setLightbox] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState(0)
+  const [lightOn, setLightOn] = useState(false)
+  const [litFailed, setLitFailed] = useState(false)
+
+  // The lit shot only corresponds to the primary image, so the overlay is
+  // suppressed once the user browses to another angle.
+  const litSrc = litFailed ? undefined : lightOnImage
+  const showLit = lightOn && Boolean(litSrc) && active === 0
+  const showLitInLightbox = lightOn && Boolean(litSrc) && lightboxIndex === 0
 
   const openLightbox = useCallback((index: number) => {
     setLightboxIndex(index)
@@ -58,6 +67,25 @@ export default function ProductGallery({ images, name }: Props) {
             priority={active === 0}
           />
 
+          {litSrc && (
+            <Image
+              src={litSrc}
+              alt=""
+              aria-hidden="true"
+              fill
+              className={`object-cover transition-opacity duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] ${showLit ? 'opacity-100' : 'opacity-0'}`}
+              sizes="50vw"
+              onError={() => setLitFailed(true)}
+            />
+          )}
+
+          {/* Light on/off */}
+          {litSrc && (
+            <div className="absolute bottom-4 left-4 z-10 bg-white/90 border border-[#D8D0C4] rounded-full px-3.5 py-2">
+              <LightToggle on={lightOn} onChange={setLightOn} />
+            </div>
+          )}
+
           {/* Zoom button */}
           <button
             type="button"
@@ -90,6 +118,17 @@ export default function ProductGallery({ images, name }: Props) {
               className="object-contain"
               sizes="100vw"
             />
+            {litSrc && (
+              <Image
+                src={litSrc}
+                alt=""
+                aria-hidden="true"
+                fill
+                className={`object-contain transition-opacity duration-500 ${showLitInLightbox ? 'opacity-100' : 'opacity-0'}`}
+                sizes="100vw"
+                onError={() => setLitFailed(true)}
+              />
+            )}
           </div>
 
           {/* Close */}

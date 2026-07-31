@@ -3,30 +3,16 @@ import { useEffect } from 'react'
 import { useFilterStore } from '@/lib/stores/filterStore'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-const DEFAULT_CATEGORIES = [
-  { label: 'All' },
-  { label: 'Chandeliers' },
-  { label: 'Pendant Lights' },
-  { label: 'Sputnik Lights' },
-  { label: 'Dome Lights' },
-  { label: 'Crystal Lights' },
-]
 const MATERIALS = ['Crystal', 'Brass', 'Iron & Steel', 'Blown Glass', 'Wood & Rattan']
 const ROOMS = ['Living Room', 'Dining Room', 'Bedroom', 'Home Office', 'Foyer / Entrance']
 
-interface CategoryItem {
-  label: string
-  count?: number
-}
-
 interface FilterItemProps {
   label: string
-  count?: number
   active: boolean
   onToggle: () => void
 }
 
-function FilterItem({ label, count, active, onToggle }: FilterItemProps) {
+function FilterItem({ label, active, onToggle }: FilterItemProps) {
   return (
     <button
       type="button"
@@ -41,7 +27,6 @@ function FilterItem({ label, count, active, onToggle }: FilterItemProps) {
         )}
       </div>
       <span className="text-[12px] text-[#2C2825] opacity-75 flex-1">{label}</span>
-      {count !== undefined && <span className="text-[10px] text-[#A09488]">{count}</span>}
     </button>
   )
 }
@@ -60,16 +45,10 @@ function FilterGroup({ title, children }: FilterGroupProps) {
   )
 }
 
-interface FilterSidebarProps {
-  categories?: CategoryItem[]
-}
-
-export default function FilterSidebar({ categories = DEFAULT_CATEGORIES }: FilterSidebarProps) {
+export default function FilterSidebar() {
   const { materials, rooms, toggleMaterial, toggleRoom, priceRange, setPriceRange, clearAll } = useFilterStore()
   const router = useRouter()
   const searchParams = useSearchParams()
-
-  const activeCategory = searchParams.get('category') ?? 'All'
 
   // Sync URL price params to store on mount
   useEffect(() => {
@@ -83,17 +62,6 @@ export default function FilterSidebar({ categories = DEFAULT_CATEGORIES }: Filte
       }
     }
   }, [])
-
-  function handleCategoryToggle(label: string) {
-    const params = new URLSearchParams(searchParams.toString())
-    if (label === 'All') {
-      params.delete('category')
-    } else {
-      params.set('category', label)
-    }
-    params.set('page', '1')
-    router.push(`/collections?${params.toString()}`)
-  }
 
   function handleClearAll() {
     clearAll()
@@ -115,21 +83,7 @@ export default function FilterSidebar({ categories = DEFAULT_CATEGORIES }: Filte
   }
 
   return (
-    <aside className="w-[268px] flex-shrink-0 px-7 py-8 border-r border-[#D8D0C4] sticky top-[72px] h-[calc(100vh-72px)] overflow-y-auto [scrollbar-width:thin]">
-      <FilterGroup title="Category">
-        {categories.map(c => (
-          <FilterItem
-            key={c.label}
-            label={c.label}
-            count={c.count}
-            active={activeCategory === c.label}
-            onToggle={() => handleCategoryToggle(c.label)}
-          />
-        ))}
-      </FilterGroup>
-
-      <hr className="border-[#D8D0C4] my-7" />
-
+    <aside className="w-[268px] flex-shrink-0 px-7 py-8 border-r border-[#D8D0C4] h-[calc(100vh-172px)] overflow-y-auto [scrollbar-width:thin]">
       <FilterGroup title="Price Range">
         <div className="flex gap-2 mb-3">
           <input

@@ -45,11 +45,6 @@ export default async function CollectionsPage({ searchParams }: Props) {
     ? apiProducts.map(p => mapApiProduct(p, categoryMap.get(p.categoryId)))
     : staticProducts
 
-  const sidebarCategories = [
-    { label: 'All', count: usingApi ? total : staticProducts.length },
-    ...categories.map(c => ({ label: c.name })),
-  ]
-
   return (
     <>
       <PageBanner
@@ -63,8 +58,10 @@ export default async function CollectionsPage({ searchParams }: Props) {
       />
       <Toolbar categories={categories} total={total} />
       <div className="flex items-start min-h-screen bg-[#EDE8E0]">
-        <div className="hidden lg:block">
-          <FilterSidebar categories={sidebarCategories} />
+        {/* ponytail: sticky lives on the flex child, not the <aside>. A wrapper sized
+            to its own content gives sticky no travel room, so it scrolls away. */}
+        <div className="hidden lg:block sticky top-[172px]">
+          <FilterSidebar />
         </div>
         <InfiniteProductGrid
           initialProducts={products}

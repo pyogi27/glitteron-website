@@ -7,6 +7,7 @@ import Badge from '@/components/ui/Badge'
 import StarRating from '@/components/ui/StarRating'
 import { useCartStore } from '@/lib/stores/cartStore'
 import { useWishlistStore } from '@/lib/stores/wishlistStore'
+import { useFilterStore } from '@/lib/stores/filterStore'
 
 type CardVariant = 'grid' | 'list' | 'related'
 
@@ -23,8 +24,14 @@ export default function ProductCard({ product, variant = 'grid' }: ProductCardPr
   const { toggle, has } = useWishlistStore()
   const [mounted, setMounted] = useState(false)
   const [imgSrc, setImgSrc] = useState(product.images[0] || FALLBACK_IMAGE)
+  const lightOn = useFilterStore((s) => s.lightOn)
+  const [litFailed, setLitFailed] = useState(false)
   useEffect(() => { setMounted(true) }, [])
   const isWishlisted = mounted && has(product.id)
+  // Lit layer sits above the base image and crossfades in; products without a
+  // lightOnImage simply keep showing the off state.
+  const litSrc = !litFailed ? product.lightOnImage : undefined
+  const showLit = lightOn && Boolean(litSrc)
 
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault()
@@ -64,6 +71,18 @@ export default function ProductCard({ product, variant = 'grid' }: ProductCardPr
             sizes="220px"
             onError={() => setImgSrc(FALLBACK_IMAGE)}
           />
+          {litSrc && (
+            <Image
+              src={litSrc}
+              alt=""
+              aria-hidden="true"
+              fill
+              className={`object-cover transition-[opacity,transform] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]
+                group-hover:scale-[1.07] ${showLit ? 'opacity-100' : 'opacity-0'}`}
+              sizes="220px"
+              onError={() => setLitFailed(true)}
+            />
+          )}
         </div>
         <div className="flex flex-col flex-1 p-[20px_24px] justify-between">
           <div>
@@ -121,6 +140,18 @@ export default function ProductCard({ product, variant = 'grid' }: ProductCardPr
           sizes={variant === 'related' ? '(max-width: 768px) 50vw, 25vw' : '(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw'}
           onError={() => setImgSrc(FALLBACK_IMAGE)}
         />
+
+        {litSrc && (
+          <Image
+            src={litSrc}
+            alt=""
+            aria-hidden="true"
+            fill
+            className={`product-card-img object-cover transition-[opacity,transform] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] ${showLit ? 'opacity-100' : 'opacity-0'}`}
+            sizes={variant === 'related' ? '(max-width: 768px) 50vw, 25vw' : '(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw'}
+            onError={() => setLitFailed(true)}
+          />
+        )}
 
         {product.badge && <Badge variant={product.badge} />}
 

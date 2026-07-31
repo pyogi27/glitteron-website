@@ -7,6 +7,8 @@ interface FilterStore {
   priceRange: [number, number]
   sortBy: string
   viewMode: 'grid' | 'list'
+  lightOn: boolean
+  setLightOn: (on: boolean) => void
   setActiveTab: (tab: string) => void
   toggleMaterial: (material: string) => void
   toggleRoom: (room: string) => void
@@ -23,6 +25,8 @@ export const useFilterStore = create<FilterStore>()((set) => ({
   priceRange: [2000, 50000],
   sortBy: 'featured',
   viewMode: 'grid',
+  lightOn: false,
+  setLightOn: (on) => set({ lightOn: on }),
   setActiveTab: (tab) => set({ activeTab: tab }),
   toggleMaterial: (material) =>
     set((s) => ({

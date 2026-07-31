@@ -1,6 +1,7 @@
 'use client'
 import { useFilterStore } from '@/lib/stores/filterStore'
 import { useRouter, useSearchParams } from 'next/navigation'
+import LightToggle from '@/components/ui/LightToggle'
 
 const SORT_OPTIONS = [
   { value: 'featured', label: 'Featured' },
@@ -20,7 +21,7 @@ interface Props {
 }
 
 export default function Toolbar({ categories = [], total }: Props) {
-  const { sortBy, setSortBy, viewMode, setViewMode } = useFilterStore()
+  const { sortBy, setSortBy, viewMode, setViewMode, lightOn, setLightOn } = useFilterStore()
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -40,9 +41,10 @@ export default function Toolbar({ categories = [], total }: Props) {
   }
 
   return (
-    <div className="bg-[#EDE8E0] border-b border-[#D8D0C4]">
+    // ponytail: CSS sticky, no scroll listener. top matches fixed Header h-[72px].
+    <div className="sticky top-[72px] z-40 bg-[#EDE8E0]/95 backdrop-blur-md border-b border-[#D8D0C4]">
       {/* Category tab rail */}
-      <div className="relative px-8 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="relative px-4 md:px-8 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <div className="flex items-end gap-0 min-w-max">
           {tabs.map(tab => {
             const isActive = activeCategory === tab.name
@@ -76,7 +78,7 @@ export default function Toolbar({ categories = [], total }: Props) {
       </div>
 
       {/* Sort + view + count */}
-      <div className="flex items-center justify-between px-8 pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-y-2 px-4 md:px-8 pb-3">
         <span className="text-[12px] text-[#A09488]">
           {total !== undefined
             ? <>Showing <strong className="text-[#2C2825]">{total}</strong> results</>
@@ -84,6 +86,10 @@ export default function Toolbar({ categories = [], total }: Props) {
           }
         </span>
         <div className="flex items-center gap-3">
+          <LightToggle on={lightOn} onChange={setLightOn} />
+
+          <span aria-hidden="true" className="w-px h-5 bg-[#D8D0C4]" />
+
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value)}

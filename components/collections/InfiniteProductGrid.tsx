@@ -85,6 +85,7 @@ function mapRawProduct(p: RawProduct): Product {
     specs: {},
     variants: { sizes: [], finishes: [], crystalTones: [] },
     reviews: [],
+    lightOnImage: typeof p.lightOnImage === 'string' && p.lightOnImage.length > 0 ? p.lightOnImage : undefined,
   }
 }
 

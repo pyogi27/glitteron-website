@@ -22,6 +22,7 @@ export interface ApiProduct {
   thumbnailImage?: string;
   mainImage?: string;
   arImages?: string;
+  lightOnImage?: string;
   imageUrls?: string[];
   images?: Array<string | { url: string }>;
   rating?: number | string;
