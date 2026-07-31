@@ -9,6 +9,12 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ARG API_URL
 ENV API_URL=$API_URL
+# NEXT_PUBLIC_* are inlined into the client bundle at build time — setting them
+# as App Runner runtime env vars has no effect, they must be build args.
+ARG NEXT_PUBLIC_RAZORPAY_KEY_ID
+ENV NEXT_PUBLIC_RAZORPAY_KEY_ID=$NEXT_PUBLIC_RAZORPAY_KEY_ID
+ARG NEXT_PUBLIC_SITE_URL
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 RUN npm run build
 
 FROM node:20-alpine AS runner
