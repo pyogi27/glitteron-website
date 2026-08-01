@@ -30,9 +30,14 @@ export default function HeroSection() {
         muted
         loop
         playsInline
+        preload="metadata"
+        poster="/hero-poster.jpg"
         className="absolute inset-0 w-full h-full object-cover"
       >
-        <source src="/hero-video.mp4" type="video/mp4" />
+        {/* ponytail: native <source media> picks the file — no JS, no resize listener.
+            Locked at load; a desktop→mobile resize keeps the desktop file. Fine for a background. */}
+        <source src="/website_video.mp4" media="(min-width: 768px)" type="video/mp4" />
+        <source src="/mobile_video.mp4" type="video/mp4" />
       </video>
       {/* Dark fallback background */}
       <div className="absolute inset-0 bg-[#1A1210]" style={{ zIndex: -1 }} />

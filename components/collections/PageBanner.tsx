@@ -3,13 +3,15 @@ interface Props {
   title: string
   subtitle: string
   stats: Stat[]
+  /** Eyebrow label above the title. Defaults to 'Collections'. */
+  eyebrow?: string
 }
 
-export default function PageBanner({ title, subtitle, stats }: Props) {
+export default function PageBanner({ title, subtitle, stats, eyebrow = 'Collections' }: Props) {
   return (
     <div className="pt-[72px] bg-[#2C2825] text-white pb-12 px-12">
       <div className="max-w-[900px] pt-12">
-        <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#C4714A] mb-4">Collections</div>
+        <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#C4714A] mb-4">{eyebrow}</div>
         <h1 className="font-serif text-[clamp(36px,5vw,64px)] font-light leading-[1.1] mb-4">{title}</h1>
         <p className="text-[14px] font-light text-white/55 max-w-[480px] leading-[1.8] mb-10">{subtitle}</p>
         <div className="flex gap-10">

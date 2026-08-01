@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef, ReactNode } from 'react'
+import { useEffect, useRef, ReactNode, CSSProperties, ElementType } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -9,14 +9,19 @@ interface RevealOnScrollProps {
   children: ReactNode
   delay?: number
   className?: string
+  style?: CSSProperties
+  /** Render as a different element (e.g. 'li', 'article') when the parent requires it. */
+  as?: ElementType
 }
 
 export default function RevealOnScroll({
   children,
   delay = 0,
   className = '',
+  style,
+  as: Tag = 'div',
 }: RevealOnScrollProps) {
-  const ref = useRef<HTMLDivElement>(null)
+  const ref = useRef<HTMLElement>(null)
 
   useEffect(() => {
     const el = ref.current
@@ -45,8 +50,8 @@ export default function RevealOnScroll({
   }, [delay])
 
   return (
-    <div ref={ref} className={className}>
+    <Tag ref={ref} className={className} style={style}>
       {children}
-    </div>
+    </Tag>
   )
 }
