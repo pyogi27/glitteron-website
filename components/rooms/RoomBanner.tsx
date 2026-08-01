@@ -8,7 +8,7 @@ interface Props {
 
 export default function RoomBanner({ room, total }: Props) {
   return (
-    <div className="relative pt-[72px] bg-[#2C2825] text-white overflow-hidden">
+    <div className="relative pt-header bg-[#2C2825] text-white overflow-hidden">
       {/* Room image — right side, fading into the dark banner */}
       <div className="absolute inset-y-0 right-0 w-full md:w-[55%]">
         <Image

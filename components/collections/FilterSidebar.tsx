@@ -83,7 +83,7 @@ export default function FilterSidebar() {
   }
 
   return (
-    <aside className="w-[268px] flex-shrink-0 px-7 py-8 border-r border-[#D8D0C4] h-[calc(100vh-172px)] overflow-y-auto [scrollbar-width:thin]">
+    <aside className="w-[268px] flex-shrink-0 px-7 py-8 border-r border-[#D8D0C4] h-[calc(100vh-var(--spacing-header-ticker))] overflow-y-auto [scrollbar-width:thin]">
       <FilterGroup title="Price Range">
         <div className="flex gap-2 mb-3">
           <input

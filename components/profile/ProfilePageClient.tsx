@@ -55,7 +55,7 @@ function getInitials(firstName: string, lastName: string) {
 
 function Skeleton() {
   return (
-    <div className="bg-[#EDE8E0] min-h-[calc(100vh-72px)] px-4 md:px-12 py-8 md:py-12">
+    <div className="bg-[#EDE8E0] min-h-[calc(100vh-var(--spacing-header))] px-4 md:px-12 py-8 md:py-12">
       <div className="max-w-[1320px] mx-auto grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 md:gap-8">
         <div className="bg-white rounded-[24px] border border-[#D8D0C4] p-6 md:p-8 animate-pulse">
           <div className="w-16 h-16 rounded-full bg-[#E2DAD0] mx-auto mb-4" />
@@ -276,14 +276,14 @@ export default function ProfilePageClient() {
   if (!user) {
     return (
       <>
-        <div className="pt-[72px] bg-white border-b border-[#D8D0C4]">
+        <div className="pt-header bg-white border-b border-[#D8D0C4]">
           <div className="px-4 md:px-12 py-3.5 flex items-center gap-2 text-[11.5px]" style={{ color: '#A09488' }}>
             <Link href="/" className="hover:text-[#8B5E3C] transition-colors">Home</Link>
             <span className="opacity-45">›</span>
             <span style={{ color: '#2C2825' }}>Profile</span>
           </div>
         </div>
-        <section className="bg-[#EDE8E0] min-h-[calc(100vh-72px)] flex items-center justify-center px-4 py-16">
+        <section className="bg-[#EDE8E0] min-h-[calc(100vh-var(--spacing-header))] flex items-center justify-center px-4 py-16">
           <div className="text-center max-w-[400px]">
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6"
@@ -364,7 +364,7 @@ export default function ProfilePageClient() {
   return (
     <>
       {/* Breadcrumb */}
-      <div className="pt-[72px] bg-white border-b border-[#D8D0C4]">
+      <div className="pt-header bg-white border-b border-[#D8D0C4]">
         <div className="px-4 md:px-12 py-3.5 flex items-center gap-2 text-[11.5px]" style={{ color: '#A09488' }}>
           <Link href="/" className="hover:text-[#8B5E3C] transition-colors">Home</Link>
           <span className="opacity-45">›</span>
@@ -372,7 +372,7 @@ export default function ProfilePageClient() {
         </div>
       </div>
 
-      <section className="bg-[#EDE8E0] min-h-[calc(100vh-72px)] px-4 md:px-12 py-8 md:py-12">
+      <section className="bg-[#EDE8E0] min-h-[calc(100vh-var(--spacing-header))] px-4 md:px-12 py-8 md:py-12">
         <div className="max-w-[1320px] mx-auto grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 md:gap-8 items-start">
 
           {/* ── Sidebar ─────────────────────────────────────────────────────── */}

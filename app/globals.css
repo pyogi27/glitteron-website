@@ -9,27 +9,35 @@
   --color-mid-gray: #A09488;
   --color-dark: #2C2825;
   --color-black: #1A1210;
-  --color-gold: #C4714A;
-  --color-gold-light: #E8A87C;
-  --color-gold-dark: #8B5E3C;
-  --color-gold-terra: #C4714A;
-  --color-gold-terra-light: #E8A87C;
-  --color-gold-terra-dark: #8B5E3C;
+  /* Official LitMeUp brand palette — see exports/README.txt */
+  --color-brand-umber: #2E2620; /* line art, wordmark, dark ground */
+  --color-brand-clay: #A85B3B;  /* primary brand tone, accents on light */
+  --color-brand-ochre: #C08A3E; /* bulb light, accents on dark */
+  --color-brand-olive: #5F6650; /* descriptor / secondary text */
+  --color-brand-sand: #E8E0D4;  /* surfaces, backgrounds, reversed art */
 
-  /* Official LitMeUp brand palette — see LitMeUp brand-assets/README.txt */
-  --color-brand-umber: #2E2620; /* text, plates, fixtures */
-  --color-brand-clay: #A85B3B;  /* primary brand tone */
-  --color-brand-ochre: #C08A3E; /* light, accents on dark */
-  --color-brand-olive: #5F6650; /* descriptors, secondary */
-  --color-brand-sand: #E8E0D4;  /* surfaces, backgrounds */
+  /* Accent scale — aliased onto the brand palette so the whole site tracks it.
+     Clay carries accents on light grounds (4.08:1 on our white, vs 2.96:1 for
+     the old #C4714A); ochre is the on-dark/glow tone per the brand README. */
+  --color-gold: #A85B3B;
+  --color-gold-light: #C08A3E;
+  --color-gold-dark: #7E4229;
+  --color-gold-terra: #A85B3B;
+  --color-gold-terra-light: #C08A3E;
+  --color-gold-terra-dark: #7E4229;
+
+  /* Fixed header height — the stacked logo artwork sets this. Single source of
+     truth for every sticky offset and calc(100vh - header) on the site. */
+  --spacing-header: 104px;
+  --spacing-header-ticker: 168px; /* header + TickerStrip */
 
   /* Fonts */
   --font-serif: "Cormorant Garamond", serif;
   --font-sans: "Outfit", sans-serif;
 
   /* Box Shadows */
-  --shadow-gold-glow: 0 24px 64px rgba(196,113,74,0.22), 0 8px 24px rgba(26,18,16,0.14);
-  --shadow-card-hover: 0 28px 70px rgba(196,113,74,0.32), 0 10px 30px rgba(44,40,37,0.2);
+  --shadow-gold-glow: 0 24px 64px rgba(168,91,59,0.22), 0 8px 24px rgba(26,18,16,0.14);
+  --shadow-card-hover: 0 28px 70px rgba(168,91,59,0.32), 0 10px 30px rgba(44,40,37,0.2);
 
   /* Keyframes */
   --animate-ticker: ticker 18s linear infinite;
@@ -137,9 +145,9 @@
   @media (hover: hover) {
     .product-card:hover {
       transform: scale(1.04) translateY(-10px);
-      border-color: rgba(196, 113, 74, 0.4);
+      border-color: rgba(168, 91, 59, 0.4);
       border-radius: 24px;
-      box-shadow: 0 28px 70px rgba(196, 113, 74, 0.28), 0 10px 30px rgba(44, 40, 37, 0.18);
+      box-shadow: 0 28px 70px rgba(168, 91, 59, 0.28), 0 10px 30px rgba(44, 40, 37, 0.18);
     }
 
     /* Image zoom on card hover */
@@ -229,7 +237,7 @@
   .rg-card::after {
     content: '';
     position: absolute; inset: 0;
-    background: rgba(196, 113, 74, 0);
+    background: rgba(168, 91, 59, 0);
     transition: background 0.45s;
     border-radius: inherit;
     pointer-events: none;
@@ -256,7 +264,7 @@
   /* Focused card */
   .room-grid:has(.rg-card:hover) .rg-card:hover {
     filter: saturate(1) brightness(1);
-    box-shadow: 0 24px 60px rgba(44, 40, 37, 0.28), 0 0 0 2px rgba(196, 113, 74, 0.3);
+    box-shadow: 0 24px 60px rgba(44, 40, 37, 0.28), 0 0 0 2px rgba(168, 91, 59, 0.3);
     z-index: 2;
   }
 
@@ -265,18 +273,18 @@
   }
 
   .room-grid:has(.rg-card:hover) .rg-card:hover::after {
-    background: rgba(196, 113, 74, 0.06);
+    background: rgba(168, 91, 59, 0.06);
   }
 
   .room-grid:has(.rg-card:hover) .rg-card:hover .rg-arrow {
     opacity: 1;
     transform: translateX(0);
-    background: rgba(196, 113, 74, 0.25);
-    border-color: rgba(196, 113, 74, 0.5);
+    background: rgba(168, 91, 59, 0.25);
+    border-color: rgba(168, 91, 59, 0.5);
   }
 
   .room-grid:has(.rg-card:hover) .rg-card:hover .rg-pill {
-    background: rgba(196, 113, 74, 0.35);
+    background: rgba(168, 91, 59, 0.35);
     color: #EDE8E0;
   }
 
@@ -287,7 +295,7 @@
   }
 
   .auth-input:focus {
-    border-color: rgba(196, 113, 74, 0.65) !important;
+    border-color: rgba(168, 91, 59, 0.65) !important;
   }
 
   .auth-input::placeholder {
@@ -335,9 +343,9 @@
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(196, 113, 74, 0.05) 47%,
-    rgba(196, 113, 74, 0.18) 50%,
-    rgba(196, 113, 74, 0.05) 53%,
+    rgba(168, 91, 59, 0.05) 47%,
+    rgba(168, 91, 59, 0.18) 50%,
+    rgba(168, 91, 59, 0.05) 53%,
     transparent 100%
   );
   animation: vizScan 1.7s ease-in-out infinite;

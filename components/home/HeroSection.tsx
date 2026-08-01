@@ -4,19 +4,16 @@ import gsap from 'gsap'
 import Link from 'next/link'
 
 export default function HeroSection() {
-  const eyebrow = useRef<HTMLParagraphElement>(null)
   const title = useRef<HTMLHeadingElement>(null)
-  const subtitle = useRef<HTMLParagraphElement>(null)
   const actions = useRef<HTMLDivElement>(null)
   const scroll = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline()
-      tl.fromTo(eyebrow.current, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.8, delay: 0.3 })
-        .fromTo(title.current,   { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.9 }, '-=0.4')
-        .fromTo(subtitle.current,{ opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.9 }, '-=0.5')
-        .fromTo(actions.current, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.9 }, '-=0.5')
+      // ponytail: tween to partial opacity, not 1 — the video shows through the type.
+      tl.fromTo(title.current,   { opacity: 0, y: 24 }, { opacity: 0.78, y: 0, duration: 0.9, delay: 0.3 })
+        .fromTo(actions.current, { opacity: 0, y: 24 }, { opacity: 0.85, y: 0, duration: 0.9 }, '-=0.5')
         .fromTo(scroll.current,  { opacity: 0 },         { opacity: 1, duration: 1 }, '-=0.2')
     })
     return () => ctx.revert()
@@ -51,17 +48,11 @@ export default function HeroSection() {
 
       {/* Content */}
       <div className="relative z-[3] text-center text-white max-w-[760px] px-6">
-        <p ref={eyebrow} className="text-[11px] font-medium tracking-[0.22em] uppercase text-[rgba(237,232,224,0.72)] mb-6 opacity-0">
-          Premium Chandeliers &amp; Pendant Lights
-        </p>
-        <h1 ref={title} className="font-serif text-[clamp(52px,7vw,92px)] font-light leading-[1.05] tracking-[-0.01em] mb-7 opacity-0">
-          Where Light Becomes <em className="italic text-[#F5F0EB]">Art</em>
+        <h1 ref={title} className="font-serif text-[clamp(52px,7vw,92px)] font-light leading-[1.05] tracking-[-0.01em] mb-10 opacity-0">
+          Where Light Becomes <em className="italic text-[#F5F0EB]">an Art</em>
         </h1>
-        <p ref={subtitle} className="text-[15px] font-light text-white/65 max-w-[480px] mx-auto mb-10 leading-[1.8] opacity-0">
-          Curated chandeliers and pendant lights that transform every room into a masterpiece. Crafted for those who believe ambiance is everything.
-        </p>
         <div ref={actions} className="flex gap-4 justify-center opacity-0">
-          <Link href="/collections" className="bg-[#E2DAD0] text-[#2C2825] border-none px-9 py-3.5 rounded-3xl font-sans text-[13px] font-medium tracking-[0.08em] uppercase no-underline inline-flex items-center gap-2 transition-all hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(196,113,74,0.4)]">
+          <Link href="/collections" className="bg-[#E2DAD0]/25 text-white border border-white/45 px-9 py-3.5 rounded-3xl font-sans text-[13px] font-medium tracking-[0.08em] uppercase no-underline inline-flex items-center gap-2 backdrop-blur-[2px] transition-all hover:bg-[#E2DAD0]/40 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(196,113,74,0.4)]">
             Explore Collection
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M5 12h14M12 5l7 7-7 7"/>

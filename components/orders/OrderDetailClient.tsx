@@ -80,7 +80,7 @@ export default function OrderDetailClient() {
 
   if (!authChecked || loading) {
     return (
-      <div className="pt-[72px] bg-[#EDE8E0] min-h-screen flex items-center justify-center">
+      <div className="pt-header bg-[#EDE8E0] min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 rounded-full border-2 border-[#C9A84C] border-t-transparent animate-spin" />
       </div>
     )
@@ -88,7 +88,7 @@ export default function OrderDetailClient() {
 
   if (error || !order) {
     return (
-      <div className="pt-[72px] bg-[#EDE8E0] min-h-screen px-4 md:px-12 py-12">
+      <div className="pt-header bg-[#EDE8E0] min-h-screen px-4 md:px-12 py-12">
         <div className="max-w-[800px] mx-auto text-center">
           <p className="text-[#A09488] text-[14px] mb-4">{error ?? 'Order not found'}</p>
           <Link href="/orders" className="text-[#C9A84C] text-[13px] hover:underline">← Back to orders</Link>
@@ -113,7 +113,7 @@ export default function OrderDetailClient() {
         </div>
       )}
 
-      <div className={showSuccessBanner ? 'pt-[72px] mt-[48px]' : 'pt-[72px]'}>
+      <div className={showSuccessBanner ? 'pt-header mt-[48px]' : 'pt-header'}>
         {/* Breadcrumb */}
         <div className="bg-white border-b border-[#D8D0C4]">
           <div className="px-4 md:px-12 py-3.5 flex items-center gap-2 text-[11.5px] text-[#A09488]">
@@ -125,7 +125,7 @@ export default function OrderDetailClient() {
           </div>
         </div>
 
-        <section className="bg-[#EDE8E0] min-h-[calc(100vh-72px)] px-4 md:px-12 py-8 md:py-12">
+        <section className="bg-[#EDE8E0] min-h-[calc(100vh-var(--spacing-header))] px-4 md:px-12 py-8 md:py-12">
           <div className="max-w-[900px] mx-auto space-y-6">
             {/* Header */}
             <div className="bg-white rounded-[24px] border border-[#D8D0C4] p-5 md:p-8">

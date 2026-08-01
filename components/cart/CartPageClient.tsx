@@ -84,7 +84,7 @@ export default function CartPageClient() {
 
   return (
     <>
-      <div className="pt-[72px] bg-white border-b border-[#D8D0C4]">
+      <div className="pt-header bg-white border-b border-[#D8D0C4]">
         <div className="px-4 md:px-12 py-3.5 flex items-center gap-2 text-[11.5px] text-[#A09488]">
           <Link href="/" className="hover:text-[#8B5E3C] transition-colors">Home</Link>
           <span className="opacity-45">›</span>
@@ -92,7 +92,7 @@ export default function CartPageClient() {
         </div>
       </div>
 
-      <section className="bg-[#EDE8E0] min-h-[calc(100vh-72px)] px-4 md:px-12 py-8 md:py-12">
+      <section className="bg-[#EDE8E0] min-h-[calc(100vh-var(--spacing-header))] px-4 md:px-12 py-8 md:py-12">
         <div className="max-w-[1320px] mx-auto grid grid-cols-1 lg:grid-cols-[1.6fr_0.95fr] gap-6 md:gap-8">
           <div className="bg-white rounded-[24px] border border-[#D8D0C4] p-5 md:p-8">
             <div className="flex items-center justify-between gap-3 mb-6 md:mb-7">

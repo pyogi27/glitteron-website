@@ -16,8 +16,8 @@ export default function RoomToolbar({ total }: Props) {
   const { sortBy, setSortBy, viewMode, setViewMode } = useFilterStore()
 
   return (
-    // ponytail: CSS sticky, no scroll listener. top matches fixed Header h-[72px].
-    <div className="sticky top-[72px] z-40 bg-[#EDE8E0]/95 backdrop-blur-md border-b border-[#D8D0C4]">
+    // ponytail: CSS sticky, no scroll listener. top matches fixed Header h-header.
+    <div className="sticky top-header z-40 bg-[#EDE8E0]/95 backdrop-blur-md border-b border-[#D8D0C4]">
       <div className="flex items-center justify-between px-4 md:px-8 py-3">
         <span className="text-[12px] text-[#A09488]">
           Showing <strong className="text-[#2C2825]">{total}</strong> {total === 1 ? 'result' : 'results'}

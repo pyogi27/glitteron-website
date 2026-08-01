@@ -41,8 +41,8 @@ export default function Toolbar({ categories = [], total }: Props) {
   }
 
   return (
-    // ponytail: CSS sticky, no scroll listener. top matches fixed Header h-[72px].
-    <div className="sticky top-[72px] z-40 bg-[#EDE8E0]/95 backdrop-blur-md border-b border-[#D8D0C4]">
+    // ponytail: CSS sticky, no scroll listener. top matches fixed Header h-header.
+    <div className="sticky top-header z-40 bg-[#EDE8E0]/95 backdrop-blur-md border-b border-[#D8D0C4]">
       {/* Category tab rail */}
       <div className="relative px-4 md:px-8 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <div className="flex items-end gap-0 min-w-max">

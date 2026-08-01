@@ -34,7 +34,7 @@ export default function ProductGallery({ images, name, lightOnImage }: Props) {
 
   return (
     <>
-      <div className="lg:sticky lg:top-[72px] flex gap-3.5 p-[32px_24px_32px_48px] bg-[#EDE8E0] h-[50vh] lg:h-[calc(100vh-72px)]">
+      <div className="lg:sticky lg:top-header flex gap-3.5 p-[32px_24px_32px_48px] bg-[#EDE8E0] h-[50vh] lg:h-[calc(100vh-var(--spacing-header))]">
         {/* Thumbnails */}
         <div className="hidden lg:flex flex-col gap-2.5 w-[76px] flex-shrink-0 overflow-y-auto">
           {images.map((src, i) => (

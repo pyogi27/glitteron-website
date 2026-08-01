@@ -154,7 +154,7 @@ export default function ForgotPasswordPage() {
   // ─────────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex" style={{ minHeight: 'calc(100vh - 72px)' }}>
+    <div className="flex" style={{ minHeight: 'calc(100vh - var(--spacing-header))' }}>
       <AuthBrandPanel
         eyebrow="Account Recovery"
         headline={

@@ -17,8 +17,8 @@ export default function TickerStrip() {
   return (
     <div
       aria-hidden={!visible}
-      className={`fixed top-[72px] left-0 right-0 z-[90] bg-[#EDE8E0] border-b border-[#D8D0C4] flex items-center overflow-hidden py-3.5 transition-transform duration-500 ${
-        visible ? 'translate-y-0' : '-translate-y-[calc(100%+72px)]'
+      className={`fixed top-header left-0 right-0 z-[90] bg-[#EDE8E0] border-b border-[#D8D0C4] flex items-center overflow-hidden py-3.5 transition-transform duration-500 ${
+        visible ? 'translate-y-0' : '-translate-y-[calc(100%+var(--spacing-header))]'
       }`}
     >
       <div className="flex gap-16 animate-[ticker_18s_linear_infinite] whitespace-nowrap">

@@ -227,7 +227,7 @@ export default function Header({ transparent }: HeaderProps) {
           : 'border-b border-warm-gray/40 bg-white/96 backdrop-blur-xl'
       }`}
     >
-      <div className="flex items-center justify-between px-4 md:px-12 h-[72px]">
+      <div className="flex items-center justify-between px-4 md:px-12 h-header">
         <Logo light={isLight} />
 
         <nav className="hidden md:flex items-center gap-9">

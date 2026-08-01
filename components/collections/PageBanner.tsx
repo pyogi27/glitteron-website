@@ -9,7 +9,7 @@ interface Props {
 
 export default function PageBanner({ title, subtitle, stats, eyebrow = 'Collections' }: Props) {
   return (
-    <div className="pt-[72px] bg-[#2C2825] text-white pb-12 px-12">
+    <div className="pt-header bg-[#2C2825] text-white pb-12 px-12">
       <div className="max-w-[900px] pt-12">
         <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#C4714A] mb-4">{eyebrow}</div>
         <h1 className="font-serif text-[clamp(36px,5vw,64px)] font-light leading-[1.1] mb-4">{title}</h1>

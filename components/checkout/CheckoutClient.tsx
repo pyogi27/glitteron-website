@@ -245,7 +245,7 @@ export default function CheckoutClient() {
   // Loading skeleton while waiting for auth check
   if (!authChecked) {
     return (
-      <div className="pt-[72px] bg-[#EDE8E0] min-h-screen flex items-center justify-center">
+      <div className="pt-header bg-[#EDE8E0] min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 rounded-full border-2 border-[#C9A84C] border-t-transparent animate-spin" />
       </div>
     )
@@ -254,7 +254,7 @@ export default function CheckoutClient() {
   return (
     <>
       {/* Breadcrumb */}
-      <div className="pt-[72px] bg-white border-b border-[#D8D0C4]">
+      <div className="pt-header bg-white border-b border-[#D8D0C4]">
         <div className="px-4 md:px-12 py-3.5 flex items-center gap-2 text-[11.5px] text-[#A09488]">
           <Link href="/" className="hover:text-[#8B5E3C] transition-colors">Home</Link>
           <span className="opacity-45">›</span>
@@ -264,7 +264,7 @@ export default function CheckoutClient() {
         </div>
       </div>
 
-      <section className="bg-[#EDE8E0] min-h-[calc(100vh-72px)] px-4 md:px-12 py-8 md:py-12">
+      <section className="bg-[#EDE8E0] min-h-[calc(100vh-var(--spacing-header))] px-4 md:px-12 py-8 md:py-12">
         <div className="max-w-[1320px] mx-auto">
           <h1 className="font-serif text-[clamp(32px,3.5vw,52px)] leading-[1.05] text-[#2C2825] mb-8">Checkout</h1>
           <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_0.95fr] gap-6 md:gap-8">

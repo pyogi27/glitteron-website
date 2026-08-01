@@ -60,7 +60,7 @@ export default async function CollectionsPage({ searchParams }: Props) {
       <div className="flex items-start min-h-screen bg-[#EDE8E0]">
         {/* ponytail: sticky lives on the flex child, not the <aside>. A wrapper sized
             to its own content gives sticky no travel room, so it scrolls away. */}
-        <div className="hidden lg:block sticky top-[172px]">
+        <div className="hidden lg:block sticky top-header-ticker">
           <FilterSidebar />
         </div>
         <InfiniteProductGrid
