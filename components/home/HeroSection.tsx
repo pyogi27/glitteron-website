@@ -21,6 +21,11 @@ export default function HeroSection() {
 
   return (
     <section className="relative h-screen min-h-[680px] flex items-center justify-center overflow-hidden">
+      {/* GSAP reveals the hero from opacity-0. Without JS it would stay blank,
+          so restore visibility when scripting is unavailable. */}
+      <noscript>
+        <style>{`.hero-reveal { opacity: 1 !important; }`}</style>
+      </noscript>
       {/* Video background */}
       <video
         autoPlay
@@ -48,10 +53,15 @@ export default function HeroSection() {
 
       {/* Content */}
       <div className="relative z-[3] text-center text-white max-w-[760px] px-6">
-        <h1 ref={title} className="font-serif text-[clamp(52px,7vw,92px)] font-light leading-[1.05] tracking-[-0.01em] mb-10 opacity-0">
+        <h1 ref={title} className="hero-reveal font-serif text-[clamp(52px,7vw,92px)] font-light leading-[1.05] tracking-[-0.01em] mb-10 opacity-0">
           Where Light Becomes <em className="italic text-[#F5F0EB]">an Art</em>
+          {/* The visible h1 is deliberately atmospheric; this carries the terms
+              the page actually ranks for, for crawlers and screen readers. */}
+          <span className="sr-only">
+            {' '}— handcrafted chandeliers and pendant lights
+          </span>
         </h1>
-        <div ref={actions} className="flex gap-4 justify-center opacity-0">
+        <div ref={actions} className="hero-reveal flex gap-4 justify-center opacity-0">
           <Link href="/collections" className="bg-[#E2DAD0]/25 text-white border border-white/45 px-9 py-3.5 rounded-3xl font-sans text-[13px] font-medium tracking-[0.08em] uppercase no-underline inline-flex items-center gap-2 backdrop-blur-[2px] transition-all hover:bg-[#E2DAD0]/40 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(196,113,74,0.4)]">
             Explore Collection
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">

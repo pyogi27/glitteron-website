@@ -173,20 +173,21 @@ export default function ProductCard({ product, variant = 'grid' }: ProductCardPr
 
         {/* Desktop hover overlay — hidden by default, slides up on hover via CSS */}
         <div
-          className="product-card-overlay absolute bottom-0 left-0 right-0 z-10 px-5 pt-9 pb-5"
-          style={{
-            background: 'linear-gradient(to top, rgba(44,40,37,0.88) 0%, rgba(44,40,37,0.62) 55%, transparent 100%)',
-            backdropFilter: 'blur(2px)',
-            WebkitBackdropFilter: 'blur(2px)',
-          }}
+          // ponytail: no background layer — the halo in .product-card-overlay-text
+          // carries contrast, and the text flips black/white with the light toggle.
+          className={`product-card-overlay absolute bottom-0 left-0 right-0 z-10 px-5 pt-4 pb-5
+            ${lightOn ? 'product-card-overlay-text' : 'product-card-overlay-text-dark'}`}
         >
-          <div className="text-[10px] text-[#E8A87C] tracking-[0.15em] uppercase font-medium mb-1.5">{product.category}</div>
-          <div className="font-serif text-[19px] font-normal leading-[1.25] text-[#EDE8E0] mb-2.5">{product.name}</div>
+          <div className={`text-[10px] tracking-[0.15em] uppercase font-medium mb-1.5 ${lightOn ? 'text-[#FFD9BF]' : 'text-[#8A4A22]'}`}>{product.category}</div>
+          <div className={`font-serif text-[19px] font-normal leading-[1.25] mb-2.5 ${lightOn ? 'text-white' : 'text-[#1A1715]'}`}>{product.name}</div>
           <div className="flex items-center justify-between">
-            <div className="text-[16px] font-medium text-[#EDE8E0] flex items-baseline gap-1.5">
+            <div className={`text-[16px] font-medium flex items-baseline gap-1.5 ${lightOn ? 'text-white' : 'text-[#1A1715]'}`}>
               ₹{product.price.toLocaleString('en-IN')}
               {product.originalPrice && (
-                <span className="text-[13px] font-light" style={{ color: 'rgba(250,247,243,0.5)' }}>
+                <span
+                  className="text-[13px] font-light line-through"
+                  style={{ color: lightOn ? 'rgba(255,255,255,0.72)' : 'rgba(26,23,21,0.6)' }}
+                >
                   ₹{product.originalPrice.toLocaleString('en-IN')}
                 </span>
               )}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, FormEvent } from 'react'
+import { COMPANY } from '@/lib/company'
 
 const TOPICS = [
   'Product question',
@@ -178,8 +179,8 @@ export default function ContactForm() {
       {status === 'error' && (
         <p role="alert" className="text-[12.5px] text-[#A8552C] leading-[1.7]">
           Something went wrong sending that. Please try again, or email us directly at{' '}
-          <a href="mailto:hello@litmeup.com" className="underline underline-offset-4">
-            hello@litmeup.com
+          <a href={`mailto:${COMPANY.email}`} className="underline underline-offset-4">
+            {COMPANY.email}
           </a>
           .
         </p>

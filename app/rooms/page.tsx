@@ -6,9 +6,10 @@ import { fetchProducts } from '@/lib/api/server'
 import { rooms } from '@/lib/data'
 
 export const metadata: Metadata = {
-  title: 'Shop by Room — LitMeUp',
+  title: 'Shop Lighting by Room',
   description:
-    'Find the right light for every space — living room, dining, bedroom, kitchen and home office.',
+    'Find the right light for every space — living room, dining, bedroom, kitchen and home office. Curated handcrafted fixtures for each room.',
+  alternates: { canonical: '/rooms' },
 }
 
 export default async function RoomsPage() {

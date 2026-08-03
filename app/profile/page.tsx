@@ -3,8 +3,9 @@ import { Suspense } from 'react'
 import ProfilePageClient from '@/components/profile/ProfilePageClient'
 
 export const metadata: Metadata = {
-  title: 'My Profile — LitMeUp',
+  title: 'My Profile',
   description: 'View and update your profile details and track your order history.',
+  robots: { index: false, follow: false },
 }
 
 export default function ProfilePage() {

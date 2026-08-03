@@ -14,6 +14,10 @@ export default function VariantSelector({ label, value, options, disabledOptions
     if (disabledOptions.includes(opt)) return
     onChange(opt)
   }
+
+  // Nothing to choose from — render nothing rather than a bare "SIZE —" row.
+  if (options.length === 0) return null
+
   return (
     <div className="mb-5">
       <div className="text-[11px] font-semibold tracking-[0.14em] uppercase text-[#2C2825] mb-3 flex items-center gap-1.5">

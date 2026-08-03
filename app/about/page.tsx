@@ -5,9 +5,10 @@ import PageBanner from '@/components/collections/PageBanner'
 import RevealOnScroll from '@/components/ui/RevealOnScroll'
 
 export const metadata: Metadata = {
-  title: 'About Us — LitMeUp',
+  title: 'About Us — Our Craft & Story',
   description:
     'We design and handcraft lighting for spaces that deserve to glow. Meet the people, the process and the promise behind LitMeUp.',
+  alternates: { canonical: '/about' },
 }
 
 const VALUES = [

@@ -1,27 +1,38 @@
 import Link from 'next/link'
 import Logo from '@/components/ui/Logo'
 
+// Only profiles we can verify. Dead href="#" links are worse than no link, and
+// each real one is a sameAs signal for the Organization schema.
+// TODO: add facebook / pinterest / youtube here once those profiles exist.
+const SOCIAL_LINKS = [
+  { platform: 'Instagram', href: 'https://www.instagram.com/litmeup.in/' },
+]
+
+// The collections page filters on ?category=<category name>; the old ?cat= and
+// ?room= params were read by nothing and silently landed on the unfiltered grid.
+// Room links now point at the real /rooms/[slug] pages.
 const FOOTER_LINKS = {
+  // Category names must match the backend exactly — the page filters by name.
   Collections: [
-    { label: 'Chandeliers', href: '/collections?cat=chandeliers' },
-    { label: 'Pendant Lights', href: '/collections?cat=pendant' },
-    { label: 'Sputnik Lights', href: '/collections?cat=sputnik' },
-    { label: 'Dome Lights', href: '/collections?cat=dome' },
-    { label: 'Crystal Lights', href: '/collections?cat=crystal' },
+    { label: 'Chandelier Lights', href: '/collections?category=Chandelier+Lights' },
+    { label: 'Pendant Lights', href: '/collections?category=Pendant+Lights' },
+    { label: 'Ceiling Lights', href: '/collections?category=Ceiling+Lights' },
+    { label: 'Wall Lights', href: '/collections?category=Wall+Lights' },
+    { label: 'Floor Lamps', href: '/collections?category=Floor+Lamps' },
   ],
   Rooms: [
-    { label: 'Living Room', href: '/collections?room=living-room' },
-    { label: 'Dining Room', href: '/collections?room=dining-room' },
-    { label: 'Bedroom', href: '/collections?room=bedroom' },
-    { label: 'Home Office', href: '/collections?room=home-office' },
-    { label: 'Foyer / Entrance', href: '/collections?room=foyer' },
+    { label: 'Living Room', href: '/rooms/living-room' },
+    { label: 'Dining Room', href: '/rooms/dining-room' },
+    { label: 'Bedroom', href: '/rooms/bedroom' },
+    { label: 'Kitchen & Island', href: '/rooms/kitchen' },
+    { label: 'Shop All Rooms', href: '/rooms' },
   ],
   Help: [
     { label: 'About Us', href: '/about' },
     { label: 'Contact', href: '/contact' },
     { label: 'Shipping Policy', href: '/shipping' },
-    { label: 'Returns & Warranty', href: '/returns' },
-    { label: 'Installation Guide', href: '/installation' },
+    { label: 'Returns & Exchange', href: '/returns' },
+    { label: 'Room Visualizer', href: '/room-visualizer' },
   ],
 }
 
@@ -37,11 +48,13 @@ export default function Footer() {
           </p>
           {/* Social icons */}
           <div className="flex gap-2.5">
-            {['instagram', 'facebook', 'pinterest', 'youtube'].map((platform) => (
+            {SOCIAL_LINKS.map(({ platform, href }) => (
               <a
                 key={platform}
-                href="#"
-                aria-label={platform}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer me"
+                aria-label={`LitMeUp on ${platform}`}
                 className="w-[34px] h-[34px] rounded-full border border-[#D8D0C4] flex items-center justify-center text-[#8B7D6E] transition-all duration-200 hover:border-[#A8552C] hover:text-[#A8552C] no-underline cursor-none"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -75,11 +88,15 @@ export default function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div className="flex items-center justify-between text-[11.5px] text-[#8B7D6E]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-[11.5px] text-[#8B7D6E]">
         <span>© {new Date().getFullYear()} LitMeUp. All rights reserved.</span>
         <div className="flex gap-6">
-          <Link href="/privacy" className="text-[#8B7D6E] no-underline hover:text-[#A8552C] transition-colors">Privacy Policy</Link>
-          <Link href="/terms" className="text-[#8B7D6E] no-underline hover:text-[#A8552C] transition-colors">Terms of Service</Link>
+          <Link href="/privacy" className="text-[#8B7D6E] no-underline hover:text-[#A8552C] transition-colors">
+            Privacy Policy
+          </Link>
+          <Link href="/terms" className="text-[#8B7D6E] no-underline hover:text-[#A8552C] transition-colors">
+            Terms of Use
+          </Link>
         </div>
       </div>
     </footer>

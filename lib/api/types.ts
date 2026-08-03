@@ -61,6 +61,19 @@ export interface ApiProductDetail extends ApiProduct {
   whereUsed?: string;
   additionalImages?: string[];
   mainImage?: string;
+  // Variant data as the backend actually returns it (there is no /variations endpoint).
+  availableSizes?: string[];
+  availableColors?: string[];
+  availableAttributes?: {
+    colors?: string[];
+    sizes?: string[];
+    materials?: string[];
+    wattages?: string[];
+  } | null;
+  bodyColors?: string;
+  materials?: string;
+  productHeight?: string;
+  diameter?: string;
 }
 
 export interface ApiListResponse<T> {

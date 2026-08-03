@@ -2,7 +2,6 @@ import type { Product } from "@/lib/types";
 import type {
   ApiCategory,
   ApiProduct,
-  ApiVariation,
   ApiProductDetail,
 } from "./types";
 
@@ -11,7 +10,12 @@ const BACKEND = process.env.API_URL ?? "http://localhost:3000";
 const PLACEHOLDER_IMAGE =
   "https://images.pexels.com/photos/1123262/pexels-photo-1123262.jpeg?auto=compress&cs=tinysrgb&w=800&h=900&fit=crop";
 
-function slugify(name: string): string {
+/**
+ * The API returns slug: null for every product, so product URLs are derived
+ * from the name. Exported so the sitemap builds the exact same slugs that
+ * findApiProductBySlug resolves — a divergent copy would emit 404s.
+ */
+export function slugify(name: string): string {
   return name
     .toLowerCase()
     .replace(/[^\w\s-]/g, "")
@@ -171,50 +175,161 @@ export async function fetchFeaturedProducts(
   return apiProducts.map((p) => mapApiProduct(p));
 }
 
+/**
+ * The whole catalog, fetched once and reused.
+ *
+ * findApiProductBySlug used to page through the API per product. Prerendering
+ * ~1000 products meant ~5000 requests, which blew the backend's 1000-per-15min
+ * rate limit partway through a build — every later lookup then returned empty
+ * and the page called notFound(), so every product built as a 404 shell.
+ * React's cache() collapses this to one pass per build/request.
+ */
+let catalogPromise: Promise<ApiProduct[]> | null = null;
+
+const getCatalog = (): Promise<ApiProduct[]> => {
+  // Memoised on the module, not via React cache(): a build renders pages across
+  // several worker processes and cache() is per-request, so it deduped nothing.
+  // One in-flight promise per worker turns ~5000 requests into ~5 per worker.
+  if (!catalogPromise) {
+    catalogPromise = (async () => {
+      const limit = 250;
+      const firstPage = await fetchProducts({ page: 1, limit });
+      if (firstPage.products.length === 0) {
+        catalogPromise = null; // let a transient failure be retried
+        return [];
+      }
+
+      const rest: ApiProduct[] = [];
+      for (let page = 2; page <= firstPage.totalPages; page += 1) {
+        const { products } = await fetchProducts({ page, limit });
+        rest.push(...products);
+      }
+      return [...firstPage.products, ...rest];
+    })().catch(err => {
+      catalogPromise = null;
+      throw err;
+    });
+  }
+  return catalogPromise;
+};
+
+/** Every product in the catalog, deduped. Shared by the sitemap and SSG params. */
+export async function fetchAllProducts(): Promise<ApiProduct[]> {
+  return getCatalog();
+}
+
+/** Slug → product, built once per process from the memoised catalog. */
+let slugIndexPromise: Promise<Map<string, ApiProduct>> | null = null;
+
+const getSlugIndex = (): Promise<Map<string, ApiProduct>> => {
+  if (!slugIndexPromise) {
+    slugIndexPromise = getCatalog()
+      .then(catalog => {
+        const index = new Map<string, ApiProduct>();
+        for (const p of catalog) {
+          const key = (p.slug ?? slugify(p.name)).trim().toLowerCase();
+          if (key && !index.has(key)) index.set(key, p);
+        }
+        // An empty catalog means the fetch failed — do not cache that.
+        if (index.size === 0) slugIndexPromise = null;
+        return index;
+      })
+      .catch(err => {
+        slugIndexPromise = null;
+        throw err;
+      });
+  }
+  return slugIndexPromise;
+};
+
 export async function findApiProductBySlug(
   slug: string,
 ): Promise<ApiProduct | null> {
-  const normalizedSlug = slug.trim().toLowerCase();
-  const limit = 250;
-
-  const matchesSlug = (p: ApiProduct): boolean => {
-    const candidate = (p.slug ?? slugify(p.name)).trim().toLowerCase();
-    return candidate === normalizedSlug;
-  };
-
-  const firstPage = await fetchProducts({ page: 1, limit });
-  const firstMatch = firstPage.products.find(matchesSlug);
-  if (firstMatch) return firstMatch;
-
-  for (let page = 2; page <= firstPage.totalPages; page += 1) {
-    const { products } = await fetchProducts({ page, limit });
-    const match = products.find(matchesSlug);
-    if (match) return match;
-  }
-
-  return null;
+  const index = await getSlugIndex();
+  return index.get(slug.trim().toLowerCase()) ?? null;
 }
 
-// Map ApiVariation[] to Product's variant format
-function mapVariations(variations: ApiVariation[] = []): Product["variants"] {
-  const sizes: string[] = [];
-  const finishes: string[] = [];
-  const crystalTones: Array<{ name: string; hex: string }> = [];
+// Split combined field values: "White+Golden", "White + Golden", "Black/Gold" -> ["White", "Golden"]
+function splitValues(raw?: string | null): string[] {
+  if (!raw) return [];
+  return raw
+    .split(/[+/,]|\s&\s/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
 
-  variations.forEach((v) => {
-    if (v.type === "size" && !sizes.includes(v.value)) {
-      sizes.push(v.value);
-    } else if (v.type === "finish" && !finishes.includes(v.value)) {
-      finishes.push(v.value);
-    } else if (v.type === "color" || v.type === "tone") {
-      if (!crystalTones.find((ct) => ct.name === v.value)) {
-        crystalTones.push({
-          name: v.value,
-          hex: v.hex ?? "#E8E8E8",
-        });
-      }
-    }
+function dedupe(values: string[]): string[] {
+  const seen = new Set<string>();
+  return values.filter((v) => {
+    const key = v.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
   });
+}
+
+// Named colours the backend actually uses, mapped to swatch hexes.
+const COLOR_HEX: Record<string, string> = {
+  gold: "#C9A227", golden: "#C9A227", brass: "#B5A642",
+  "brass gold": "#B5A642", "antique brass": "#8C7853", "antique gold": "#997A45",
+  silver: "#C0C0C0", chrome: "#DBDBDB", nickel: "#B8B8B8",
+  black: "#1E1E1E", "matte black": "#232323", "black smokey": "#3A3A3A",
+  white: "#F5F3EF", "milky white": "#F3EFE7", ivory: "#EFE6D4",
+  grey: "#8A8A8A", gray: "#8A8A8A", smoke: "#7A7573", smokey: "#7A7573",
+  amber: "#C88A3A", champagne: "#E3CFA3", bronze: "#7B5A3A", copper: "#B06A3B",
+  clear: "#E6EEF2", transparent: "#E6EEF2", cognac: "#9A5B2C", tea: "#A9865B",
+  green: "#4B6B4A", yellow: "#D8B24A", blue: "#3E5C7A", red: "#9B3B34",
+  wooden: "#9A7247", "light wooden": "#BE9A6B", walnut: "#5C4033", oak: "#B08C5A",
+  rose: "#B76E79", "rose gold": "#B76E79", gunmetal: "#4A4E54",
+};
+
+function toHex(name: string): string {
+  return COLOR_HEX[name.trim().toLowerCase()] ?? "#E8E8E8";
+}
+
+// Dimension fields are inconsistent: some rows are pre-labelled ("D90mm", "H970mm"),
+// others are bare numbers ("90", "1270"). Normalise to a labelled, united string.
+function formatDimension(prefix: "D" | "H", raw?: string): string {
+  const value = raw?.trim();
+  if (!value) return "";
+  // Already carries a letter/unit — trust it as authored.
+  if (/[a-z]/i.test(value)) return value;
+  return `${prefix}${value}mm`;
+}
+
+// Build variants from the detail payload. The backend exposes variant data as
+// availableAttributes/availableSizes/availableColors plus the flat bodyColors and
+// dimension fields — there is no /variations endpoint.
+function mapVariants(p: ApiProductDetail): Product["variants"] {
+  const attrs = p.availableAttributes ?? {};
+
+  const sizes = dedupe([
+    ...(p.availableSizes ?? []),
+    ...(attrs.sizes ?? []),
+    // No variant sizes: fall back to the product's own dimensions so the row is useful.
+    ...(!(p.availableSizes?.length || attrs.sizes?.length)
+      ? [
+          [
+            formatDimension("D", p.diameter),
+            formatDimension("H", p.productHeight),
+          ]
+            .filter(Boolean)
+            .join(" "),
+        ]
+      : []),
+  ].map((s) => s.trim()).filter(Boolean));
+
+  // Finish = colour/material treatment of the body.
+  const finishes = dedupe([
+    ...(p.availableColors ?? []),
+    ...(attrs.colors ?? []),
+    ...splitValues(p.bodyColors),
+  ]);
+
+  const crystalTones = dedupe([
+    ...(attrs.colors ?? []),
+    ...(p.availableColors ?? []),
+  ]).map((name) => ({ name, hex: toHex(name) }));
 
   return { sizes, finishes, crystalTones };
 }
@@ -243,9 +358,7 @@ export async function fetchProductById(id: number): Promise<Product | null> {
         verified: r.verified ?? false,
       })) ?? [];
 
-    // Fetch variations separately
-    const variations = await fetchProductVariations(id);
-    const mappedVariants = mapVariations(variations);
+    const mappedVariants = mapVariants(productData);
 
     const product = mapApiProduct(productData, productData.category?.name);
 
@@ -269,29 +382,6 @@ export async function fetchProductById(id: number): Promise<Product | null> {
   } catch (err) {
     console.error(`[fetchProductById] failed to reach ${url}:`, err);
     return null;
-  }
-}
-
-// Fetch variations for a product
-export async function fetchProductVariations(
-  productId: number,
-): Promise<ApiVariation[]> {
-  const url = `${BACKEND}/api/products/${productId}/variations`;
-  try {
-    const res = await fetch(url, { next: { revalidate: 60 } });
-    if (!res.ok) {
-      console.warn(`[fetchProductVariations] ${res.status} from ${url}`);
-      return [];
-    }
-    const body = await res.json();
-    const variations = extractArray<ApiVariation>(body, "data", "variations");
-    console.log(
-      `[fetchProductVariations] ${variations.length} variations for product ${productId}`,
-    );
-    return variations;
-  } catch (err) {
-    console.error(`[fetchProductVariations] failed to reach ${url}:`, err);
-    return [];
   }
 }
 

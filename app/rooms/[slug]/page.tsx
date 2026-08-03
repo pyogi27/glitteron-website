@@ -7,6 +7,8 @@ import RoomToolbar from '@/components/rooms/RoomToolbar'
 import InfiniteProductGrid from '@/components/collections/InfiniteProductGrid'
 import { fetchCategories, fetchProducts, mapApiProduct } from '@/lib/api/server'
 import { rooms } from '@/lib/data'
+import JsonLd from '@/components/seo/JsonLd'
+import { breadcrumbSchema, itemListSchema } from '@/lib/seo/schema'
 
 const INITIAL_BATCH = 100
 
@@ -21,10 +23,20 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const room = rooms.find(r => r.slug === slug)
-  if (!room) return { title: 'Rooms — LitMeUp' }
+  if (!room) return { title: 'Rooms', robots: { index: false, follow: true } }
+
+  const description = `${room.tag}: handcrafted ${room.subtitle.toLowerCase()} curated for your ${room.name.toLowerCase()}. Free shipping across India, 5-year warranty.`
   return {
-    title: `${room.name} Lighting — LitMeUp`,
-    description: `${room.tag}: handcrafted ${room.subtitle.toLowerCase()} curated for your ${room.name.toLowerCase()}.`,
+    title: `${room.name} Lighting — Chandeliers & Pendants`,
+    description,
+    alternates: { canonical: `/rooms/${room.slug}` },
+    openGraph: {
+      title: `${room.name} Lighting`,
+      description,
+      url: `/rooms/${room.slug}`,
+      type: 'website',
+      images: [{ url: room.image, alt: `${room.name} lighting` }],
+    },
   }
 }
 
@@ -47,6 +59,16 @@ export default async function RoomPage({ params }: Props) {
 
   return (
     <>
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: 'Home', path: '/' },
+          { name: 'Rooms', path: '/rooms' },
+          { name: room.name, path: `/rooms/${room.slug}` },
+        ])}
+      />
+      {products.length > 0 && (
+        <JsonLd data={itemListSchema(products, `/rooms/${room.slug}`)} />
+      )}
       <RoomBanner room={room} total={total} />
       <RoomSwitcher activeSlug={room.slug} />
       <div className="min-h-screen bg-[#EDE8E0]">

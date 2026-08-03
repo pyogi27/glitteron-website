@@ -19,8 +19,8 @@ const PERKS = [
 
 export default function ProductInfo({ product }: { product: Product }) {
   const [qty, setQty] = useState(1)
-  const [size, setSize] = useState(product.variants.sizes[0])
-  const [finish, setFinish] = useState(product.variants.finishes[0])
+  const [size, setSize] = useState(product.variants.sizes[0] ?? '')
+  const [finish, setFinish] = useState(product.variants.finishes[0] ?? '')
   const [crystalTone, setCrystalTone] = useState(product.variants.crystalTones[0]?.name ?? '')
 
   const [mounted, setMounted] = useState(false)
@@ -59,12 +59,11 @@ export default function ProductInfo({ product }: { product: Product }) {
       <h1 className="font-serif text-[clamp(28px,3vw,40px)] font-light leading-[1.2] text-[#2C2825] mb-2">
         {product.name}
       </h1>
-      <p className="text-[13px] text-[#A09488] mb-3">{product.subtitle}</p>
 
       {/* SKU + Stock */}
-      <div className="flex items-center gap-4 text-[11px] text-[#A09488] mb-4">
+      <div className="flex items-center gap-4 text-[11px] text-[#A09488] mb-4 mt-3">
         <span>SKU: {product.sku}</span>
-        <span className="text-green-600 font-medium">{product.stock} in stock</span>
+        <span className="text-green-600 font-medium">in stock</span>
       </div>
 
       {/* Rating */}
@@ -89,9 +88,6 @@ export default function ProductInfo({ product }: { product: Product }) {
               Save {product.discount}%
             </span>
           )}
-        </div>
-        <div className="text-[11px] text-[#A09488]">
-          or ₹{emi.toLocaleString('en-IN')}/mo with 0% EMI
         </div>
       </div>
 
