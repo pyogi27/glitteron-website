@@ -376,7 +376,7 @@ export default function ProfilePageClient() {
         <div className="max-w-[1320px] mx-auto grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 md:gap-8 items-start">
 
           {/* ── Sidebar ─────────────────────────────────────────────────────── */}
-          <aside className="bg-white rounded-[24px] border border-[#D8D0C4] p-6 md:p-8 lg:sticky lg:top-[88px]">
+          <aside className="bg-white rounded-[24px] border border-[#D8D0C4] p-6 md:p-8 lg:sticky lg:top-header">
             {/* Avatar */}
             <div className="flex flex-col items-center text-center mb-6 pb-6 border-b border-[#D8D0C4]">
               <div

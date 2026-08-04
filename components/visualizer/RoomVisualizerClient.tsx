@@ -23,7 +23,8 @@ export default function RoomVisualizerClient() {
   return (
     <div
       className="flex flex-col overflow-hidden pt-header"
-      style={{ height: '100dvh' }}
+      // ponytail: box-border keeps pt-header inside 100dvh instead of overflowing it
+      style={{ height: '100dvh', boxSizing: 'border-box' }}
     >
       <StepBar />
 

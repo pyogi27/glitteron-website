@@ -211,7 +211,7 @@ export default function SignupPage() {
   // ─────────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex" style={{ minHeight: 'calc(100vh - var(--spacing-header))' }}>
+    <div className="flex pt-header" style={{ minHeight: '100vh' }}>
       {/* Left — Brand panel */}
       <AuthBrandPanel
         eyebrow="Join Us"
