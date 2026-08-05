@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import Logo from '@/components/ui/Logo'
 import CartButton from './CartButton'
+import WishlistButton from './WishlistButton'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { logoutApi } from '@/lib/auth/api'
 
@@ -253,10 +254,11 @@ export default function Header({ transparent }: HeaderProps) {
           ))}
         </nav>
 
-        <div className="flex items-center gap-5">
-          {/* Search */}
+        <div className="flex items-center gap-3 md:gap-5">
+          {/* Search — desktop only. It has no onClick yet, and at 320px the row cannot
+              hold five controls; a dead button does not get to outrank a working one. */}
           <button
-            className={`cursor-none border-none bg-transparent w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 ${
+            className={`cursor-none border-none bg-transparent w-9 h-9 items-center justify-center rounded-full transition-all duration-200 hidden md:flex ${
               isLight
                 ? 'text-white/80 hover:text-gold'
                 : 'text-dark opacity-70 hover:opacity-100 hover:text-gold-dark'
@@ -270,18 +272,7 @@ export default function Header({ transparent }: HeaderProps) {
           </button>
 
           {/* Wishlist */}
-          <button
-            className={`cursor-none border-none bg-transparent w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 hidden md:flex ${
-              isLight
-                ? 'text-white/80 hover:text-gold'
-                : 'text-dark opacity-70 hover:opacity-100 hover:text-gold-dark'
-            }`}
-            aria-label="Wishlist"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-            </svg>
-          </button>
+          <WishlistButton isLight={isLight} />
 
           <ProfileButton isLight={isLight} />
 

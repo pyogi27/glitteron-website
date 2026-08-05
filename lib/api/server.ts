@@ -324,14 +324,26 @@ function toHex(name: string): string {
   return COLOR_HEX[name.trim().toLowerCase()] ?? "#E8E8E8";
 }
 
-// Dimension fields are inconsistent: some rows are pre-labelled ("D90mm", "H970mm"),
-// others are bare numbers ("90", "1270"). Normalise to a labelled, united string.
-function formatDimension(prefix: "D" | "H", raw?: string): string {
+// Dimension fields are inconsistent: some rows carry a legacy letter prefix ("D90mm",
+// "H970mm"), others are bare numbers ("90", "1270"). Strip any legacy prefix (our own
+// L:/B:/H:/⌀: label supplies that now) and normalise to a united value.
+function normalizeDimensionValue(raw?: string): string {
   const value = raw?.trim();
   if (!value) return "";
-  // Already carries a letter/unit — trust it as authored.
-  if (/[a-z]/i.test(value)) return value;
-  return `${prefix}${value}mm`;
+  const stripped = value.replace(/^[a-z]+/i, "").trim();
+  // Already carries a unit — trust it as authored.
+  if (/[a-z]/i.test(stripped)) return stripped;
+  return `${stripped}mm`;
+}
+
+// Build the "L: 300mm, B: 200mm, H: 150mm" / "⌀: 800mm" size label shown to shoppers.
+function formatSizeLabel(p: ApiProductDetail): string {
+  return [
+    p.productLength && `L: ${normalizeDimensionValue(p.productLength)}`,
+    p.productWidth && `B: ${normalizeDimensionValue(p.productWidth)}`,
+    p.productHeight && `H: ${normalizeDimensionValue(p.productHeight)}`,
+    p.diameter && `⌀: ${normalizeDimensionValue(p.diameter)}`,
+  ].filter(Boolean).join(", ");
 }
 
 // Build the SELECTOR view of variants: flat, de-duplicated display strings for the
@@ -355,14 +367,7 @@ function mapVariants(p: ApiProductDetail): Product["variants"] {
     ...(attrs.sizes ?? []),
     // No variant sizes: fall back to the product's own dimensions so the row is useful.
     ...(!(p.availableSizes?.length || attrs.sizes?.length)
-      ? [
-          [
-            formatDimension("D", p.diameter),
-            formatDimension("H", p.productHeight),
-          ]
-            .filter(Boolean)
-            .join(" "),
-        ]
+      ? [formatSizeLabel(p)]
       : []),
   ].map((s) => s.trim()).filter(Boolean));
 

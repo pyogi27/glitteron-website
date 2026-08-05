@@ -73,8 +73,23 @@ export default function ProductInfo({ product }: { product: Product }) {
   // Rows reachable only by name.
   const namedOnly = unlabelledVariations(product.variations)
 
-  // Colour swatches, de-duplicated against the finish list they now drive.
-  const swatches = product.variants.crystalTones ?? []
+  /**
+   * Finish is presented ONCE, as either swatches or text — never both.
+   *
+   * `crystalTones` was measured to be a strict subset of `finishes`, never carrying a
+   * value the finish list lacks, so rendering both showed the shopper the same choice
+   * twice. Swatches win where they cover every offered finish: on a lighting product,
+   * seeing the finish beats reading its name. Where a finish has no swatch (composite
+   * names like "Frosted + Gloden" have no hex), fall back to the text selector so no
+   * option becomes unreachable.
+   */
+  const swatches = (product.variants.crystalTones ?? []).filter(ct =>
+    finishes.includes(ct.name),
+  )
+  const swatchesCoverAllFinishes =
+    swatches.length > 0 && finishes.every(f => swatches.some(s => s.name === f))
+  const showSwatches = swatchesCoverAllFinishes
+  const showFinishText = !swatchesCoverAllFinishes && finishes.length > 0
 
   // The variation the current selection points at. An explicit id (from a name-labelled
   // option) wins; otherwise size + finish are matched against the rows. null means no
@@ -178,13 +193,15 @@ export default function ProductInfo({ product }: { product: Product }) {
 
       {/* Variants */}
       <VariantSelector label="Size" value={size} options={sizes} onChange={selectSize} />
-      <VariantSelector
-        label="Finish"
-        value={finish}
-        options={finishes}
-        disabledOptions={finishesUnavailable}
-        onChange={selectFinish}
-      />
+      {showFinishText && (
+        <VariantSelector
+          label="Finish"
+          value={finish}
+          options={finishes}
+          disabledOptions={finishesUnavailable}
+          onChange={selectFinish}
+        />
+      )}
 
       {/* Variation rows whose size and colour are both blank cannot be reached by the
           selectors above — their identity is the name. Offering them here is what makes
@@ -204,19 +221,19 @@ export default function ProductInfo({ product }: { product: Product }) {
         />
       )}
 
-      {/* Colour swatches.
+      {/* Finish, as swatches — the primary presentation when every offered finish has one.
           Measured 2026-08-04: `crystalTones` is a strict SUBSET of `finishes` and never
           carries a value the finish list lacks, and all 84 real `variation.color` values
-          appear in the finish list. So this was never a separate variant axis — it was
-          the same colour data rendered twice, and its state was never read, never sent to
-          the cart, and never affected price. Rather than keep a control that looks
-          functional and is not, the swatches now select the finish. Swatches whose colour
-          is not an offered finish are shown as non-interactive, because selecting one
-          would resolve to no row and silently fall back to the parent price. */}
-      {swatches.length > 0 && (
+          appear in the finish list. So this was never a separate variant axis. It used to
+          render alongside the text selector as a second control for the same attribute,
+          with state nothing read — never sent to the cart, never affecting price. Now it
+          IS the finish control, and the text selector only appears when some finish has no
+          swatch. Swatches unavailable for the chosen size disable rather than resolving to
+          no row and silently falling back to the parent price. */}
+      {showSwatches && (
         <div className="mb-5">
           <div className="text-[11px] font-semibold tracking-[0.14em] uppercase text-[#2C2825] mb-3">
-            Colour
+            Finish
             <span className="text-[#A09488] font-light tracking-[0.04em] normal-case ml-1.5">— {finish}</span>
           </div>
           <div className="flex gap-2.5">

@@ -106,6 +106,8 @@ export interface ApiProductDetail extends ApiProduct {
   bodyColors?: string;
   materials?: string;
   productHeight?: string;
+  productWidth?: string;
+  productLength?: string;
   diameter?: string;
 }
 
