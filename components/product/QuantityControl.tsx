@@ -8,9 +8,14 @@ interface Props {
 }
 
 export default function QuantityControl({ value, max = 99, onChange }: Props) {
+  // A max below 1 cannot be satisfied (quantity is always at least 1), and clamping to
+  // it silently pinned the stepper — which is how a bad stock value turned into "the +
+  // button does nothing" rather than a visible error. Treat it as unbounded instead.
+  const ceiling = max >= 1 ? max : 99
   const update = (val: number) => {
-    onChange(Math.max(1, Math.min(max, val)))
+    onChange(Math.max(1, Math.min(ceiling, val)))
   }
+  const atCeiling = value >= ceiling
   return (
     <div className="flex items-center border border-[#D8D0C4] rounded-2xl overflow-hidden w-fit">
       <button
@@ -26,8 +31,10 @@ export default function QuantityControl({ value, max = 99, onChange }: Props) {
       <button
         type="button"
         onClick={() => update(value + 1)}
+        disabled={atCeiling}
         aria-label="Increase quantity"
-        className="w-9 h-9 flex items-center justify-center text-[#A09488] hover:text-[#2C2825] hover:bg-[#D8D0C4] transition-all text-[18px] font-light"
+        title={atCeiling ? `Only ${ceiling} available` : undefined}
+        className="w-9 h-9 flex items-center justify-center text-[#A09488] hover:text-[#2C2825] hover:bg-[#D8D0C4] transition-all text-[18px] font-light disabled:opacity-30 disabled:cursor-not-allowed"
       >
         +
       </button>

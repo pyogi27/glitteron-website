@@ -271,12 +271,37 @@ export const getServerCart = () =>
 export const getWebsiteCart = () =>
   authedFetch<WebsiteCartSummary>('/api/website/cart')
 
+/**
+ * Add a line to the server cart.
+ *
+ * NOTE: this INCREMENTS when a row already exists for the same
+ * (websiteUserId, productId, productVariationId) — see AddToCart.usecase.js. Calling it
+ * twice with quantity 2 leaves 4. Use updateServerCartItem() to set an absolute
+ * quantity; syncCartToServer() in lib/api/cartSync.ts picks the right one per row.
+ */
 export const addToServerCart = (productId: number, productVariationId: number | null, quantity: number) =>
   authedFetch<{ success: true; item: ServerCartItem }>('/api/cart/items', {
     method: 'POST',
     body: JSON.stringify({ productId, productVariationId, quantity }),
   })
 
+/** Set a line's quantity ABSOLUTELY (UpdateCartItem does item.update({ quantity })). */
+export const updateServerCartItem = (cartItemId: number, quantity: number) =>
+  authedFetch<{ success: true; item: ServerCartItem }>(`/api/cart/items/${cartItemId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ quantity }),
+  })
+
+/** Remove a single line. Ownership is enforced server-side (403 on someone else's row). */
+export const removeServerCartItem = (cartItemId: number) =>
+  authedFetch<{ success: true }>(`/api/cart/items/${cartItemId}`, { method: 'DELETE' })
+
+/**
+ * Empty the whole server cart.
+ *
+ * Prefer syncCartToServer() for reconciling local state — this used to be called before
+ * re-adding every row, which left the cart destroyed if any add then failed.
+ */
 export const clearServerCart = () =>
   authedFetch<{ success: true }>('/api/cart', { method: 'DELETE' })
 

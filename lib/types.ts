@@ -21,10 +21,32 @@ export interface Product {
     finishes: string[]
     crystalTones: { name: string; hex: string }[]
   }
+  /**
+   * Real ProductVariation rows, when the detail endpoint returned them.
+   *
+   * `variants` above is a flattened, de-duplicated view built for rendering selectors.
+   * This is the authoritative list: each entry carries the id and the price that
+   * checkout will actually charge. Empty when the product has no variations, or when
+   * the list endpoint (which omits them) was the source.
+   */
+  variations?: ProductVariation[]
   reviews: Review[]
   whereUsed?: string   // e.g. "Living Room, Dining Room"
   arImage?: string     // AR/room visualizer image URL
   lightOnImage?: string // same product photographed with the light switched on
+}
+
+/**
+ * A single purchasable variation of a product, normalised from the API's wide row.
+ * `price` is authoritative and may differ from the parent product's price.
+ */
+export interface ProductVariation {
+  id: number
+  name: string
+  size: string
+  color: string
+  price: number
+  inStock: boolean
 }
 
 export interface Review {

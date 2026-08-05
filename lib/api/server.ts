@@ -1,4 +1,5 @@
 import type { Product } from "@/lib/types";
+import { mapVariations } from "@/lib/variations";
 import type {
   ApiCategory,
   ApiProduct,
@@ -6,6 +7,12 @@ import type {
 } from "./types";
 
 const BACKEND = process.env.API_URL ?? "http://localhost:3000";
+
+/**
+ * Ceiling for the quantity stepper when the API gives no numeric stock but says the
+ * product is in stock. Matches QuantityControl's own default.
+ */
+const DEFAULT_MAX_QTY = 99;
 
 const PLACEHOLDER_IMAGE =
   "https://images.pexels.com/photos/1123262/pexels-photo-1123262.jpeg?auto=compress&cs=tinysrgb&w=800&h=900&fit=crop";
@@ -30,6 +37,36 @@ function extractImageUrl(img: string | { url: string }): string {
 
 // Backend serializes numeric columns as strings (e.g. price "7800.00").
 // Coerce defensively so downstream arithmetic and toLocaleString work.
+/**
+ * Available stock for a product, in units.
+ *
+ * The API has no `stock` field. It reports availability as `quantity` (the row's own
+ * stock), `totalStock` (summed across variations), `reservedQuantity` (held by pending
+ * payments) and an `inStock` boolean. Reading `p.stock` returned undefined for every
+ * product, so `toNumber()` coerced it to 0 — which read as "out of stock" and pinned
+ * the quantity stepper at 1 across the whole site.
+ *
+ *   hasVariations -> totalStock (variation stock is the real constraint)
+ *   otherwise     -> quantity - reservedQuantity
+ *   neither set   -> fall back to the backend's own inStock verdict
+ */
+function resolveStock(p: Partial<ApiProduct>): number {
+  const totalStock = p.totalStock != null ? toNumber(p.totalStock, -1) : -1;
+  if (p.hasVariations && totalStock >= 0) return totalStock;
+
+  if (p.quantity != null) {
+    const onHand = toNumber(p.quantity);
+    const reserved = toNumber(p.reservedQuantity);
+    // Negative stock exists in this catalogue (9 products measured 2026-08-04); clamp
+    // so callers never see a negative max.
+    return Math.max(0, onHand - reserved);
+  }
+
+  if (totalStock >= 0) return totalStock;
+  // Nothing numeric available: trust the boolean, but we cannot know the real ceiling.
+  return p.inStock ? DEFAULT_MAX_QTY : 0;
+}
+
 function toNumber(value: unknown, fallback = 0): number {
   if (typeof value === "number") return Number.isFinite(value) ? value : fallback;
   if (typeof value === "string") {
@@ -82,7 +119,7 @@ export function mapApiProduct(p: ApiProduct, categoryName?: string): Product {
     rating: toNumber(p.rating),
     reviewCount: toNumber(p.reviewCount),
     sku: p.sku ?? "",
-    stock: toNumber(p.stock),
+    stock: resolveStock(p),
     images,
     description: p.description ?? "",
     specs: {},
@@ -297,9 +334,19 @@ function formatDimension(prefix: "D" | "H", raw?: string): string {
   return `${prefix}${value}mm`;
 }
 
-// Build variants from the detail payload. The backend exposes variant data as
-// availableAttributes/availableSizes/availableColors plus the flat bodyColors and
-// dimension fields — there is no /variations endpoint.
+// Build the SELECTOR view of variants: flat, de-duplicated display strings for the
+// dropdowns and swatches.
+//
+// This is not the authoritative variation list. Real ProductVariation rows (with ids
+// and per-variation prices) come back from GET /api/products/:id?includeVariations=true
+// and are mapped separately into Product.variations — use those for anything that
+// touches money. An earlier version of this comment claimed no variations endpoint
+// existed; that was wrong, and it cost real revenue by sending a null variation id to
+// checkout, which then priced from the parent product.
+//
+// Known wrinkle: sizes here can contain near-duplicates ("300" and "300mm" on product
+// 1466) because the catalogue is entered inconsistently. resolveVariation() in
+// lib/variations.ts normalises them when matching a selection back to a row.
 function mapVariants(p: ApiProductDetail): Product["variants"] {
   const attrs = p.availableAttributes ?? {};
 
@@ -336,7 +383,10 @@ function mapVariants(p: ApiProductDetail): Product["variants"] {
 
 // Fetch single product by ID with variations and specs
 export async function fetchProductById(id: number): Promise<Product | null> {
-  const url = `${BACKEND}/api/products/${id}`;
+  // includeVariations is passed explicitly: the backend's default is the boolean `true`
+  // but its guard also accepts the string form, and relying on a server-side default we
+  // cannot see from here is how variations went missing (and prices went wrong) before.
+  const url = `${BACKEND}/api/products/${id}?includeVariations=true`;
   try {
     const res = await fetch(url, { next: { revalidate: 60 } });
     if (!res.ok) {
@@ -376,6 +426,7 @@ export async function fetchProductById(id: number): Promise<Product | null> {
       images: mergedImages,
       specs: productData.specs ?? {},
       variants: mappedVariants,
+      variations: mapVariations(productData.variations),
       reviews,
       whereUsed: productData.whereUsed,
     };

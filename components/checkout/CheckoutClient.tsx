@@ -6,14 +6,13 @@ import Link from 'next/link'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { useCartStore } from '@/lib/stores/cartStore'
 import {
-  clearServerCart,
-  addToServerCart,
   createCheckout,
   verifyPayment,
   getWebsiteCart,
   getShippingRate,
   type WebsiteCartSummary,
 } from '@/lib/auth/api'
+import { syncCartToServer, toSyncable } from '@/lib/api/cartSync'
 import { loadRazorpayScript, openRazorpayModal } from '@/lib/razorpay'
 import AddressForm, { type AddressFormData } from './AddressForm'
 import OrderSummary from './OrderSummary'
@@ -149,9 +148,7 @@ export default function CheckoutClient() {
       // Step 1: Sync local cart → server cart (clear first to remove stale items)
       setLoading('syncing')
 
-      const syncable = items
-        .map(i => ({ ...i, resolvedId: i.apiProductId ?? (parseInt(i.productId) || undefined) }))
-        .filter(i => i.resolvedId != null)
+      const syncable = toSyncable(items)
 
       if (syncable.length === 0) {
         setError('Cart items could not be synced. Please try re-adding items to cart.')
@@ -159,10 +156,10 @@ export default function CheckoutClient() {
         return
       }
 
-      await clearServerCart()
-      for (const item of syncable) {
-        await addToServerCart(item.resolvedId!, null, item.quantity)
-      }
+      // Reconcile rather than clear-then-re-add. On this path a failed sync must block
+      // before the Razorpay modal opens — the surrounding try already does that, and
+      // syncCartToServer throws rather than swallowing.
+      await syncCartToServer(items)
 
       // Step 2: Create Razorpay order
       setLoading('creating_order')

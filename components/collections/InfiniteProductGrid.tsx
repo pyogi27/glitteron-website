@@ -79,7 +79,13 @@ function mapRawProduct(p: RawProduct): Product {
     rating: toNumber(p.rating),
     reviewCount: toNumber(p.reviewCount),
     sku: typeof p.sku === 'string' ? p.sku : '',
-    stock: toNumber(p.stock ?? p.totalStock ?? p.quantity),
+    // Mirrors resolveStock() in lib/api/server.ts — kept local because that module is
+    // server-only. The API sends no `stock` field: use totalStock for products with
+    // variations, else quantity minus what pending payments have reserved. Clamped
+    // because some rows carry negative stock.
+    stock: p.hasVariations && p.totalStock != null
+      ? toNumber(p.totalStock)
+      : Math.max(0, toNumber(p.quantity ?? p.totalStock) - toNumber(p.reservedQuantity)),
     images,
     description: typeof p.description === 'string' ? p.description : '',
     specs: {},

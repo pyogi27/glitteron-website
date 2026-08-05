@@ -269,6 +269,48 @@ behavior cannot be rehearsed. Flagged as separate scope, not folded into feature
 
 ---
 
+## P3 — Catalogue data hygiene for variations (code side is DONE)
+
+Selectors are now derived from the real `ProductVariation` rows rather than the
+denormalised summary fields. Verified across all 60 products with variations (125 active
+rows) on 2026-08-04:
+
+| | before | after |
+|---|---|---|
+| phantom combinations offered (resolve to no row) | 120 | **0** |
+| offered combinations that resolve to a real row | — | **117/117 (100%)** |
+| products whose default selection falls back to the parent price | 32 | **0** |
+| variation rows reachable by some selection | 117/125 | 118/125 |
+
+What remains is **data entry, not code**:
+
+### Inconsistent size strings
+The same physical size is entered several ways, so it appears as multiple options:
+- product 1466: `"300"` on one row, `"300mm"` on three others
+- product 1337: `"D480"` / `"d480"`, `"D600"` / `"600"`, `"d-350"` / `"350"`
+
+`resolveVariation()` normalises case, whitespace and a trailing `mm`, so these still
+resolve correctly — but the selector shows near-duplicate buttons. Cleaning the admin data
+removes the duplicates; no code change needed.
+
+### One genuinely ambiguous pair
+Product **1353** has `D280 H220 / Beige` on **two** rows at different prices:
+`1015-1 Beige` at 12,600 and `1015-2 Beige` at 26,400. A shopper cannot express which one
+they mean. The resolver prefers in-stock then **cheapest**, so it can never charge more
+than the shopper could have paid — but the second row is effectively unsellable until the
+rows are given distinguishing size or colour values.
+
+(5 other duplicate pairs exist and are harmless: they are same-price A/B variants, e.g.
+product 444's `LM712-32A BLACK` and `LM712-32B BLACK` both at 15,600.)
+
+### Rows with no distinguishing axis
+Product 1494 (`D39073-S`) has `D39073-M` at 15,500 and `D39073-L` at 17,800, both with a
+blank `size`, and `availableSizes` is `[]`. These are now offered as name-labelled
+options, so they are purchasable — but populating `size` would let them use the normal
+size selector.
+
+**Effort:** S (admin data entry) · **Priority:** P3 · **Blocks:** nothing
+
 ## Also
 
 - `components/layout/Footer.tsx:6` — add facebook / pinterest / youtube links once those profiles

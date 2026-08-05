@@ -8,6 +8,13 @@ import QuantityControl from './QuantityControl'
 import ProductTabs from './ProductTabs'
 import { useCartStore } from '@/lib/stores/cartStore'
 import { useWishlistStore } from '@/lib/stores/wishlistStore'
+import {
+  resolveVariation,
+  sizeOptions,
+  finishOptions,
+  unavailableFinishes,
+  unlabelledVariations,
+} from '@/lib/variations'
 import { parseWhereUsed } from '@/lib/data/visualizer'
 import RoomVisualizerModal from './RoomVisualizerModal'
 
@@ -18,10 +25,28 @@ const PERKS = [
 ]
 
 export default function ProductInfo({ product }: { product: Product }) {
+  // Options come from the real variation rows when the product has them, and fall back to
+  // the denormalised summary strings otherwise (products with no variations, or when the
+  // detail endpoint was not the source). Row-derived options are always purchasable; the
+  // summary strings include phantoms split out of the decorative `bodyColors` field.
+  const rowSizes = sizeOptions(product.variations)
+  const hasRowVariations = (product.variations?.length ?? 0) > 0
+
   const [qty, setQty] = useState(1)
-  const [size, setSize] = useState(product.variants.sizes[0] ?? '')
-  const [finish, setFinish] = useState(product.variants.finishes[0] ?? '')
-  const [crystalTone, setCrystalTone] = useState(product.variants.crystalTones[0]?.name ?? '')
+  const [size, setSize] = useState(
+    (hasRowVariations ? rowSizes[0] : product.variants.sizes[0]) ?? '',
+  )
+  const [finish, setFinish] = useState(
+    (hasRowVariations
+      ? finishOptions(product.variations, rowSizes[0])[0]
+      : product.variants.finishes[0]) ?? '',
+  )
+  /**
+   * Set when the shopper picks a name-labelled option — a variation row whose size and
+   * colour are both blank, so nothing can be matched on. Measured 2026-08-04: 8 such rows
+   * across 5 products were previously unbuyable, the worst worth 18,300 per unit.
+   */
+  const [pickedVariationId, setPickedVariationId] = useState<number | undefined>(undefined)
 
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
@@ -35,20 +60,76 @@ export default function ProductInfo({ product }: { product: Product }) {
   const { toggle, has } = useWishlistStore()
   const wishlisted = mounted && has(product.id)
 
+  // Options for the selectors, narrowed so every offered pair maps to a real row.
+  const sizes = hasRowVariations ? rowSizes : product.variants.sizes
+  const finishes = hasRowVariations
+    ? finishOptions(product.variations)
+    : product.variants.finishes
+  // Finishes that exist but not for the chosen size — shown struck-through rather than
+  // hidden, so options do not silently appear and disappear as the size changes.
+  const finishesUnavailable = hasRowVariations
+    ? unavailableFinishes(product.variations, size)
+    : []
+  // Rows reachable only by name.
+  const namedOnly = unlabelledVariations(product.variations)
+
+  // Colour swatches, de-duplicated against the finish list they now drive.
+  const swatches = product.variants.crystalTones ?? []
+
+  // The variation the current selection points at. An explicit id (from a name-labelled
+  // option) wins; otherwise size + finish are matched against the rows. null means no
+  // match, so no id is sent and the backend prices from the parent product.
+  const selectedVariation = resolveVariation(
+    product.variations,
+    size,
+    finish,
+    pickedVariationId,
+  )
+
+  // Picking a size or finish supersedes a previously picked name-labelled option.
+  const selectSize = (value: string) => {
+    setSize(value)
+    setPickedVariationId(undefined)
+    // If the current finish is not available for the new size, move to one that is.
+    const available = finishOptions(product.variations, value)
+    if (available.length && !available.includes(finish)) setFinish(available[0])
+  }
+  const selectFinish = (value: string) => {
+    if (finishesUnavailable.includes(value)) return
+    setFinish(value)
+    setPickedVariationId(undefined)
+  }
+
+  // Show the price that will actually be charged. Checkout re-reads variation.price
+  // server-side, so displaying the parent price here while charging the variation price
+  // would just move the surprise to the payment screen.
+  const effectivePrice = selectedVariation?.price ?? product.price
+
   const handleAddToCart = () => {
     addItem({
       productId: product.id,
       name: product.name,
-      price: product.price,
+      price: effectivePrice,
       image: product.images[0],
       quantity: qty,
       size,
       finish,
       apiProductId: product.apiProductId,
+      productVariationId: selectedVariation?.id,
     })
   }
 
-  const emi = Math.round(product.price / 12)
+  const emi = Math.round(effectivePrice / 12)
+
+  // A variation carries its own stock. Fall back to the product-level count when the
+  // selection has not resolved to a row.
+  const inStock = selectedVariation ? selectedVariation.inStock : product.stock > 0
+
+  // Ceiling for the quantity stepper. A resolved variation has its own stock but the
+  // API's variation rows do not expose a usable count here, so cap by the product total
+  // rather than pinning to 1 — the backend re-checks availability at checkout anyway
+  // (CreateCheckout locks the row and rejects if quantity - reserved is short).
+  const maxQty = product.stock > 0 ? product.stock : undefined
 
   return (
     <div className="p-5 lg:p-[40px_48px_48px_40px] overflow-y-auto h-auto lg:h-[calc(100vh-var(--spacing-header))] bg-white">
@@ -63,7 +144,11 @@ export default function ProductInfo({ product }: { product: Product }) {
       {/* SKU + Stock */}
       <div className="flex items-center gap-4 text-[11px] text-[#A09488] mb-4 mt-3">
         <span>SKU: {product.sku}</span>
-        <span className="text-green-600 font-medium">in stock</span>
+        {inStock ? (
+          <span className="text-green-600 font-medium">in stock</span>
+        ) : (
+          <span className="text-[#C4714A] font-medium">out of stock</span>
+        )}
       </div>
 
       {/* Rating */}
@@ -76,7 +161,7 @@ export default function ProductInfo({ product }: { product: Product }) {
       <div className="mb-6">
         <div className="flex items-baseline gap-3 mb-1">
           <span className="font-serif text-[32px] font-light text-[#2C2825]">
-            ₹{product.price.toLocaleString('en-IN')}
+            ₹{effectivePrice.toLocaleString('en-IN')}
           </span>
           {product.originalPrice && (
             <span className="text-[15px] text-[#A09488] line-through font-light">
@@ -92,41 +177,83 @@ export default function ProductInfo({ product }: { product: Product }) {
       </div>
 
       {/* Variants */}
-      <VariantSelector label="Size" value={size} options={product.variants.sizes} onChange={setSize} />
-      <VariantSelector label="Finish" value={finish} options={product.variants.finishes} onChange={setFinish} />
+      <VariantSelector label="Size" value={size} options={sizes} onChange={selectSize} />
+      <VariantSelector
+        label="Finish"
+        value={finish}
+        options={finishes}
+        disabledOptions={finishesUnavailable}
+        onChange={selectFinish}
+      />
 
-      {/* Crystal tones */}
-      {product.variants.crystalTones?.length > 0 && (
+      {/* Variation rows whose size and colour are both blank cannot be reached by the
+          selectors above — their identity is the name. Offering them here is what makes
+          them purchasable at all. */}
+      {namedOnly.length > 1 && (
+        <VariantSelector
+          label="Option"
+          value={selectedVariation && namedOnly.some(v => v.id === selectedVariation.id)
+            ? selectedVariation.name
+            : ''}
+          options={namedOnly.map(v => v.name)}
+          onChange={(name) => {
+            const row = namedOnly.find(v => v.name === name)
+            if (!row) return
+            setPickedVariationId(row.id)
+          }}
+        />
+      )}
+
+      {/* Colour swatches.
+          Measured 2026-08-04: `crystalTones` is a strict SUBSET of `finishes` and never
+          carries a value the finish list lacks, and all 84 real `variation.color` values
+          appear in the finish list. So this was never a separate variant axis — it was
+          the same colour data rendered twice, and its state was never read, never sent to
+          the cart, and never affected price. Rather than keep a control that looks
+          functional and is not, the swatches now select the finish. Swatches whose colour
+          is not an offered finish are shown as non-interactive, because selecting one
+          would resolve to no row and silently fall back to the parent price. */}
+      {swatches.length > 0 && (
         <div className="mb-5">
           <div className="text-[11px] font-semibold tracking-[0.14em] uppercase text-[#2C2825] mb-3">
-            Crystal Tone
-            <span className="text-[#A09488] font-light tracking-[0.04em] normal-case ml-1.5">— {crystalTone}</span>
+            Colour
+            <span className="text-[#A09488] font-light tracking-[0.04em] normal-case ml-1.5">— {finish}</span>
           </div>
           <div className="flex gap-2.5">
-            {product.variants.crystalTones.map(ct => (
-              <button
-                key={ct.name}
-                type="button"
-                title={ct.name}
-                aria-label={ct.name}
-                onClick={() => setCrystalTone(ct.name)}
-                className={`w-6 h-6 rounded-full border-2 transition-all ${crystalTone === ct.name ? 'border-[#C4714A] scale-110' : 'border-[#D8D0C4] hover:border-[#C4714A]'}`}
-                style={{ backgroundColor: ct.hex }}
-              />
-            ))}
+            {swatches.map(ct => {
+              const selectable = finishes.includes(ct.name) && !finishesUnavailable.includes(ct.name)
+              return (
+                <button
+                  key={ct.name}
+                  type="button"
+                  title={selectable ? ct.name : `${ct.name} — not available`}
+                  aria-label={ct.name}
+                  aria-pressed={finish === ct.name}
+                  disabled={!selectable}
+                  onClick={() => selectFinish(ct.name)}
+                  className={`w-6 h-6 rounded-full border-2 transition-all ${
+                    finish === ct.name
+                      ? 'border-[#C4714A] scale-110'
+                      : 'border-[#D8D0C4] hover:border-[#C4714A]'
+                  } disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-[#D8D0C4]`}
+                  style={{ backgroundColor: ct.hex }}
+                />
+              )
+            })}
           </div>
         </div>
       )}
 
       {/* Quantity + Actions */}
       <div className="flex items-center gap-3 mb-4">
-        <QuantityControl value={qty} max={product.stock} onChange={setQty} />
+        <QuantityControl value={qty} max={maxQty} onChange={setQty} />
         <button
           type="button"
           onClick={handleAddToCart}
-          className="flex-1 bg-[#2C2825] text-white border-none py-3 rounded-3xl font-sans text-[13px] font-medium tracking-[0.08em] uppercase transition-all hover:bg-[#8B5E3C] hover:-translate-y-0.5"
+          disabled={!inStock}
+          className="flex-1 bg-[#2C2825] text-white border-none py-3 rounded-3xl font-sans text-[13px] font-medium tracking-[0.08em] uppercase transition-all hover:bg-[#8B5E3C] hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#2C2825] disabled:hover:translate-y-0"
         >
-          Add to Cart
+          {inStock ? 'Add to Cart' : 'Out of Stock'}
         </button>
         <button
           type="button"
@@ -142,7 +269,8 @@ export default function ProductInfo({ product }: { product: Product }) {
       <button
         type="button"
         onClick={handleAddToCart}
-        className="w-full bg-[#C4714A] text-[#2C2825] border-none py-3 rounded-3xl font-sans text-[13px] font-semibold tracking-[0.08em] uppercase transition-all hover:bg-[#E8A87C] hover:-translate-y-0.5"
+        disabled={!inStock}
+        className="w-full bg-[#C4714A] text-[#2C2825] border-none py-3 rounded-3xl font-sans text-[13px] font-semibold tracking-[0.08em] uppercase transition-all hover:bg-[#E8A87C] hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#C4714A] disabled:hover:translate-y-0"
       >
         Buy Now
       </button>

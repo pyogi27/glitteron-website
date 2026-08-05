@@ -7,12 +7,8 @@ import { useRouter } from 'next/navigation'
 import QuantityControl from '@/components/product/QuantityControl'
 import { useCartStore } from '@/lib/stores/cartStore'
 import { useAuthStore } from '@/lib/stores/authStore'
-import {
-  clearServerCart,
-  addToServerCart,
-  getWebsiteCart,
-  type WebsiteCartSummary,
-} from '@/lib/auth/api'
+import { getWebsiteCart, type WebsiteCartSummary } from '@/lib/auth/api'
+import { syncCartToServer, toSyncable } from '@/lib/api/cartSync'
 
 const SHIPPING_THRESHOLD = 15000
 
@@ -30,46 +26,79 @@ export default function CartPageClient() {
 
   const [serverCart, setServerCart] = useState<WebsiteCartSummary | null>(null)
   const [summaryLoading, setSummaryLoading] = useState(false)
+  /**
+   * Why this exists: the totals shown here used to have exactly two states — "server
+   * values" or "local fallback" — and BOTH a failed sync and a successful-but-empty
+   * sync collapsed into the fallback. That is a silent failure on a money screen:
+   * local totals omit courier charges entirely (they default to 0), so the shopper is
+   * shown a cheaper total than checkout will charge, with nothing on screen to say so.
+   *
+   *   sync threw                  -> 'error'      banner + retry
+   *   sync ok, server has items   -> null         server totals (the happy path)
+   *   sync ok, server cart EMPTY  -> 'desynced'   banner + retry; never quietly local
+   */
+  const [syncProblem, setSyncProblem] = useState<'error' | 'desynced' | null>(null)
+  const [retryNonce, setRetryNonce] = useState(0)
 
   // Sync local cart → server, then fetch live totals.
   // Debounced so rapid quantity changes don't flood the API.
   useEffect(() => {
     if (!accessToken || items.length === 0) {
       setServerCart(null)
+      setSyncProblem(null)
       return
     }
 
-    const syncable = items
-      .map(i => ({ ...i, resolvedId: i.apiProductId ?? (parseInt(i.productId) || undefined) }))
-      .filter(i => i.resolvedId != null)
+    // Guards against a slow response landing after the cart changed again (or after
+    // unmount) and overwriting fresher state with stale totals.
+    let cancelled = false
 
-    if (syncable.length === 0) return
+    if (toSyncable(items).length === 0) {
+      // Nothing resolvable to sync (e.g. only static-catalogue items). Clear any stale
+      // notice from a previous attempt so an old banner does not linger.
+      setSyncProblem(null)
+      return
+    }
 
     setSummaryLoading(true)
 
     const timer = setTimeout(async () => {
       try {
-        await clearServerCart()
-        for (const item of syncable) {
-          await addToServerCart(item.resolvedId!, null, item.quantity)
-        }
+        // Reconciles instead of clear-then-re-add: nothing is destroyed before its
+        // replacement exists, quantities are SET rather than incremented, and an
+        // unchanged cart issues zero writes. Throws on failure — handled below.
+        await syncCartToServer(items)
         const data = await getWebsiteCart()
+        if (cancelled) return
         setServerCart(data)
-      } catch {
-        // silently fall back to local calculation
+        // A successful call that comes back with no items means the rows we just wrote
+        // are not there — a partly-destroyed cart, a concurrent order completing, or an
+        // add that silently no-opped. Do not paper over it with local totals.
+        setSyncProblem(data.items.length === 0 ? 'desynced' : null)
+      } catch (err: unknown) {
+        if (cancelled) return
+        const apiErr = err as { status?: number; message?: string }
+        console.error('[cart] server sync failed', apiErr.status, apiErr.message)
+        setServerCart(null)
+        setSyncProblem('error')
       } finally {
-        setSummaryLoading(false)
+        if (!cancelled) setSummaryLoading(false)
       }
     }, 500)
 
     return () => {
+      cancelled = true
       clearTimeout(timer)
       setSummaryLoading(false)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accessToken, items])
+  }, [accessToken, items, retryNonce])
 
-  // Totals — server values when available, local fallback otherwise
+  // Totals — server values when available, local fallback otherwise.
+  // `hasServer` still requires items, because zero-item server totals are all zeroes and
+  // would render a 0 total next to a visibly non-empty cart. The difference now is that
+  // the empty case sets syncProblem='desynced', so the shopper is told rather than shown
+  // a quietly wrong number.
   const localSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const hasServer = serverCart !== null && serverCart.items.length > 0
 
@@ -190,6 +219,30 @@ export default function CartPageClient() {
           <aside className="h-fit bg-[#2C2825] text-[#EDE8E0] rounded-[24px] p-5 md:p-7">
             <h3 className="font-serif text-[34px] leading-[1] mb-6">Summary</h3>
 
+            {/* Sync problem notice. Replaces a silent fallback to local totals, which
+                omitted courier charges and rendered shipping as "Free" without ever
+                having calculated it. */}
+            {syncProblem && !summaryLoading && (
+              <div
+                role="alert"
+                aria-live="polite"
+                className="mb-5 rounded-2xl bg-[#C4714A]/15 border border-[#E8A87C]/40 p-4"
+              >
+                <p className="text-[12.5px] leading-[1.5] text-[#EDE8E0]">
+                  {syncProblem === 'error'
+                    ? 'We could not confirm your total with our server, so shipping and tax below are estimates.'
+                    : 'Your cart did not save to your account, so the total below is an estimate.'}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setRetryNonce((n) => n + 1)}
+                  className="mt-2.5 text-[12px] font-medium text-[#E8A87C] underline underline-offset-2 hover:text-white transition-colors"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+
             <div className="space-y-3 text-[13px]">
               <div className="flex items-center justify-between text-[#EDE8E0]/80">
                 <span>Subtotal</span>
@@ -204,9 +257,14 @@ export default function CartPageClient() {
                 <span>
                   {summaryLoading
                     ? <span className="text-[#EDE8E0]/40">—</span>
-                    : courierCharges === 0
-                      ? <span className="text-[#C9A84C]">Free</span>
-                      : formatPrice(courierCharges)}
+                    : !hasServer
+                      // Never claim "Free" from the local fallback: courierCharges is 0
+                      // there because it was never calculated, not because delivery is
+                      // free. Shipping depends on the pincode and the item weights.
+                      ? <span className="text-[#EDE8E0]/50">Calculated at checkout</span>
+                      : courierCharges === 0
+                        ? <span className="text-[#C9A84C]">Free</span>
+                        : formatPrice(courierCharges)}
                 </span>
               </div>
               <div className="flex items-center justify-between text-[#EDE8E0]/80">
@@ -219,7 +277,14 @@ export default function CartPageClient() {
               </div>
               <div className="h-px bg-white/15 my-1.5" />
               <div className="flex items-center justify-between text-[16px] font-medium text-white">
-                <span>Total</span>
+                <span>
+                  Total
+                  {!summaryLoading && !hasServer && (
+                    <span className="ml-1.5 text-[11px] font-normal text-[#EDE8E0]/55">
+                      (estimated)
+                    </span>
+                  )}
+                </span>
                 <span>
                   {summaryLoading
                     ? <span className="text-[#EDE8E0]/60">—</span>
