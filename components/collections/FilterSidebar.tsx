@@ -1,7 +1,18 @@
 'use client'
 import { useEffect } from 'react'
-import { useFilterStore } from '@/lib/stores/filterStore'
+import {
+  useFilterStore,
+  PRICE_FLOOR,
+  PRICE_CEILING,
+  PRICE_STEP,
+} from '@/lib/stores/filterStore'
 import { useRouter, useSearchParams } from 'next/navigation'
+
+const formatPrice = (n: number) => `₹${n.toLocaleString('en-IN')}`
+
+/** Position on the 0–100% track for a given price. */
+const trackPercent = (value: number) =>
+  ((value - PRICE_FLOOR) / (PRICE_CEILING - PRICE_FLOOR)) * 100
 
 const MATERIALS = ['Crystal', 'Brass', 'Iron & Steel', 'Blown Glass', 'Wood & Rattan']
 const ROOMS = ['Living Room', 'Dining Room', 'Bedroom', 'Home Office', 'Foyer / Entrance']
@@ -50,17 +61,15 @@ export default function FilterSidebar() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  // Sync URL price params to store on mount
+  // Sync URL price params to store on mount. Each bound is independent: an
+  // absent one means that end is unbounded, so it falls back to the track end.
   useEffect(() => {
-    const minPriceStr = searchParams.get('minPrice')
-    const maxPriceStr = searchParams.get('maxPrice')
-    if (minPriceStr && maxPriceStr) {
-      const minPrice = Number(minPriceStr)
-      const maxPrice = Number(maxPriceStr)
-      if (!isNaN(minPrice) && !isNaN(maxPrice)) {
-        setPriceRange([minPrice, maxPrice])
-      }
-    }
+    const min = Number(searchParams.get('minPrice'))
+    const max = Number(searchParams.get('maxPrice'))
+    setPriceRange([
+      Number.isFinite(min) && min > 0 ? min : PRICE_FLOOR,
+      Number.isFinite(max) && max > 0 ? max : PRICE_CEILING,
+    ])
   }, [])
 
   function handleClearAll() {
@@ -73,42 +82,88 @@ export default function FilterSidebar() {
     router.push(`/collections?${params.toString()}`)
   }
 
-  function handlePriceRangeChange(newMin: number, newMax: number) {
-    setPriceRange([newMin, newMax])
+  /**
+   * Pushes the current range to the URL, which is what actually filters (the
+   * server reads ?minPrice/?maxPrice). Called on release rather than on every
+   * `change` event — a drag emits one per step, and each push refetched the grid.
+   * A bound sitting at its end of the track is omitted, so it reads as "no limit"
+   * instead of silently excluding items beyond the slider's reach.
+   */
+  function commitPriceRange([min, max]: [number, number]) {
     const params = new URLSearchParams(searchParams.toString())
-    params.set('minPrice', String(newMin))
-    params.set('maxPrice', String(newMax))
+
+    if (min > PRICE_FLOOR) params.set('minPrice', String(min))
+    else params.delete('minPrice')
+
+    if (max < PRICE_CEILING) params.set('maxPrice', String(max))
+    else params.delete('maxPrice')
+
     params.set('page', '1')
     router.push(`/collections?${params.toString()}`)
   }
 
   return (
-    <aside className="w-[268px] flex-shrink-0 px-7 py-8 border-r border-[#D8D0C4] h-[calc(100vh-var(--spacing-header-ticker))] overflow-y-auto [scrollbar-width:thin]">
+    <aside className="w-[268px] flex-shrink-0 px-7 py-8 bg-[#EDE8E0] border-r border-[#D8D0C4] h-[calc(100vh-var(--spacing-header-ticker))] overflow-y-auto [scrollbar-width:thin]">
       <FilterGroup title="Price Range">
-        <div className="flex gap-2 mb-3">
+        <div className="flex items-end gap-2 mb-4">
+          <div className="flex-1">
+            <span className="block text-[9px] tracking-[0.14em] uppercase text-[#7A6E62] mb-1">Min</span>
+            <output className="block bg-white border border-[#C9BFB0] text-[#2C2825] px-2.5 py-2 rounded-lg text-[13px] font-medium tabular-nums">
+              {formatPrice(priceRange[0])}
+            </output>
+          </div>
+          <span className="text-[#7A6E62] text-[13px] pb-2.5">–</span>
+          <div className="flex-1">
+            <span className="block text-[9px] tracking-[0.14em] uppercase text-[#7A6E62] mb-1">Max</span>
+            <output className="block bg-white border border-[#C9BFB0] text-[#2C2825] px-2.5 py-2 rounded-lg text-[13px] font-medium tabular-nums">
+              {priceRange[1] >= PRICE_CEILING ? 'Any' : formatPrice(priceRange[1])}
+            </output>
+          </div>
+        </div>
+
+        {/* Dual-thumb range: two native inputs stacked over one shared rail. */}
+        <div
+          className="price-range"
+          style={{
+            ['--min-pct' as string]: `${trackPercent(priceRange[0])}%`,
+            ['--max-pct' as string]: `${trackPercent(priceRange[1])}%`,
+          }}
+        >
+          <div className="price-range-rail" aria-hidden="true" />
+          <div className="price-range-fill" aria-hidden="true" />
           <input
-            type="text"
-            value={`₹${priceRange[0].toLocaleString('en-IN')}`}
-            readOnly
-            className="flex-1 bg-transparent border border-[#D8D0C4] text-[#2C2825] px-2.5 py-1.5 rounded-lg text-[12px] focus:border-[#C4714A] outline-none"
+            type="range"
+            className="price-range-input"
+            min={PRICE_FLOOR}
+            max={PRICE_CEILING}
+            step={PRICE_STEP}
+            value={priceRange[0]}
+            aria-label="Minimum price"
+            aria-valuetext={formatPrice(priceRange[0])}
+            // Thumbs cannot cross; each stops one step short of the other.
+            onChange={e => setPriceRange([Math.min(Number(e.target.value), priceRange[1] - PRICE_STEP), priceRange[1]])}
+            onPointerUp={() => commitPriceRange(priceRange)}
+            onKeyUp={() => commitPriceRange(priceRange)}
           />
-          <span className="text-[#A09488] text-[12px] self-center">–</span>
           <input
-            type="text"
-            value={`₹${priceRange[1].toLocaleString('en-IN')}`}
-            readOnly
-            className="flex-1 bg-transparent border border-[#D8D0C4] text-[#2C2825] px-2.5 py-1.5 rounded-lg text-[12px] focus:border-[#C4714A] outline-none"
+            type="range"
+            className="price-range-input"
+            min={PRICE_FLOOR}
+            max={PRICE_CEILING}
+            step={PRICE_STEP}
+            value={priceRange[1]}
+            aria-label="Maximum price"
+            aria-valuetext={priceRange[1] >= PRICE_CEILING ? 'Any' : formatPrice(priceRange[1])}
+            onChange={e => setPriceRange([priceRange[0], Math.max(Number(e.target.value), priceRange[0] + PRICE_STEP)])}
+            onPointerUp={() => commitPriceRange(priceRange)}
+            onKeyUp={() => commitPriceRange(priceRange)}
           />
         </div>
-        <input
-          type="range"
-          min={2000}
-          max={50000}
-          step={1000}
-          value={priceRange[1]}
-          onChange={e => handlePriceRangeChange(priceRange[0], Number(e.target.value))}
-          className="w-full accent-[#C4714A]"
-        />
+
+        <div className="flex justify-between text-[10px] text-[#7A6E62] tabular-nums mt-1.5">
+          <span>{formatPrice(PRICE_FLOOR)}</span>
+          <span>{formatPrice(PRICE_CEILING)}+</span>
+        </div>
       </FilterGroup>
 
       <hr className="border-[#D8D0C4] my-7" />

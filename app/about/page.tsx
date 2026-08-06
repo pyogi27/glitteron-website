@@ -151,14 +151,14 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Values — asymmetric card grid on dark */}
-      <section className="bg-[#2C2825] py-16 md:py-24 px-4 md:px-12">
+      {/* Values — asymmetric card grid */}
+      <section className="bg-[#EDE8E0] py-16 md:py-24 px-4 md:px-12">
         <div className="max-w-6xl mx-auto">
           <RevealOnScroll className="max-w-[560px] mb-12">
-            <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#C4714A] mb-4">
+            <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#A8552C] mb-4">
               What We Stand For
             </div>
-            <h2 className="font-serif text-[clamp(28px,3.6vw,46px)] font-light leading-[1.15] text-[#EDE8E0]">
+            <h2 className="font-serif text-[clamp(28px,3.6vw,46px)] font-light leading-[1.15] text-[#2C2825]">
               Four rules we have not broken yet.
             </h2>
           </RevealOnScroll>
@@ -168,10 +168,9 @@ export default function AboutPage() {
               <RevealOnScroll
                 key={value.title}
                 delay={i * 0.08}
-                className="rounded-2xl p-8 md:p-9 border border-white/8 transition-colors duration-300 hover:border-[#C4714A]/50"
-                style={{ background: 'rgba(237,232,224,0.035)' }}
+                className="bg-[#E2DAD0] rounded-2xl p-8 md:p-9 border border-transparent transition-colors duration-300 hover:border-[#A85B3B]/50"
               >
-                <span className="w-11 h-11 rounded-full bg-[#C4714A]/12 flex items-center justify-center text-[#E8A87C] mb-6">
+                <span className="w-11 h-11 rounded-full bg-[#A85B3B]/12 flex items-center justify-center text-[#A85B3B] mb-6">
                   <svg
                     width="20"
                     height="20"
@@ -186,8 +185,8 @@ export default function AboutPage() {
                     {value.icon}
                   </svg>
                 </span>
-                <h3 className="font-serif text-[24px] font-light text-[#EDE8E0] mb-3">{value.title}</h3>
-                <p className="text-[14px] leading-[1.8] text-white/55 max-w-[46ch]">{value.body}</p>
+                <h3 className="font-serif text-[24px] font-light text-[#2C2825] mb-3">{value.title}</h3>
+                <p className="text-[14px] leading-[1.8] text-[#5C5449] max-w-[46ch]">{value.body}</p>
               </RevealOnScroll>
             ))}
           </div>
@@ -225,33 +224,24 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Craft process — numbered strip over image */}
-      <section className="relative py-16 md:py-24 px-4 md:px-12 overflow-hidden">
-        <Image
-          src="https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"
-          alt=""
-          fill
-          aria-hidden="true"
-          className="object-cover object-center"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-[#1A1210]/85" />
-        <div className="relative max-w-6xl mx-auto">
+      {/* Craft process — numbered strip */}
+      <section className="bg-[#EDE8E0] py-16 md:py-24 px-4 md:px-12">
+        <div className="max-w-6xl mx-auto">
           <RevealOnScroll className="max-w-[520px] mb-12">
-            <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#E8A87C] mb-4">
+            <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#A8552C] mb-4">
               From Bench To Ceiling
             </div>
-            <h2 className="font-serif text-[clamp(28px,3.6vw,46px)] font-light leading-[1.15] text-[#EDE8E0]">
+            <h2 className="font-serif text-[clamp(28px,3.6vw,46px)] font-light leading-[1.15] text-[#2C2825]">
               Four steps, none of them skipped.
             </h2>
           </RevealOnScroll>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-white/10 rounded-2xl overflow-hidden">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
             {CRAFT_STEPS.map((s, i) => (
-              <RevealOnScroll key={s.step} delay={i * 0.08} className="bg-[#1A1210] p-8 md:p-9">
-                <div className="font-serif text-[46px] font-light text-white/12 leading-none mb-4">{s.step}</div>
-                <h3 className="text-[15px] font-medium text-[#EDE8E0] mb-2.5">{s.title}</h3>
-                <p className="text-[13.5px] leading-[1.75] text-white/50">{s.body}</p>
+              <RevealOnScroll key={s.step} delay={i * 0.08} className="bg-[#E2DAD0] rounded-2xl p-8 md:p-9">
+                <div className="font-serif text-[46px] font-light text-[#2C2825]/12 leading-none mb-4">{s.step}</div>
+                <h3 className="text-[15px] font-medium text-[#2C2825] mb-2.5">{s.title}</h3>
+                <p className="text-[13.5px] leading-[1.75] text-[#5C5449]">{s.body}</p>
               </RevealOnScroll>
             ))}
           </div>
@@ -271,7 +261,7 @@ export default function AboutPage() {
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/collections"
-              className="inline-flex items-center gap-2.5 rounded-full bg-[#2C2825] px-8 py-4 text-[13px] font-medium tracking-[0.06em] text-[#EDE8E0] no-underline transition-colors duration-200 hover:bg-[#A8552C] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A8552C]"
+              className="inline-flex items-center gap-2.5 rounded-full bg-[#2C2825] px-8 py-4 text-[13px] font-medium tracking-[0.06em] text-[#EDE8E0] no-underline transition-colors duration-200 hover:bg-[#A85B3B] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A85B3B]"
             >
               Browse the collection
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -280,7 +270,7 @@ export default function AboutPage() {
             </Link>
             <Link
               href="/contact"
-              className="inline-flex items-center rounded-full border border-[#2C2825]/25 px-8 py-4 text-[13px] font-medium tracking-[0.06em] text-[#2C2825] no-underline transition-colors duration-200 hover:border-[#A8552C] hover:text-[#A8552C] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A8552C]"
+              className="inline-flex items-center rounded-full border border-[#2C2825]/25 px-8 py-4 text-[13px] font-medium tracking-[0.06em] text-[#2C2825] no-underline transition-colors duration-200 hover:border-[#A85B3B] hover:text-[#A85B3B] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A85B3B]"
             >
               Talk to us
             </Link>

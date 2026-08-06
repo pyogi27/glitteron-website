@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useVisualizerStore } from '@/lib/stores/visualizerStore'
 import { useCartStore } from '@/lib/stores/cartStore'
+import { useAuthStore } from '@/lib/stores/authStore'
+import { getVisualizerUsage } from '@/lib/auth/api'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import type { VisualizerProduct } from '@/lib/data/visualizer'
 import type { AIGenerateResponse, ShareResult } from '@/lib/ai/types'
@@ -109,6 +111,7 @@ function isChainableDataUrl(url: string): boolean {
 async function generateChain(
   baseImage: string,
   items: VisualizerProduct[],
+  token: string | null,
   onProgress: (progress: { current: number; total: number; productName: string }) => void,
 ): Promise<string> {
   let current = baseImage
@@ -117,7 +120,10 @@ async function generateChain(
     onProgress({ current: i + 1, total: items.length, productName: product.name })
     const res = await fetch('/api/visualizer/generate', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify({
         imageDataUrl: current,
         productImageUrl: product.full,
@@ -125,6 +131,16 @@ async function generateChain(
         productCategory: product.category,
       }),
     })
+    if (res.status === 401) throw new Error('Sign in to use the room visualizer')
+    if (res.status === 429) {
+      const data = await res.json().catch(() => ({}))
+      const resetAt = data.resetAt ? new Date(data.resetAt) : null
+      throw new Error(
+        resetAt
+          ? `Daily visualizer limit reached. Try again after ${resetAt.toLocaleTimeString()}.`
+          : 'Daily visualizer limit reached. Try again later.',
+      )
+    }
     if (!res.ok) throw new Error(`Could not add ${product.name} (API ${res.status})`)
     const data = await res.json() as AIGenerateResponse
     if (!isChainableDataUrl(data.compositeImageUrl) && i < items.length - 1) {
@@ -164,11 +180,24 @@ function GenerateBlock() {
 
   const [bulkAdded, setBulkAdded] = useState(false)
   const [confirm, setConfirm] = useState<ConfirmRequest | null>(null)
+  const [remaining, setRemaining] = useState<number | null>(null)
+  const [resetAt, setResetAt] = useState<Date | null>(null)
 
   // A new render means a new set of fixtures — re-enable "Add All to Cart"
   useEffect(() => {
     setBulkAdded(false)
   }, [generatedImageUrl])
+
+  // Show today's remaining quota so the button can be disabled before the
+  // user burns a generation on a request the backend would reject anyway.
+  useEffect(() => {
+    getVisualizerUsage()
+      .then((u) => {
+        setRemaining(u.remaining)
+        setResetAt(u.resetAt ? new Date(u.resetAt) : null)
+      })
+      .catch(() => {})
+  }, [])
 
   // Fixtures placed on the canvas but not yet baked into the AI render
   const pendingProducts = placedProductIds
@@ -190,10 +219,20 @@ function GenerateBlock() {
     setIsGenerating(true)
     setGenerationError(null)
     try {
-      const url = await generateChain(baseImage, items, setGenerationProgress)
+      const token = useAuthStore.getState().accessToken
+      const url = await generateChain(baseImage, items, token, setGenerationProgress)
       applyRender(url, resultIds)
     } catch (err) {
       setGenerationError(err instanceof Error ? err.message : 'Generation failed')
+    } finally {
+      // Each chained call consumed one backend usage — re-sync rather than
+      // guess how many succeeded before an error.
+      getVisualizerUsage()
+        .then((u) => {
+          setRemaining(u.remaining)
+          setResetAt(u.resetAt ? new Date(u.resetAt) : null)
+        })
+        .catch(() => {})
     }
   }
 
@@ -306,9 +345,9 @@ function GenerateBlock() {
         <button
           type="button"
           onClick={handleGenerate}
-          disabled={isGenerating}
+          disabled={isGenerating || remaining === 0}
           className={`w-full py-[11px] text-[10.5px] tracking-[1.5px] uppercase rounded-[5px] transition-all font-sans mb-1.5 ${
-            isGenerating
+            isGenerating || remaining === 0
               ? 'bg-warm-gray text-mid-gray cursor-not-allowed'
               : 'bg-gold text-white hover:opacity-90 cursor-pointer'
           }`}
@@ -318,12 +357,22 @@ function GenerateBlock() {
               <span className="w-3 h-3 rounded-full border border-white border-t-transparent animate-spin" />
               Generating…
             </span>
+          ) : remaining === 0 ? (
+            'Daily limit reached'
           ) : (
             `${generatedImageUrl ? 'Update AI Preview' : 'Generate AI Preview'}${
               pendingProducts.length > 1 ? ` (${pendingProducts.length})` : ''
             }`
           )}
         </button>
+      )}
+
+      {pendingProducts.length > 0 && remaining !== null && (
+        <p className="text-[10px] text-mid-gray mt-1">
+          {remaining === 0
+            ? `Try again after ${resetAt ? resetAt.toLocaleTimeString() : 'tomorrow'}.`
+            : `${remaining} of 4 AI previews left today`}
+        </p>
       )}
 
       {generationError && (

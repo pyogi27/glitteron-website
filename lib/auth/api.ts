@@ -173,6 +173,20 @@ async function authedFetch<T>(fullPath: string, opts: RequestInit = {}): Promise
   }
 }
 
+// ─── Visualizer usage ──────────────────────────────────────────────────────────
+
+export interface VisualizerUsage {
+  success: true;
+  limit: number;
+  count: number;
+  remaining: number;
+  resetAt: string | null;
+}
+
+/** How many of today's 4 AI generations this user has left. */
+export const getVisualizerUsage = () =>
+  authedFetch<VisualizerUsage>('/api/visualizer-usage/usage');
+
 // ─── Orders ───────────────────────────────────────────────────────────────────
 
 export interface OrderItem {

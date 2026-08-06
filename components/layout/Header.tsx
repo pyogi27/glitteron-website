@@ -185,11 +185,13 @@ function ProfileButton({ isLight }: { isLight: boolean }) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-const NAV_LINKS = [
+const NAV_LINKS_BEFORE_VISUALIZER = [
   { href: '/', label: 'Home' },
   { href: '/collections', label: 'Collections' },
   { href: '/rooms', label: 'Rooms' },
-  { href: '/room-visualizer', label: 'Visualizer' },
+]
+const VISUALIZER_LINK = { href: '/room-visualizer', label: 'Visualizer' }
+const NAV_LINKS_AFTER_VISUALIZER = [
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ]
@@ -202,6 +204,13 @@ export default function Header({ transparent }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const pathname = usePathname()
+  const user = useAuthStore(s => s.user)
+
+  const navLinks = [
+    ...NAV_LINKS_BEFORE_VISUALIZER,
+    ...(user ? [VISUALIZER_LINK] : []),
+    ...NAV_LINKS_AFTER_VISUALIZER,
+  ]
 
   const isTransparent = transparent ?? pathname === '/'
 
@@ -232,7 +241,7 @@ export default function Header({ transparent }: HeaderProps) {
         <Logo light={isLight} />
 
         <nav className="hidden md:flex items-center gap-9">
-          {NAV_LINKS.map(({ href, label }) => (
+          {navLinks.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
@@ -302,7 +311,7 @@ export default function Header({ transparent }: HeaderProps) {
 
       {menuOpen && (
         <nav className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-[#D8D0C4] shadow-lg py-4 px-6 flex flex-col gap-3">
-          {NAV_LINKS.map(({ href, label }) => (
+          {navLinks.map(({ href, label }) => (
             <Link
               key={href}
               href={href}

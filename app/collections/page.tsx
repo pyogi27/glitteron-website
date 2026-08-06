@@ -137,7 +137,10 @@ export default async function CollectionsPage({ searchParams }: Props) {
       <div className="flex items-start min-h-screen bg-[#EDE8E0]">
         {/* ponytail: sticky lives on the flex child, not the <aside>. A wrapper sized
             to its own content gives sticky no travel room, so it scrolls away. */}
-        <div className="hidden lg:block sticky top-header-ticker">
+        {/* ponytail: relative z-10 — .cards-track is an isolated stacking context
+            painted after this sibling, so hovered cards (scale 1.04) drew over
+            the sidebar. z-10 puts the filters back on top. */}
+        <div className="hidden lg:block sticky top-header-ticker relative z-10">
           <FilterSidebar />
         </div>
         <InfiniteProductGrid

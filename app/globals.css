@@ -130,6 +130,99 @@
     overflow: visible;
   }
 
+  /* ── Price range: dual-thumb from two native inputs ────────────────────
+     Two <input type="range"> stacked over one shared rail. The inputs render
+     no track of their own and only their thumbs take pointer events, so both
+     stay draggable through the overlap. Default UA styling was a 2px hairline
+     on beige — invisible against #EDE8E0.
+     ponytail: no range-slider library, and no listening for pointer moves.
+  ── */
+  .price-range {
+    position: relative;
+    height: 20px;
+  }
+
+  .price-range-rail,
+  .price-range-fill {
+    position: absolute;
+    top: 50%;
+    height: 5px;
+    margin-top: -2.5px;
+    border-radius: 999px;
+    pointer-events: none;
+  }
+
+  .price-range-rail {
+    left: 0;
+    right: 0;
+    background: #D8D0C4;
+  }
+
+  .price-range-fill {
+    left: var(--min-pct);
+    right: calc(100% - var(--max-pct));
+    background: #C4714A;
+  }
+
+  .price-range-input {
+    -webkit-appearance: none;
+    appearance: none;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 20px;
+    margin: 0;
+    background: transparent;
+    pointer-events: none;
+  }
+
+  .price-range-input::-webkit-slider-runnable-track {
+    height: 5px;
+    background: transparent;
+    border: none;
+  }
+
+  .price-range-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    pointer-events: auto;
+    width: 18px;
+    height: 18px;
+    margin-top: -6.5px;
+    border-radius: 50%;
+    background: #C4714A;
+    border: 2px solid #FFFFFF;
+    box-shadow: 0 1px 5px rgba(44, 40, 37, 0.35);
+    cursor: pointer;
+  }
+
+  .price-range-input::-moz-range-track {
+    height: 5px;
+    background: transparent;
+    border: none;
+  }
+
+  .price-range-input::-moz-range-thumb {
+    pointer-events: auto;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #C4714A;
+    border: 2px solid #FFFFFF;
+    box-shadow: 0 1px 5px rgba(44, 40, 37, 0.35);
+    cursor: pointer;
+  }
+
+  .price-range-input:focus-visible::-webkit-slider-thumb {
+    outline: 2px solid #8B5E3C;
+    outline-offset: 2px;
+  }
+
+  .price-range-input:focus-visible::-moz-range-thumb {
+    outline: 2px solid #8B5E3C;
+    outline-offset: 2px;
+  }
+
   .product-card {
     border-radius: 20px;
     border: 1px solid transparent;
