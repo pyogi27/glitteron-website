@@ -96,6 +96,8 @@ interface Props {
   intro: string
   /** Section anchors for the sidebar index. */
   sections: SectionSpec[]
+  /** Kicker above the title. The FAQ uses this shell but is not a legal page. */
+  eyebrow?: string
   children: React.ReactNode
 }
 
@@ -106,13 +108,13 @@ interface Props {
  * simpler header in the same visual language. Long documents get a sticky
  * section index on desktop so the page is navigable rather than one long scroll.
  */
-export default function LegalPage({ title, intro, sections, children }: Props) {
+export default function LegalPage({ title, intro, sections, eyebrow = 'Legal', children }: Props) {
   return (
     <>
       <header className="pt-header bg-[#2C2825] text-white pb-14 px-6 md:px-12">
         <div className="max-w-[900px] pt-12">
-          <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#C4714A] mb-4">
-            Legal
+          <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#D08355] mb-4">
+            {eyebrow}
           </div>
           <h1 className="font-serif text-[clamp(38px,5vw,64px)] font-light leading-[1.08] mb-5">
             {title}

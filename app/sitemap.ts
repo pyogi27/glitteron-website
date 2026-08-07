@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
-import { fetchAllProducts, slugify } from '@/lib/api/server'
+import { fetchAllProducts, fetchCategories, slugify } from '@/lib/api/server'
 import { rooms } from '@/lib/data'
+import { guides } from '@/lib/data/guides'
 import { products as staticProducts } from '@/lib/data/products'
 import { absoluteUrl } from '@/lib/site'
 
@@ -27,6 +28,26 @@ async function allProductSlugs(): Promise<string[]> {
   }
 }
 
+/**
+ * `?category=<name>` views canonicalise to themselves and are the strongest
+ * commercial landing pages on the site, so they belong in the sitemap. A dead
+ * category API just drops them rather than failing the build.
+ *
+ * URLSearchParams, not encodeURIComponent: it encodes a space as `+`, matching
+ * the canonical the collections page emits and the footer links. `%20` would
+ * list a second URL string for the same page.
+ */
+async function categoryUrls(): Promise<string[]> {
+  try {
+    const categories = await fetchCategories()
+    return categories.map(
+      c => `/collections?${new URLSearchParams({ category: c.name }).toString()}`,
+    )
+  } catch {
+    return []
+  }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date()
 
@@ -35,6 +56,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absoluteUrl('/collections'), lastModified: now, changeFrequency: 'daily', priority: 0.9 },
     { url: absoluteUrl('/rooms'), lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
     { url: absoluteUrl('/room-visualizer'), lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: absoluteUrl('/faq'), lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
+    { url: absoluteUrl('/guides'), lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: absoluteUrl('/about'), lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
     { url: absoluteUrl('/contact'), lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
     { url: absoluteUrl('/shipping'), lastModified: now, changeFrequency: 'yearly', priority: 0.4 },
@@ -42,6 +65,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absoluteUrl('/privacy'), lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
     { url: absoluteUrl('/terms'), lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
   ]
+
+  const categoryRoutes: MetadataRoute.Sitemap = (await categoryUrls()).map(path => ({
+    url: absoluteUrl(path),
+    lastModified: now,
+    changeFrequency: 'weekly',
+    priority: 0.8,
+  }))
+
+  // lastModified is the guide's own updated date, not the build time — these
+  // are the only pages on the site where we actually know when the content changed.
+  const guideRoutes: MetadataRoute.Sitemap = guides.map(guide => ({
+    url: absoluteUrl(`/guides/${guide.slug}`),
+    lastModified: new Date(guide.updated),
+    changeFrequency: 'yearly',
+    priority: 0.6,
+  }))
 
   const roomRoutes: MetadataRoute.Sitemap = rooms.map(room => ({
     url: absoluteUrl(`/rooms/${room.slug}`),
@@ -58,5 +97,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
-  return [...staticRoutes, ...roomRoutes, ...productRoutes]
+  return [...staticRoutes, ...categoryRoutes, ...guideRoutes, ...roomRoutes, ...productRoutes]
 }

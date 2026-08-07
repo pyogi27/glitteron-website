@@ -27,7 +27,7 @@ const FANNED_HOVER_TY = [16, -6, -12, -6, 16]
 export default function ShuffleDeck({ products }: Props) {
   const deck = products.slice(0, 5)
   const deckRef      = useRef<HTMLDivElement>(null)
-  const cardRefs     = useRef<(HTMLDivElement | null)[]>([])
+  const cardRefs     = useRef<(HTMLElement | null)[]>([])
   const activeIdxRef = useRef(deck.length - 1)
   const isBusyRef    = useRef(false)
   const isFannedRef  = useRef(false)
@@ -202,19 +202,21 @@ export default function ShuffleDeck({ products }: Props) {
     }, 420)
   }, [deck.length, applyStack])
 
-  const handleCardClick = useCallback((cardArrayIdx: number) => {
-    if (cardArrayIdx === activeIdxRef.current) shuffle()
-  }, [shuffle])
-
   // ── Mobile: swipe navigation ──
   const mobilePrev = () => setMobileIdx(i => (i - 1 + deck.length) % deck.length)
   const mobileNext = () => setMobileIdx(i => (i + 1) % deck.length)
+
+  // fetchProducts returns { products: [] } on any backend failure, so deck can
+  // be empty. The mobile branch below reads deck[mobileIdx].images[0], which
+  // threw a TypeError and white-screened the page. A deck of nothing has no
+  // section to render.
+  if (deck.length === 0) return null
 
   // ─────────────────────────────────────────
   // MOBILE LAYOUT
   // ─────────────────────────────────────────
   if (isMobile) {
-    const product = deck[mobileIdx]
+    const product = deck[mobileIdx % deck.length]
     return (
       <section className="bg-[#EDE8E0] py-16 px-6 relative overflow-hidden">
         {/* Ambient glow */}
@@ -245,9 +247,11 @@ export default function ShuffleDeck({ products }: Props) {
             </svg>
           </button>
 
-          {/* Card */}
-          <div
-            className="relative rounded-[20px] overflow-hidden flex-shrink-0"
+          {/* Card — a link, not a dead div. Tapping a light you like should open
+              it, not advance the carousel. */}
+          <Link
+            href={`/collections/${product.slug}`}
+            className="relative rounded-[20px] overflow-hidden flex-shrink-0 block no-underline"
             style={{
               width: 260,
               height: 340,
@@ -274,9 +278,9 @@ export default function ShuffleDeck({ products }: Props) {
             >
               <div className="text-[9px] font-semibold tracking-[0.18em] uppercase text-[#C4714A] mb-1">{product.category}</div>
               <div className="font-serif text-[17px] font-normal text-white leading-[1.2]">{product.name}</div>
-              <div className="text-[13px] text-white/60 mt-1">₹{product.price.toLocaleString('en-IN')}</div>
+              <div className="text-[13px] text-white/80 mt-1">₹{product.price.toLocaleString('en-IN')}</div>
             </div>
-          </div>
+          </Link>
 
           {/* Next */}
           <button
@@ -347,7 +351,7 @@ export default function ShuffleDeck({ products }: Props) {
           Find your <em className="italic text-[#A8552C]">light</em>
         </h2>
         <p className="text-[14px] font-light text-[#2C2825]/70 leading-[1.85] mb-8 max-w-[380px] mx-auto lg:mx-0">
-          From grand crystal chandeliers to minimal pendants — our collection holds a light for every taste. Hover the deck to fan out, or shuffle to discover something unexpected.
+          From grand crystal chandeliers to minimal pendants — our collection holds a light for every taste. Pick any card to see the piece.
         </p>
 
         <div className="flex flex-wrap gap-4 justify-center lg:justify-start items-center">
@@ -388,8 +392,9 @@ export default function ShuffleDeck({ products }: Props) {
         </div>
       </div>
 
-      {/* Card deck */}
-      <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 540, height: 540 }}>
+      {/* Card deck. The fan spans 310px + 2×230px of translate = 770px, so the
+          box has to be at least that wide or the outer cards clip at 1440. */}
+      <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 780, height: 540 }}>
         <div
           ref={deckRef}
           onMouseEnter={handleDeckEnter}
@@ -404,10 +409,10 @@ export default function ShuffleDeck({ products }: Props) {
               return N - 1 - distFromTop
             }
             return (
-              <div
+              <Link
                 key={product.id}
+                href={`/collections/${product.slug}`}
                 ref={el => { cardRefs.current[i] = el }}
-                onClick={() => handleCardClick(i)}
                 onMouseEnter={() => handleCardEnter(getFanIdx())}
                 onMouseLeave={() => handleCardLeave(getFanIdx())}
                 style={{
@@ -434,30 +439,22 @@ export default function ShuffleDeck({ products }: Props) {
                   sizes="310px"
                   draggable={false}
                 />
-                <div className="sh-card-label absolute bottom-0 left-0 right-0 z-[2] px-[22px] pb-[22px] pt-[30px]"
+                {/* Always visible. These cards are links now, and a link whose
+                    label only appears on hover tells you nothing about where
+                    it goes — on touch, nothing at all. */}
+                <div className="absolute bottom-0 left-0 right-0 z-[2] px-[22px] pb-[22px] pt-[30px]"
                   style={{ background: 'linear-gradient(to top, rgba(26,18,16,.9) 0%, transparent 100%)' }}
                 >
                   <div className="text-[9px] font-semibold tracking-[0.18em] uppercase text-[#C4714A] mb-1">{product.category}</div>
                   <div className="font-serif text-[18px] font-normal text-white leading-[1.2]">{product.name}</div>
-                  <div className="text-[13px] text-white/60 mt-1">₹{product.price.toLocaleString('en-IN')}</div>
+                  <div className="text-[13px] text-white/80 mt-1">₹{product.price.toLocaleString('en-IN')}</div>
                 </div>
-              </div>
+              </Link>
             )
           })}
         </div>
       </div>
 
-      <style>{`
-        .sh-card-label {
-          opacity: 0;
-          transform: translateY(10px);
-          transition: opacity .35s, transform .35s;
-        }
-        div:hover > .sh-card-label {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      `}</style>
     </section>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 
-const items = ['Handcrafted Chandeliers', 'Free Delivery Above ₹15,000', '5-Year Warranty', '12,000+ Happy Customers', 'Expert Installation Available', '500+ Designs In Stock']
+const items = ['Handcrafted Chandeliers', 'Free Delivery On Every Order', '5-Year Warranty', '12,000+ Happy Customers', 'Expert Installation Available', '500+ Designs In Stock']
 
 export default function TickerStrip() {
   const [visible, setVisible] = useState(false)
@@ -23,8 +23,10 @@ export default function TickerStrip() {
     >
       <div className="flex gap-16 animate-[ticker_18s_linear_infinite] whitespace-nowrap">
         {[...items, ...items].map((item, i) => (
-          <span key={`${item}-${i}`} className="text-[11px] font-medium tracking-[0.18em] uppercase flex items-center gap-4 text-[#A8552C]">
-            {item} <span className="text-[#8B7D6E]">·</span>
+          // #A8552C on #EDE8E0 measured 4.30:1 — just under the 4.5:1 AA floor
+          // at this size. #96471F clears it.
+          <span key={`${item}-${i}`} className="text-[11px] font-medium tracking-[0.18em] uppercase flex items-center gap-4 text-[#96471F]">
+            {item} <span className="text-[#6E655C]" aria-hidden="true">·</span>
           </span>
         ))}
       </div>

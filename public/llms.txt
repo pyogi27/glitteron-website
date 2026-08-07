@@ -1,0 +1,73 @@
+# LitMeUp
+
+> LitMeUp designs and handcrafts lighting — chandeliers, pendant lights, ceiling
+> lights, wall lights and floor lamps — in Surat, Gujarat, India, and sells them
+> direct to customers across India. Over 500 designs across twelve finishes,
+> assembled and inspected in one workshop since 2016.
+
+Key facts, all published on the site and current as of this file:
+
+- Shipping: free on every order, anywhere in India, no minimum order value.
+- Delivery: 5–7 days from dispatch, by registered courier, tracked by email.
+- Returns: 7 days from receipt; a no-questions return carries a 15% re-stocking
+  fee on invoiced MRP; the fixture must be uninstalled and in original packaging.
+- Damaged, defective or wrong item: report within 24 hours of delivery;
+  replacement ships within 3 days of the item reaching us.
+- Refunds: processed in 5–7 business days after the item arrives in good condition.
+- Cancellation: not possible once confirmed, but the order can be modified within
+  24 hours and before dispatch by adding items of equal or greater value.
+- Warranty: 5 years against manufacturing defects.
+- Payment: Mastercard, Visa, American Express, net banking, UPI and wallets.
+- Materials: brass, hand-blown glass and solid steel; dimmable as standard.
+- Currency: INR. Ships within India only.
+- Contact: info@litmeup.in, +91 99793 40909, 69 Jalaram Industrial Estate,
+  Navjivan Circle, Udhana Magdalla Road, Surat, Gujarat 395007, India.
+
+## Shop
+
+- [All collections](https://www.litmeup.in/collections): the full catalogue with category and price filters.
+- [Chandelier lights](https://www.litmeup.in/collections?category=Chandelier+Lights)
+- [Pendant lights](https://www.litmeup.in/collections?category=Pendant+Lights)
+- [Ceiling lights](https://www.litmeup.in/collections?category=Ceiling+Lights)
+- [Wall lights](https://www.litmeup.in/collections?category=Wall+Lights)
+- [Floor lamps](https://www.litmeup.in/collections?category=Floor+Lamps)
+
+## Shop by room
+
+- [All rooms](https://www.litmeup.in/rooms)
+- [Living room lighting](https://www.litmeup.in/rooms/living-room)
+- [Dining room lighting](https://www.litmeup.in/rooms/dining-room)
+- [Bedroom lighting](https://www.litmeup.in/rooms/bedroom)
+- [Kitchen and island lighting](https://www.litmeup.in/rooms/kitchen)
+
+## Lighting guides
+
+Sizing and light-quality guidance, each opening with a direct answer:
+
+- [All guides](https://www.litmeup.in/guides)
+- [What size chandelier do you need?](https://www.litmeup.in/guides/what-size-chandelier): room length + width in feet, read as inches of diameter; fixture height at 2.5–3 in per foot of ceiling; 7 ft floor clearance.
+- [How high to hang a light over a dining table](https://www.litmeup.in/guides/how-high-to-hang-a-dining-light): 30–36 in above the tabletop; fixture width half to two-thirds of the table width.
+- [How many pendants over a kitchen island?](https://www.litmeup.in/guides/how-many-pendants-over-a-kitchen-island): two up to 7 ft, three up to 10 ft; 24–30 in apart; 30–36 in above the counter.
+- [How to light a living room](https://www.litmeup.in/guides/how-to-light-a-living-room): three layers (ambient, task, accent), five or more sources, 2700K throughout.
+- [How to light a bedroom](https://www.litmeup.in/guides/bedroom-lighting-ideas): bedside pendants 20–26 in above the mattress, wall lights 30–36 in; 2700K or warmer.
+- [Warm or cool light: which Kelvin for which room](https://www.litmeup.in/guides/warm-or-cool-light): 2700K living and bedrooms, 3000K kitchens and bathrooms, 4000K task only; CRI 90+ where colour matters.
+
+## Answers and policies
+
+- [FAQ](https://www.litmeup.in/faq): shipping, returns, warranty, payment and how to size a chandelier for a room.
+- [Shipping policy](https://www.litmeup.in/shipping)
+- [Cancellation, return and exchange policy](https://www.litmeup.in/returns)
+- [About LitMeUp](https://www.litmeup.in/about): the workshop, the process and the direct-to-customer pricing.
+- [Contact](https://www.litmeup.in/contact)
+- [Terms of use](https://www.litmeup.in/terms)
+- [Privacy policy](https://www.litmeup.in/privacy)
+
+## Tools
+
+- [Room visualizer](https://www.litmeup.in/room-visualizer): upload a photo of a room and preview a fixture in it before buying.
+
+## Machine-readable
+
+- [Sitemap](https://www.litmeup.in/sitemap.xml): every product, category and room URL.
+- Product pages carry schema.org Product markup including price, availability,
+  shipping cost and return policy. The homepage carries OnlineStore markup.

@@ -15,8 +15,30 @@ import { fetchCategories, fetchFeaturedProducts } from '@/lib/api/server'
 export default async function HomePage() {
   const [apiCategories, featured] = await Promise.all([
     fetchCategories(),
-    fetchFeaturedProducts(20),
+    // 29 cards are laid out below (8 + 16 + 5) and the API returns duplicates,
+    // so over-fetch to leave room for the dedupe pass.
+    fetchFeaturedProducts(45),
   ])
+
+  // Three sections used to slice from index 0, so New Arrivals, Bestselling and
+  // the shuffle deck all opened with the same two products. Carve disjoint
+  // windows instead. Slices past the end are empty, which every consumer
+  // handles, so a short catalog degrades to fewer cards rather than repeats.
+  //
+  // Dedupe first: /api/products returns the same product more than once in a
+  // single page of results (MT3803-2 came back at both index 8 and 16), so
+  // slicing alone still repeated cards inside one carousel.
+  const seen = new Set<string>()
+  const catalog = featured.filter(p => {
+    const key = p.slug || String(p.id)
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+
+  const newArrivals = catalog.slice(0, 8)
+  const bestsellers = catalog.slice(8, 24)
+  const curated = catalog.slice(24, 29)
 
   return (
     <>
@@ -25,11 +47,14 @@ export default async function HomePage() {
       <TickerStrip />
       <HeroSection />
       <CollectionsSection categories={apiCategories.length > 0 ? apiCategories.slice(0, 6) : undefined} />
-      <ProductCarousel titlePrefix="New" titleHighlight="Arrivals" label="Just In" products={featured.slice(0, 6)} />
+      <ProductCarousel titlePrefix="New" titleHighlight="Arrivals" label="Just In" products={newArrivals} />
       <StatsDivider />
-      <ProductCarousel titlePrefix="Bestselling" titleHighlight="Lights" label="Most Loved" products={featured} />
+      <ProductCarousel titlePrefix="Bestselling" titleHighlight="Lights" label="Most Loved" products={bestsellers} />
       <RoomGrid />
-      <ShuffleDeck products={featured} />
+      {/* A deck of one or two cards isn't a deck. Falling back to New Arrivals
+          here would just reintroduce the duplication this split exists to fix,
+          so a thin catalog drops the section instead. */}
+      {curated.length >= 3 && <ShuffleDeck products={curated} />}
       <SocialGrid />
       <ReviewsSection />
       <NewsletterStrip />

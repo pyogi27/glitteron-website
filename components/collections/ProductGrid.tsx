@@ -1,6 +1,6 @@
 'use client'
 import { useFilterStore } from '@/lib/stores/filterStore'
-import ProductCard from '@/components/products/ProductCard'
+import ProductCard, { EAGER_CARDS } from '@/components/products/ProductCard'
 import { Product } from '@/lib/types'
 
 interface Props { products: Product[] }
@@ -43,8 +43,8 @@ export default function ProductGrid({ products }: Props) {
           ? 'cards-track grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4'
           : 'flex flex-col gap-4'
         }>
-          {sorted.map(p => (
-            <ProductCard key={p.id} product={p} variant={viewMode} />
+          {sorted.map((p, i) => (
+            <ProductCard key={p.id} product={p} variant={viewMode} priority={i < EAGER_CARDS} />
           ))}
         </div>
       )}

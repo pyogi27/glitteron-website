@@ -13,7 +13,8 @@ export default function SocialGrid() {
   return (
     <section className="py-[80px] px-4 sm:px-12 bg-[#EDE8E0]">
       <div className="text-center mb-10">
-        <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#A09488] mb-3">Follow Our World</div>
+        {/* was #A09488 = 2.43:1 */}
+        <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#5A5249] mb-3">Follow Our World</div>
         <h2 className="font-serif text-[32px] font-light text-[#2C2825]">@litmeup.in</h2>
       </div>
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 max-w-5xl mx-auto">

@@ -1,6 +1,6 @@
 // components/product/ProductGallery.tsx
 'use client'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import LightToggle from '@/components/ui/LightToggle'
 
@@ -19,6 +19,21 @@ export default function ProductGallery({ images, name, lightOnImage }: Props) {
   const showLit = lightOn && Boolean(litSrc) && active === 0
   const showLitInLightbox = lightOn && Boolean(litSrc) && lightboxIndex === 0
 
+  // Mobile carousel. Scroll position is the source of truth for `active`, so the dots
+  // and the lit-image overlay stay in sync with what the shopper actually swiped to.
+  const trackRef = useRef<HTMLDivElement>(null)
+  const onTrackScroll = useCallback(() => {
+    const el = trackRef.current
+    if (!el || el.clientWidth === 0) return
+    setActive(Math.round(el.scrollLeft / el.clientWidth))
+  }, [])
+
+  const scrollToIndex = useCallback((i: number) => {
+    const el = trackRef.current
+    if (!el) return
+    el.scrollTo({ left: i * el.clientWidth, behavior: 'smooth' })
+  }, [])
+
   const openLightbox = useCallback((index: number) => {
     setLightboxIndex(index)
     setLightbox(true)
@@ -32,9 +47,30 @@ export default function ProductGallery({ images, name, lightOnImage }: Props) {
   const lightboxNext = useCallback(() =>
     setLightboxIndex(i => (i + 1) % images.length), [images.length])
 
+  // Escape and arrows. Without these the lightbox is a keyboard trap: the only way out
+  // was clicking the backdrop or the close button with a pointer.
+  useEffect(() => {
+    if (!lightbox) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeLightbox()
+      else if (e.key === 'ArrowLeft') lightboxPrev()
+      else if (e.key === 'ArrowRight') lightboxNext()
+    }
+    window.addEventListener('keydown', onKey)
+    // Stop the page scrolling behind the overlay.
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prevOverflow
+    }
+  }, [lightbox, closeLightbox, lightboxPrev, lightboxNext])
+
   return (
     <>
-      <div className="lg:sticky lg:top-header flex gap-3.5 p-[32px_24px_32px_48px] bg-[#EDE8E0] h-[50vh] lg:h-[calc(100vh-var(--spacing-header))]">
+      {/* self-start stops the grid stretching this cell to the row height, which is
+          what lets `sticky` actually stick as the buy box and details scroll past. */}
+      <div className="lg:sticky lg:top-header lg:self-start flex gap-3.5 p-[32px_24px_32px_48px] bg-[#EDE8E0] h-[50vh] lg:h-[calc(100vh-var(--spacing-header))]">
         {/* Thumbnails */}
         <div className="hidden lg:flex flex-col gap-2.5 w-[76px] flex-shrink-0 overflow-y-auto">
           {images.map((src, i) => (
@@ -56,13 +92,33 @@ export default function ProductGallery({ images, name, lightOnImage }: Props) {
           ))}
         </div>
 
-        {/* Main image */}
+        {/* Main image. Below lg this is a scroll-snap carousel — the thumbnail rail is
+            desktop-only, so without it a phone shopper only ever saw image 1. */}
         <div className="flex-1 rounded-2xl overflow-hidden bg-[#E2DAD0] relative select-none">
+          <div
+            ref={trackRef}
+            onScroll={onTrackScroll}
+            className="lg:hidden absolute inset-0 flex overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {images.map((src, i) => (
+              <div key={i} className="relative w-full h-full flex-shrink-0 snap-center">
+                <Image
+                  src={src}
+                  alt={i === 0 ? name : `${name} view ${i + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="100vw"
+                  priority={i === 0}
+                />
+              </div>
+            ))}
+          </div>
+
           <Image
             src={images[active]}
             alt={name}
             fill
-            className="object-cover transition-opacity duration-300"
+            className="hidden lg:block object-cover transition-opacity duration-300"
             sizes="50vw"
             priority={active === 0}
           />
@@ -86,6 +142,27 @@ export default function ProductGallery({ images, name, lightOnImage }: Props) {
             </div>
           )}
 
+          {/* Mobile dots — the only affordance telling a phone shopper more photos exist */}
+          {images.length > 1 && (
+            <div className="lg:hidden absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-1.5 bg-white/80 rounded-full px-2.5 py-2">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  aria-label={`Go to image ${i + 1} of ${images.length}`}
+                  aria-current={i === active}
+                  onClick={() => scrollToIndex(i)}
+                  className="w-5 h-5 flex items-center justify-center cursor-pointer"
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`w-1.5 h-1.5 rounded-full transition-colors ${i === active ? 'bg-[#2C2825]' : 'bg-[#A09488]/50'}`}
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Zoom button */}
           <button
             type="button"
@@ -103,6 +180,9 @@ export default function ProductGallery({ images, name, lightOnImage }: Props) {
       {/* Lightbox */}
       {lightbox && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${name} images`}
           className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
           onClick={closeLightbox}
         >

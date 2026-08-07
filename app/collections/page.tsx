@@ -81,6 +81,16 @@ export default async function CollectionsPage({ searchParams }: Props) {
   const minPrice = minPriceStr ? Number(minPriceStr) : undefined
   const maxPrice = maxPriceStr ? Number(maxPriceStr) : undefined
 
+  // The filters the grid must repeat on every load-more request. It used to
+  // read these with useSearchParams, which suspended and made the Suspense
+  // fallback render a second full copy of the grid into the HTML.
+  const gridParams = new URLSearchParams()
+  if (categoryParam) gridParams.set('category', categoryParam)
+  if (minPrice !== undefined && Number.isFinite(minPrice)) gridParams.set('minPrice', String(minPrice))
+  if (maxPrice !== undefined && Number.isFinite(maxPrice)) gridParams.set('maxPrice', String(maxPrice))
+  if (page > 1) gridParams.set('page', String(page))
+  const gridQuery = gridParams.toString()
+
   const categories = await fetchCategories()
 
   const selectedCategory = categoryParam
@@ -147,6 +157,7 @@ export default async function CollectionsPage({ searchParams }: Props) {
           initialProducts={products}
           initialPage={usingApi ? page : 1}
           totalPages={usingApi ? totalPages : 1}
+          queryKey={gridQuery}
         />
       </div>
       <CrawlablePagination

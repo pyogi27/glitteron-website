@@ -28,6 +28,8 @@ const FOOTER_LINKS = {
     { label: 'Shop All Rooms', href: '/rooms' },
   ],
   Help: [
+    { label: 'Lighting Guides', href: '/guides' },
+    { label: 'FAQ', href: '/faq' },
     { label: 'About Us', href: '/about' },
     { label: 'Contact', href: '/contact' },
     { label: 'Shipping Policy', href: '/shipping' },

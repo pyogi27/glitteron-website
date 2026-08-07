@@ -250,47 +250,90 @@
     }
   }
 
-  /* Overlay: hidden by default, slides up on hover (desktop only) */
-  .product-card-overlay {
+  /* ── Product card: name and price reveal on hover ─────────────────────────
+     On pointer devices the card is image-only at rest and .product-card-reveal
+     slides name and price up over the artwork on hover. There is no background
+     panel: the halo classes below carry the contrast so the reveal never covers
+     the product.
+
+     .product-card-info is the touch fallback and is hidden wherever hover
+     works. Both are needed — the reveal cannot be reached without a pointer,
+     and the strip would otherwise duplicate it on desktop.
+  ── */
+  .product-card-reveal {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(14px);
     pointer-events: none;
     transition:
-      opacity   0.38s cubic-bezier(0.25, 1, 0.5, 1),
-      transform 0.38s cubic-bezier(0.25, 1, 0.5, 1);
+      opacity   0.34s cubic-bezier(0.25, 1, 0.5, 1),
+      transform 0.34s cubic-bezier(0.25, 1, 0.5, 1);
   }
 
-  @media (hover: hover) {
-    .product-card:hover .product-card-overlay {
+  @media (hover: hover) and (pointer: fine) {
+    /* Hidden, not faded: with the reveal carrying the information there is
+       nothing left to show under the image, so the card shouldn't reserve
+       space for it. */
+    .product-card-info {
+      display: none;
+    }
+
+    /* :focus-within as well as :hover. The reveal holds the only add-to-cart
+       button on a pointer device, so a keyboard user tabbing into the card has
+       to be able to see what they have focused. */
+    .product-card:hover .product-card-reveal,
+    .product-card:focus-within .product-card-reveal {
       opacity: 1;
       transform: translateY(0);
       pointer-events: auto;
     }
   }
 
-  /* Contrast halo: replaces the old dark gradient scrim so the overlay text
-     stays readable without any background fill. Light-on = white text on a dark
-     halo; light-off = black text on a light halo. */
+  /* Contrast carrier: replaces a background fill so the text reads against the
+     artwork without a scrim over it.
+
+     A glow alone is not enough. Sampling the catalogue, the bottom-left region
+     where this text sits measures a mean luminance above 190 on 13 of 16
+     product shots but drops to 25-85 on the rest, so roughly one card in five
+     is dark exactly where near-black type lands. A soft shadow cannot rescue
+     that.
+
+     So the contrast comes from an outline, not a glow: paint-order draws the
+     stroke behind the fill, giving each glyph its own keyline that holds on a
+     white studio shot and on a near-black one alike. The wide shadow stays for
+     depth only. Light-off = dark text, white keyline; light-on = white text,
+     dark keyline, since the lit images go dark.
+  ── */
+  .product-card-overlay-text,
+  .product-card-overlay-text-dark {
+    paint-order: stroke fill;
+  }
+
+  /* 2px, not more: the stroke is centred on the glyph outline, so half of it
+     eats into the letterform and a heavier weight visibly fattens Cormorant at
+     these sizes. The tight shadows are the fallback for engines without
+     -webkit-text-stroke, where the stroke would otherwise leave no carrier at
+     all; they sit behind the stroke and cost nothing where it is supported. */
   .product-card-overlay-text {
+    -webkit-text-stroke: 2px rgba(20, 14, 12, 0.7);
     text-shadow:
       0 1px 2px rgba(0, 0, 0, 0.85),
-      0 0 10px rgba(0, 0, 0, 0.55);
+      0 0 5px rgba(0, 0, 0, 0.7),
+      0 0 16px rgba(0, 0, 0, 0.5);
   }
 
   .product-card-overlay-text-dark {
+    -webkit-text-stroke: 2px rgba(255, 253, 250, 0.8);
     text-shadow:
       0 1px 2px rgba(255, 255, 255, 0.9),
-      0 0 10px rgba(255, 255, 255, 0.7);
+      0 0 5px rgba(255, 255, 255, 0.8),
+      0 0 16px rgba(255, 255, 255, 0.55);
   }
 
-  /* Mobile info strip: visible on touch devices, hidden on hover-capable screens */
-  .product-card-mobile-info {
-    display: block;
-  }
-
-  @media (hover: hover) {
-    .product-card-mobile-info {
-      display: none;
+  /* The global reduced-motion block already collapses the durations; drop the
+     travel too so the reveal appears in place instead of jumping. */
+  @media (prefers-reduced-motion: reduce) {
+    .product-card-reveal {
+      transform: none;
     }
   }
 
@@ -573,4 +616,84 @@
   height: 2px;
   background: var(--color-warm-gray);
   border-radius: 2px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Hero reveal
+
+   This runs in CSS rather than GSAP for one reason: the hero <h1> is the
+   home page's LCP element. Starting it at opacity-0 and fading it in from a
+   useEffect meant LCP waited for React to hydrate and GSAP to execute —
+   4.5s of pure render delay against a 1.2s first paint. A CSS animation
+   starts at first paint instead, and the hero needs no client JS at all.
+
+   --hero-opacity is the resting opacity (the video shows through the type),
+   --hero-delay staggers the elements the old timeline used to sequence.
+   ───────────────────────────────────────────────────────────── */
+@keyframes heroRise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: var(--hero-opacity, 1);
+    transform: none;
+  }
+}
+
+.hero-reveal {
+  opacity: var(--hero-opacity, 1);
+  animation: heroRise 0.9s cubic-bezier(0.16, 1, 0.3, 1) var(--hero-delay, 0s) both;
+}
+
+@keyframes heroFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: var(--hero-opacity, 1);
+  }
+}
+
+/* Fade only. heroRise ends on `transform: none`, which would wipe out a
+   positioning transform such as the scroll indicator's -translate-x-1/2. */
+.hero-fade {
+  opacity: var(--hero-opacity, 1);
+  animation: heroFade 0.9s ease-out var(--hero-delay, 0s) both;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Reduced motion
+
+   The site had no prefers-reduced-motion handling at all while running five
+   infinite CSS animations (ticker, glow flicker, scroll line), GSAP scroll
+   reveals, and a card deck that fans itself open on entering the viewport.
+   For users who ask the OS to reduce motion, that is a page that never settles.
+
+   Transitions are kept but collapsed to ~1 frame so hover and focus feedback
+   still reads as a state change rather than vanishing. Infinite decorative
+   animation stops outright; the ticker is a moving trust strip, so it holds
+   still and its content stays readable in place.
+   ───────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    /* With duration collapsed, a delay only holds the element in its start
+       state — which for a fill-mode animation means invisible. */
+    animation-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* The ticker translates its whole track; with animation stopped it would sit
+     mid-slide. Reset it and let the strip wrap instead of scroll. */
+  .animate-\[ticker_18s_linear_infinite\] {
+    transform: none !important;
+    flex-wrap: wrap;
+    white-space: normal;
+    gap: 1rem 2.5rem;
+  }
 }

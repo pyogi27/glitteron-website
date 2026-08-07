@@ -18,7 +18,7 @@ export default function RoomGrid() {
         </div>
         <Link
           href="/collections"
-          className="text-[12px] font-medium tracking-[0.1em] uppercase text-[#2C2825] opacity-50 hover:opacity-100 flex items-center gap-2 no-underline border-b border-[#D8D0C4] pb-1 transition-all hover:gap-3.5"
+          className="text-[12px] font-medium tracking-[0.1em] uppercase text-[#5A5249] hover:text-[#2C2825] flex items-center gap-2 no-underline border-b border-[#BCAF9C] pb-1 transition-all hover:gap-3.5"
         >
           All Collections
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -48,8 +48,12 @@ export default function RoomGrid() {
             {/* Base gradient overlay */}
             <div
               className="rg-overlay absolute inset-0 z-[1] transition-all duration-[400ms]"
+              // Text sits over uncontrolled stock photography, so the scrim has to
+              // hold contrast against the worst case (a near-white frame), not the
+              // average one. The original 0.22 alpha in this band left the tag at
+              // 1.27:1. At 0.78 the #F2C4A0 tag clears 5.8:1 even over pure white.
               style={{
-                background: 'linear-gradient(to top, rgba(26,18,16,0.82) 0%, rgba(26,18,16,0.22) 45%, rgba(26,18,16,0.05) 100%)',
+                background: 'linear-gradient(to top, rgba(26,18,16,0.92) 0%, rgba(26,18,16,0.78) 55%, rgba(26,18,16,0.10) 100%)',
               }}
             />
 
@@ -70,8 +74,8 @@ export default function RoomGrid() {
             {/* Info bottom */}
             <div className="absolute bottom-0 left-0 right-0 z-[3] p-[28px_26px_26px]">
               <div
-                className="text-[9px] font-semibold tracking-[0.2em] uppercase mb-1.5 transition-opacity duration-300"
-                style={{ color: '#E8A87C', opacity: 0.8 }}
+                className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-1.5"
+                style={{ color: '#F2C4A0' }}
               >
                 {room.tag}
               </div>
@@ -81,7 +85,7 @@ export default function RoomGrid() {
                 dangerouslySetInnerHTML={{ __html: i === 0 ? room.name.replace(' ', '<br>') : room.name }}
               />
               <div className="flex items-center justify-between">
-                <span className="text-[11px] tracking-[0.08em]" style={{ color: 'rgba(250,247,243,0.48)' }}>
+                <span className="text-[12px] tracking-[0.08em]" style={{ color: 'rgba(250,247,243,0.85)' }}>
                   {room.subtitle}
                 </span>
                 <span

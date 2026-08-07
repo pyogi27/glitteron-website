@@ -30,7 +30,8 @@ export default function VariantSelector({ label, value, options, disabledOptions
             key={opt}
             type="button"
             onClick={() => select(opt)}
-            className={`px-4 py-[7px] border rounded-[20px] text-[12px] transition-all
+            aria-pressed={value === opt}
+            className={`px-4 min-h-11 border rounded-[20px] text-[12px] cursor-pointer transition-colors
               ${disabledOptions.includes(opt)
                 ? 'opacity-40 line-through cursor-not-allowed border-[#D8D0C4] text-[#2C2825]'
                 : value === opt

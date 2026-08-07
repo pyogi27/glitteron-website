@@ -1,11 +1,11 @@
 // components/product/ProductInfo.tsx
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { Product } from '@/lib/types'
 import StarRating from '@/components/ui/StarRating'
 import VariantSelector from './VariantSelector'
 import QuantityControl from './QuantityControl'
-import ProductTabs from './ProductTabs'
 import { useCartStore } from '@/lib/stores/cartStore'
 import { useWishlistStore } from '@/lib/stores/wishlistStore'
 import {
@@ -19,9 +19,21 @@ import { parseWhereUsed } from '@/lib/data/visualizer'
 import RoomVisualizerModal from './RoomVisualizerModal'
 
 const PERKS = [
-  { icon: '🚚', label: 'Free Delivery', sub: 'Above ₹15,000' },
-  { icon: '🛡️', label: '5yr Warranty', sub: 'On all products' },
-  { icon: '🔧', label: 'Expert Install', sub: 'Available on request' },
+  {
+    label: 'Free Delivery',
+    sub: 'On every order, no minimum',
+    path: 'M1 3h13v13H1zM14 8h4l3 3v5h-7M5.5 19.5a2 2 0 100-4 2 2 0 000 4zM16.5 19.5a2 2 0 100-4 2 2 0 000 4z',
+  },
+  {
+    label: '5yr Warranty',
+    sub: 'On all products',
+    path: 'M12 2l8 3.5v6c0 4.8-3.3 9.1-8 10.5-4.7-1.4-8-5.7-8-10.5v-6zM9 12l2 2 4-4',
+  },
+  {
+    label: 'Expert Install',
+    sub: 'Available on request',
+    path: 'M14.7 6.3a4 4 0 01-5 5L4 17v3h3l5.7-5.7a4 4 0 015-5l-2.5 2.5 2.1 2.1z',
+  },
 ]
 
 export default function ProductInfo({ product }: { product: Product }) {
@@ -50,6 +62,22 @@ export default function ProductInfo({ product }: { product: Product }) {
 
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
+
+  const router = useRouter()
+
+  // Sticky mobile buy bar: shown once the real Add to Cart row has scrolled out of view.
+  const actionsRef = useRef<HTMLDivElement>(null)
+  const [showStickyBar, setShowStickyBar] = useState(false)
+  useEffect(() => {
+    const el = actionsRef.current
+    if (!el) return
+    const io = new IntersectionObserver(
+      ([entry]) => setShowStickyBar(!entry.isIntersecting),
+      { rootMargin: '0px 0px -80px 0px' },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
 
   const [vizOpen, setVizOpen] = useState(false)
   const parsedRoomTypes = parseWhereUsed(product.whereUsed)
@@ -134,6 +162,13 @@ export default function ProductInfo({ product }: { product: Product }) {
     })
   }
 
+  // Buy Now used to call handleAddToCart and stay put — same behaviour as Add to Cart
+  // under a label that promises checkout.
+  const handleBuyNow = () => {
+    handleAddToCart()
+    router.push('/checkout')
+  }
+
   const emi = Math.round(effectivePrice / 12)
 
   // A variation carries its own stock. Fall back to the product-level count when the
@@ -147,7 +182,10 @@ export default function ProductInfo({ product }: { product: Product }) {
   const maxQty = product.stock > 0 ? product.stock : undefined
 
   return (
-    <div className="p-5 lg:p-[40px_48px_48px_40px] overflow-y-auto h-auto lg:h-[calc(100vh-var(--spacing-header))] bg-white">
+    // ponytail: no overflow/height here — the buy box flows in the page scroll.
+    // A second scroll container next to the page scroll traps the wheel and hides
+    // the Add to Cart button behind an invisible boundary.
+    <div className="p-5 lg:p-[40px_48px_48px_40px] bg-white">
       {/* Category */}
       <div className="text-[10px] font-medium tracking-[0.18em] uppercase text-[#C4714A] mb-3">{product.category}</div>
 
@@ -166,11 +204,14 @@ export default function ProductInfo({ product }: { product: Product }) {
         )}
       </div>
 
-      {/* Rating */}
-      <div className="flex items-center gap-2 mb-5">
-        <StarRating rating={product.rating} size={14} />
-        <span className="text-[12px] text-[#A09488]">({product.reviewCount} reviews)</span>
-      </div>
+      {/* Rating — hidden with no reviews. An empty 5-star row reading "(0 reviews)"
+          sits above the price and tells the shopper nobody has bought this. */}
+      {product.reviewCount > 0 && (
+        <div className="flex items-center gap-2 mb-5">
+          <StarRating rating={product.rating} size={14} />
+          <span className="text-[12px] text-[#A09488]">({product.reviewCount} reviews)</span>
+        </div>
+      )}
 
       {/* Price */}
       <div className="mb-6">
@@ -248,13 +289,19 @@ export default function ProductInfo({ product }: { product: Product }) {
                   aria-pressed={finish === ct.name}
                   disabled={!selectable}
                   onClick={() => selectFinish(ct.name)}
-                  className={`w-6 h-6 rounded-full border-2 transition-all ${
-                    finish === ct.name
-                      ? 'border-[#C4714A] scale-110'
-                      : 'border-[#D8D0C4] hover:border-[#C4714A]'
-                  } disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-[#D8D0C4]`}
-                  style={{ backgroundColor: ct.hex }}
-                />
+                  // 44px hit area, 26px visible dot — the swatch was a 24px target.
+                  className="w-11 h-11 flex items-center justify-center rounded-full cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`w-[26px] h-[26px] rounded-full border-2 transition-colors ${
+                      finish === ct.name
+                        ? 'border-[#C4714A] ring-2 ring-[#C4714A]/30'
+                        : 'border-[#D8D0C4] hover:border-[#C4714A]'
+                    }`}
+                    style={{ backgroundColor: ct.hex }}
+                  />
+                </button>
               )
             })}
           </div>
@@ -262,13 +309,13 @@ export default function ProductInfo({ product }: { product: Product }) {
       )}
 
       {/* Quantity + Actions */}
-      <div className="flex items-center gap-3 mb-4">
+      <div ref={actionsRef} className="flex items-center gap-3 mb-4">
         <QuantityControl value={qty} max={maxQty} onChange={setQty} />
         <button
           type="button"
           onClick={handleAddToCart}
           disabled={!inStock}
-          className="flex-1 bg-[#2C2825] text-white border-none py-3 rounded-3xl font-sans text-[13px] font-medium tracking-[0.08em] uppercase transition-all hover:bg-[#8B5E3C] hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#2C2825] disabled:hover:translate-y-0"
+          className="flex-1 bg-[#2C2825] text-white border-none min-h-11 py-3 rounded-3xl font-sans text-[13px] font-medium tracking-[0.08em] uppercase cursor-pointer transition-colors hover:bg-[#8B5E3C] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#2C2825]"
         >
           {inStock ? 'Add to Cart' : 'Out of Stock'}
         </button>
@@ -285,9 +332,9 @@ export default function ProductInfo({ product }: { product: Product }) {
       </div>
       <button
         type="button"
-        onClick={handleAddToCart}
+        onClick={handleBuyNow}
         disabled={!inStock}
-        className="w-full bg-[#C4714A] text-[#2C2825] border-none py-3 rounded-3xl font-sans text-[13px] font-semibold tracking-[0.08em] uppercase transition-all hover:bg-[#E8A87C] hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#C4714A] disabled:hover:translate-y-0"
+        className="w-full bg-[#C4714A] text-[#2C2825] border-none min-h-11 py-3 rounded-3xl font-sans text-[13px] font-semibold tracking-[0.08em] uppercase cursor-pointer transition-colors hover:bg-[#E8A87C] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#C4714A]"
       >
         Buy Now
       </button>
@@ -306,20 +353,52 @@ export default function ProductInfo({ product }: { product: Product }) {
         </button>
 
       {/* Perks */}
-      <div className="flex gap-4 py-5 border-y border-[#D8D0C4] mb-7">
+      <div className="grid grid-cols-3 gap-4 py-5 border-y border-[#D8D0C4] mb-7">
         {PERKS.map(p => (
-          <div key={p.label} className="flex items-center gap-2.5 flex-1">
-            <span className="text-[20px]">{p.icon}</span>
+          <div key={p.label} className="flex items-start gap-2.5">
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              className="w-5 h-5 flex-shrink-0 stroke-[#8B5E3C] fill-none"
+              strokeWidth={1.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d={p.path} />
+            </svg>
             <div>
               <div className="text-[11px] font-semibold text-[#2C2825]">{p.label}</div>
-              <div className="text-[10px] text-[#A09488]">{p.sub}</div>
+              <div className="text-[10px] leading-[1.45] text-[#A09488]">{p.sub}</div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Tabs */}
-      <ProductTabs product={product} />
+      {/* Sticky mobile buy bar. Desktop keeps the sticky gallery as its anchor, so this
+          is below lg only. Hidden until the real buy row leaves the viewport, otherwise
+          it duplicates a button the shopper is already looking at. */}
+      <div
+        className={`lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-[#D8D0C4] px-4 py-3 flex items-center gap-3 transition-transform duration-300 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none ${
+          showStickyBar ? 'translate-y-0' : 'translate-y-full'
+        }`}
+        aria-hidden={!showStickyBar}
+      >
+        <div className="min-w-0">
+          <div className="font-serif text-[19px] leading-none text-[#2C2825]">
+            ₹{effectivePrice.toLocaleString('en-IN')}
+          </div>
+          <div className="text-[10px] text-[#A09488] truncate">{size}{finish ? ` · ${finish}` : ''}</div>
+        </div>
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          disabled={!inStock}
+          tabIndex={showStickyBar ? 0 : -1}
+          className="flex-1 bg-[#2C2825] text-white min-h-11 rounded-3xl font-sans text-[13px] font-medium tracking-[0.08em] uppercase cursor-pointer transition-colors hover:bg-[#8B5E3C] disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          {inStock ? 'Add to Cart' : 'Out of Stock'}
+        </button>
+      </div>
 
       {/* Room visualizer modal */}
       {vizOpen && roomTypes.length > 0 && (

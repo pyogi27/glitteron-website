@@ -1,31 +1,18 @@
-'use client'
-import { useEffect, useRef } from 'react'
-import gsap from 'gsap'
 import Link from 'next/link'
 
+/**
+ * Server component on purpose. The reveal is a CSS animation (.hero-reveal in
+ * globals.css) rather than a GSAP timeline in useEffect, because the <h1> is
+ * this page's LCP element — gating its first paint on hydration cost 4.5s of
+ * render delay. Nothing here needs client JS now, so none is shipped, and the
+ * hero renders with scripting unavailable.
+ *
+ * Resting opacity is below 1 on the type and the button: the video shows
+ * through them.
+ */
 export default function HeroSection() {
-  const title = useRef<HTMLHeadingElement>(null)
-  const actions = useRef<HTMLDivElement>(null)
-  const scroll = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline()
-      // ponytail: tween to partial opacity, not 1 — the video shows through the type.
-      tl.fromTo(title.current,   { opacity: 0, y: 24 }, { opacity: 0.78, y: 0, duration: 0.9, delay: 0.3 })
-        .fromTo(actions.current, { opacity: 0, y: 24 }, { opacity: 0.85, y: 0, duration: 0.9 }, '-=0.5')
-        .fromTo(scroll.current,  { opacity: 0 },         { opacity: 1, duration: 1 }, '-=0.2')
-    })
-    return () => ctx.revert()
-  }, [])
-
   return (
     <section className="relative h-screen min-h-[680px] flex items-center justify-center overflow-hidden">
-      {/* GSAP reveals the hero from opacity-0. Without JS it would stay blank,
-          so restore visibility when scripting is unavailable. */}
-      <noscript>
-        <style>{`.hero-reveal { opacity: 1 !important; }`}</style>
-      </noscript>
       {/* Video background */}
       <video
         autoPlay
@@ -53,7 +40,10 @@ export default function HeroSection() {
 
       {/* Content */}
       <div className="relative z-[3] text-center text-white max-w-[760px] px-6">
-        <h1 ref={title} className="hero-reveal font-serif text-[clamp(52px,7vw,92px)] font-light leading-[1.05] tracking-[-0.01em] mb-10 opacity-0">
+        <h1
+          className="hero-reveal font-serif text-[clamp(52px,7vw,92px)] font-light leading-[1.05] tracking-[-0.01em] mb-10"
+          style={{ '--hero-opacity': 0.78, '--hero-delay': '0.15s' } as React.CSSProperties}
+        >
           Where Light Becomes <em className="italic text-[#F5F0EB]">an Art</em>
           {/* The visible h1 is deliberately atmospheric; this carries the terms
               the page actually ranks for, for crawlers and screen readers. */}
@@ -61,7 +51,10 @@ export default function HeroSection() {
             {' '}— handcrafted chandeliers and pendant lights
           </span>
         </h1>
-        <div ref={actions} className="hero-reveal flex gap-4 justify-center opacity-0">
+        <div
+          className="hero-reveal flex gap-4 justify-center"
+          style={{ '--hero-opacity': 0.85, '--hero-delay': '0.5s' } as React.CSSProperties}
+        >
           <Link href="/collections" className="bg-[#E2DAD0]/25 text-white border border-white/45 px-9 py-3.5 rounded-3xl font-sans text-[13px] font-medium tracking-[0.08em] uppercase no-underline inline-flex items-center gap-2 backdrop-blur-[2px] transition-all hover:bg-[#E2DAD0]/40 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(196,113,74,0.4)]">
             Explore Collection
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -72,7 +65,10 @@ export default function HeroSection() {
       </div>
 
       {/* Scroll indicator */}
-      <div ref={scroll} className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/40 text-[10px] tracking-[0.18em] uppercase opacity-0">
+      <div
+        className="hero-fade absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/40 text-[10px] tracking-[0.18em] uppercase"
+        style={{ '--hero-delay': '0.9s' } as React.CSSProperties}
+      >
         <div className="w-px h-12 bg-gradient-to-b from-[#C4714A]/60 to-transparent animate-[scrollLine_2s_ease-in-out_infinite]" />
         Scroll
       </div>

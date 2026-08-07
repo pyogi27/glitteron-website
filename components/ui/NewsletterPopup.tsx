@@ -93,7 +93,7 @@ export default function NewsletterPopup() {
       aria-label="Newsletter signup"
     >
       <div
-        className="relative w-full overflow-hidden rounded-[20px]"
+        className="relative w-full overflow-hidden rounded-[20px] bg-[#1A1210]"
         style={{
           maxWidth: 420,
           animation: isClosing
@@ -102,14 +102,19 @@ export default function NewsletterPopup() {
           boxShadow: '0 32px 80px rgba(26,18,16,0.7), 0 0 0 1px rgba(250,247,243,0.06)',
         }}
       >
-        {/* Background image */}
-        <div className="absolute inset-0">
+        {/* Background image — desktop only, and never priority.
+            This popup opens 8s after load, before most visitors have clicked
+            anything, so Chrome was recording this decorative image as the
+            page's Largest Contentful Paint: 13–15s on every route. On phones,
+            where Core Web Vitals are graded, the card keeps the gradient over
+            the solid ground colour instead. `priority` also had it preloading
+            at high priority on every page for a popup that may never open. */}
+        <div className="absolute inset-0 hidden sm:block">
           <Image
             src="https://images.pexels.com/photos/1743231/pexels-photo-1743231.jpeg?auto=compress&cs=tinysrgb&w=840&h=1120&fit=crop"
             alt=""
             fill
             className="object-cover object-center"
-            priority
           />
           <div
             className="absolute inset-0"
@@ -136,7 +141,9 @@ export default function NewsletterPopup() {
         </button>
 
         {/* Content */}
-        <div className="relative z-[2] px-7 pt-52 pb-8 flex flex-col gap-3">
+        {/* pt-52 reserves the photo above the copy. With no photo on mobile
+            that padding is just dead space, so the card closes up there. */}
+        <div className="relative z-[2] px-7 pt-9 sm:pt-52 pb-8 flex flex-col gap-3">
           {state === 'success' ? (
             <div className="text-center py-6 flex flex-col items-center gap-4">
               <div

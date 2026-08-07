@@ -7,7 +7,7 @@ interface StarRatingProps {
 
 export default function StarRating({ rating, max = 5, size = 11, light = false }: StarRatingProps) {
   return (
-    <div className="flex gap-0.5">
+    <div className="flex gap-0.5" role="img" aria-label={`${rating} out of ${max} stars`}>
       {Array.from({ length: max }, (_, i) => (
         <svg
           key={i}

@@ -47,6 +47,8 @@ export const metadata: Metadata = {
     url: SITE_URL,
     locale: 'en_IN',
     type: 'website',
+    // No images here: app/opengraph-image.png is the card, and an entry in this
+    // object overrides that file rather than adding to it.
   },
   twitter: { card: 'summary_large_image', title: TITLE, description: DESCRIPTION },
 }
@@ -55,7 +57,7 @@ export const metadata: Metadata = {
 // manual <link rel="preload"> is needed in <head>.
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${outfit.variable}`}>
+    <html lang="en-IN" className={`${cormorant.variable} ${outfit.variable}`}>
       <body className="bg-white text-dark font-sans font-light leading-relaxed overflow-x-hidden" suppressHydrationWarning>
         <SessionRestorer />
         <CustomCursor />

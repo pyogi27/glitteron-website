@@ -1,9 +1,8 @@
 'use client'
-import { Suspense, useEffect, useRef, useState, useCallback, useMemo } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { Product } from '@/lib/types'
 import { useFilterStore } from '@/lib/stores/filterStore'
-import ProductCard from '@/components/products/ProductCard'
+import ProductCard, { EAGER_CARDS } from '@/components/products/ProductCard'
 import { useScrollRestoration } from '@/hooks/useScrollRestoration'
 
 const BATCH_SIZE = 100
@@ -12,6 +11,14 @@ interface Props {
   initialProducts: Product[]
   initialPage: number
   totalPages: number
+  /**
+   * The filter params this grid was rendered for, serialised (e.g.
+   * `category=Wall+Lights`). Supplied by the server page rather than read with
+   * useSearchParams: that hook suspends, and the Suspense fallback it needed
+   * was a second copy of the whole grid — so every listing page shipped 200
+   * cards and 200 image requests for 100 products, laid out twice.
+   */
+  queryKey?: string
   /** Query params merged into every load-more request (e.g. { whereUsed: 'Living Room' }) */
   extraParams?: Record<string, string>
 }
@@ -99,18 +106,18 @@ function InfiniteProductGridInner({
   initialProducts,
   initialPage,
   totalPages,
+  queryKey,
   extraParams,
 }: Props) {
-  const searchParams = useSearchParams()
   const extraKey = useMemo(
     () => new URLSearchParams(extraParams ?? {}).toString(),
     [extraParams],
   )
   const paramKey = useMemo(() => {
-    const merged = new URLSearchParams(searchParams.toString())
+    const merged = new URLSearchParams(queryKey ?? '')
     new URLSearchParams(extraKey).forEach((value, key) => merged.set(key, value))
     return merged.toString()
-  }, [searchParams, extraKey])
+  }, [queryKey, extraKey])
 
   useScrollRestoration(paramKey)
 
@@ -236,8 +243,8 @@ function InfiniteProductGridInner({
           ? 'cards-track grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 pt-4'
           : 'flex flex-col gap-4'
         }>
-          {sorted.map(p => (
-            <ProductCard key={p.id} product={p} variant={viewMode} />
+          {sorted.map((p, i) => (
+            <ProductCard key={p.id} product={p} variant={viewMode} priority={i < EAGER_CARDS} />
           ))}
         </div>
       )}
@@ -276,25 +283,9 @@ function InfiniteProductGridInner({
   )
 }
 
-/** Static fallback (no useSearchParams): renders the server-fetched products. */
-function InitialGrid({ initialProducts }: Pick<Props, 'initialProducts'>) {
-  return (
-    <div className="flex-1 p-4 sm:p-8 overflow-visible">
-      <div className="cards-track grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 pt-4">
-        {initialProducts.map(p => (
-          <ProductCard key={p.id} product={p} variant="grid" />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// useSearchParams() requires a Suspense boundary on statically prerendered
-// pages (e.g. /rooms/[slug]); wrapping here protects every call site.
+// No Suspense boundary any more: with the filter params arriving as a prop,
+// nothing in here suspends, so the grid renders once — into the server HTML
+// and again on hydration with the same markup.
 export default function InfiniteProductGrid(props: Props) {
-  return (
-    <Suspense fallback={<InitialGrid initialProducts={props.initialProducts} />}>
-      <InfiniteProductGridInner {...props} />
-    </Suspense>
-  )
+  return <InfiniteProductGridInner {...props} />
 }

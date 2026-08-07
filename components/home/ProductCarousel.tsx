@@ -22,7 +22,9 @@ export default function ProductCarousel({ titlePrefix, titleHighlight, label, pr
             {titlePrefix} <em className="italic">{titleHighlight}</em>
           </h2>
         </div>
-        <Link href="/collections" className="text-[12px] font-medium tracking-[0.1em] uppercase text-[#2C2825] opacity-50 hover:opacity-100 active:opacity-100 flex items-center gap-2 no-underline border-b border-[#D8D0C4] pb-1 transition-all hover:gap-3.5">
+        {/* opacity-50 on #2C2825 put this link at 2.51:1. A link is the last thing
+            that should be the lowest-contrast text on the page. */}
+        <Link href="/collections" className="text-[12px] font-medium tracking-[0.1em] uppercase text-[#5A5249] hover:text-[#2C2825] active:text-[#2C2825] flex items-center gap-2 no-underline border-b border-[#BCAF9C] pb-1 transition-all hover:gap-3.5">
           View All →
         </Link>
       </div>
@@ -31,10 +33,16 @@ export default function ProductCarousel({ titlePrefix, titleHighlight, label, pr
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
         {/* Outer: handles horizontal scroll only — must be a separate element from the track
-            so that overflow-x:auto doesn't force overflow-y:auto (CSS spec limitation) */}
+            so that overflow-x:auto doesn't force overflow-y:auto (CSS spec limitation)
+
+            scroll-pl must match the track's px below. scroll-snap-align: start snaps
+            a card's edge to the SCROLLPORT edge, which the track's own padding does
+            not move — so the browser was parking scrollLeft at 16 to sit the first
+            card flush, eating that padding and bleeding the card to the viewport
+            edge. scroll-padding is what insets the snap position. */}
         <div
           ref={track}
-          className="overflow-x-auto pb-6 [scroll-snap-type:x_mandatory] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="overflow-x-auto pb-6 scroll-pl-4 md:scroll-pl-12 [scroll-snap-type:x_mandatory] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {/* Inner: no overflow set, so the card's translateY(-10px) is never clipped vertically */}
           <div className="cards-track flex gap-6 px-4 md:px-12 pt-4 pb-6">

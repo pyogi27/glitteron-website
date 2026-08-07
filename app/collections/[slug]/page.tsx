@@ -7,6 +7,7 @@ import { getProductBySlug, getRelatedProducts } from '@/lib/data/products'
 import { fetchProducts, fetchRelatedProducts, findApiProductBySlug, fetchProductById, mapApiProduct } from '@/lib/api/server'
 import ProductGallery from '@/components/product/ProductGallery'
 import ProductInfo from '@/components/product/ProductInfo'
+import ProductTabs from '@/components/product/ProductTabs'
 import RelatedProducts from '@/components/product/RelatedProducts'
 import JsonLd from '@/components/seo/JsonLd'
 import { breadcrumbSchema, productSchema } from '@/lib/seo/schema'
@@ -161,11 +162,20 @@ export default async function ProductPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Split layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[calc(100vh-110px)]">
+      {/* Split layout — gallery sticks, buy box scrolls with the page.
+          One scroll container for the whole route. */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 items-start">
         <ProductGallery images={product.images} name={product.name} lightOnImage={product.lightOnImage} />
         <ProductInfo product={product} />
       </div>
+
+      {/* Description / specs / reviews run full width below the fold rather than
+          inside the narrow buy column, where they used to force a nested scroll. */}
+      <section className="bg-white border-t border-[#D8D0C4] px-5 lg:px-12 py-10 lg:py-14">
+        <div className="max-w-5xl mx-auto">
+          <ProductTabs product={product} />
+        </div>
+      </section>
 
       <RelatedProducts products={related} />
     </>
