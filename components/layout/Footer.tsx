@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Logo from '@/components/ui/Logo'
+import { categories } from '@/lib/data/categories'
 
 // Only profiles we can verify. Dead href="#" links are worse than no link, and
 // each real one is a sameAs signal for the Organization schema.
@@ -8,17 +9,13 @@ const SOCIAL_LINKS = [
   { platform: 'Instagram', href: 'https://www.instagram.com/litmeup.in/' },
 ]
 
-// The collections page filters on ?category=<category name>; the old ?cat= and
-// ?room= params were read by nothing and silently landed on the unfiltered grid.
-// Room links now point at the real /rooms/[slug] pages.
+// Category links point at the flat landing pages (/pendant-lights), not the
+// ?category= filter view — those are the indexed URLs and the ones carrying the
+// category copy. Room links point at the real /rooms/[slug] pages.
 const FOOTER_LINKS = {
-  // Category names must match the backend exactly — the page filters by name.
   Collections: [
-    { label: 'Chandelier Lights', href: '/collections?category=Chandelier+Lights' },
-    { label: 'Pendant Lights', href: '/collections?category=Pendant+Lights' },
-    { label: 'Ceiling Lights', href: '/collections?category=Ceiling+Lights' },
-    { label: 'Wall Lights', href: '/collections?category=Wall+Lights' },
-    { label: 'Floor Lamps', href: '/collections?category=Floor+Lamps' },
+    ...categories.map(c => ({ label: c.heading, href: `/${c.slug}` })),
+    { label: 'Shop All Lights', href: '/collections' },
   ],
   Rooms: [
     { label: 'Living Room', href: '/rooms/living-room' },
@@ -30,6 +27,7 @@ const FOOTER_LINKS = {
   Help: [
     { label: 'Lighting Guides', href: '/guides' },
     { label: 'FAQ', href: '/faq' },
+    { label: 'Visit the Workshop', href: '/surat-store' },
     { label: 'About Us', href: '/about' },
     { label: 'Contact', href: '/contact' },
     { label: 'Shipping Policy', href: '/shipping' },

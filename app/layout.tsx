@@ -26,9 +26,11 @@ const outfit = Outfit({
   variable: '--font-outfit',
 })
 
-const TITLE = 'Handcrafted Chandeliers & Pendant Lights | LitMeUp'
+// "Buy … Online in India" is the head-term shape every competitor ranking for
+// these queries uses; the old title led with a craft claim nobody searches for.
+const TITLE = 'Buy Decorative Lights Online in India | LitMeUp'
 const DESCRIPTION =
-  '500+ handcrafted chandeliers & pendant lights for spaces that deserve to glow. Free shipping across India, 5-year warranty.'
+  'Buy handcrafted chandeliers, pendant lights, ceiling and wall lights online in India. 500+ designs, free shipping, 5-year warranty, 7-day returns.'
 
 export const metadata: Metadata = {
   // Makes every relative OG/Twitter/canonical URL absolute.

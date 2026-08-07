@@ -26,11 +26,11 @@ Key facts, all published on the site and current as of this file:
 ## Shop
 
 - [All collections](https://www.litmeup.in/collections): the full catalogue with category and price filters.
-- [Chandelier lights](https://www.litmeup.in/collections?category=Chandelier+Lights)
-- [Pendant lights](https://www.litmeup.in/collections?category=Pendant+Lights)
-- [Ceiling lights](https://www.litmeup.in/collections?category=Ceiling+Lights)
-- [Wall lights](https://www.litmeup.in/collections?category=Wall+Lights)
-- [Floor lamps](https://www.litmeup.in/collections?category=Floor+Lamps)
+- [Chandelier lights](https://www.litmeup.in/chandelier-lights)
+- [Pendant lights](https://www.litmeup.in/pendant-lights)
+- [Ceiling lights](https://www.litmeup.in/ceiling-lights)
+- [Wall lights](https://www.litmeup.in/wall-lights)
+- [Floor lamps](https://www.litmeup.in/floor-lamps)
 
 ## Shop by room
 
@@ -39,6 +39,22 @@ Key facts, all published on the site and current as of this file:
 - [Dining room lighting](https://www.litmeup.in/rooms/dining-room)
 - [Bedroom lighting](https://www.litmeup.in/rooms/bedroom)
 - [Kitchen and island lighting](https://www.litmeup.in/rooms/kitchen)
+
+## Where we are, and where we deliver
+
+LitMeUp has exactly one location: the workshop in Surat, Gujarat. There are no
+showrooms, dealers or stockists in any other city. Everything is sold direct and
+shipped from Surat.
+
+- [Visit the Surat workshop](https://www.litmeup.in/surat-store): 69 Jalaram Industrial Estate, Navjivan Circle, Udhana Magdalla Road, Surat, Gujarat 395007. Open Monday to Saturday, 10am to 7pm; closed Sunday.
+- [Delivery to Mumbai](https://www.litmeup.in/lighting/mumbai)
+- [Delivery to Delhi NCR](https://www.litmeup.in/lighting/delhi)
+- [Delivery to Bangalore](https://www.litmeup.in/lighting/bangalore)
+- [Delivery to Hyderabad](https://www.litmeup.in/lighting/hyderabad)
+- [Delivery to Chennai](https://www.litmeup.in/lighting/chennai)
+- [Delivery to Pune](https://www.litmeup.in/lighting/pune)
+- [Delivery to Ahmedabad](https://www.litmeup.in/lighting/ahmedabad)
+- [Delivery to Kolkata](https://www.litmeup.in/lighting/kolkata)
 
 ## Lighting guides
 

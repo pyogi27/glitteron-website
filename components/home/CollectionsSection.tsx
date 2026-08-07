@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { categoryPath } from '@/lib/data/categories'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -81,7 +82,9 @@ export default function CollectionsSection({ categories = STATIC_CATEGORIES }: P
           {categories.map((cat, i) => (
             <Link
               key={cat.id ?? cat.name}
-              href={`/collections?category=${encodeURIComponent(cat.name)}`}
+              // Flat landing page where we have one; the filter view is the fallback
+              // for any category the backend adds before we write copy for it.
+              href={categoryPath(cat.name) ?? `/collections?category=${encodeURIComponent(cat.name)}`}
               className="group relative flex flex-col overflow-hidden rounded-2xl aspect-[3/4] cursor-pointer"
             >
               {/* Image */}

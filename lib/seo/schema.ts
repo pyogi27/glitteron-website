@@ -76,6 +76,50 @@ export function organizationSchema() {
   }
 }
 
+/**
+ * The Surat workshop, and the only physical location LitMeUp has.
+ *
+ * Deliberately a single node. Emitting a LocalBusiness per city we ship to
+ * would claim a presence that does not exist — the city pages are delivery
+ * areas, and `areaServed` on the organisation already says we cover India.
+ *
+ * No `geo` block: we do not have surveyed coordinates, and guessing them puts
+ * a wrong pin on a map that people navigate by.
+ */
+export function localBusinessSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'LightingStore',
+    '@id': `${SITE_URL}/surat-store#localbusiness`,
+    name: `${SITE_NAME} — Surat Workshop`,
+    url: absoluteUrl('/surat-store'),
+    parentOrganization: { '@id': `${SITE_URL}/#organization` },
+    image: absoluteUrl('/opengraph-image.png'),
+    description:
+      'The LitMeUp workshop in Udhana, Surat, where every fixture is assembled and inspected. Open to visitors Monday to Saturday.',
+    email: COMPANY.email,
+    telephone: COMPANY.phone,
+    priceRange: '₹₹',
+    currenciesAccepted: CURRENCY,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: '69 Jalaram Industrial Estate, Navjivan Circle, Udhana Magdalla Road',
+      addressLocality: 'Surat',
+      addressRegion: 'Gujarat',
+      postalCode: '395007',
+      addressCountry: 'IN',
+    },
+    openingHoursSpecification: [
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        opens: '10:00',
+        closes: '19:00',
+      },
+    ],
+  }
+}
+
 export function websiteSchema() {
   return {
     '@context': 'https://schema.org',
