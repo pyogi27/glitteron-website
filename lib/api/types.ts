@@ -14,8 +14,21 @@ export interface ApiProduct {
   name: string;
   description?: string;
   price: number | string;
-  categoryId: number;
-  category?: ApiCategory;
+  /**
+   * The category is reported as `category` holding the id AS A STRING ("5"), on
+   * both the list and detail endpoints. There is no `categoryId` key on the wire
+   * — it was declared here as a required number, so `p.categoryId` was undefined
+   * for every product and `categoryMap.get(p.categoryId)` resolved to undefined
+   * site-wide. That is why Product.category was an empty string on every page
+   * and every Product JSON-LD block shipped `"category": ""`.
+   *
+   * Verified 2026-08-08 on GET /api/products and GET /api/products/1557.
+   * Use categoryIdOf() / resolveCategoryName() in server.ts rather than reading
+   * either field directly — the object form is kept only in case the backend
+   * starts embedding it.
+   */
+  categoryId?: number;
+  category?: string | number | ApiCategory;
   /**
    * Stock is reported under several names and NOT as `stock` — that field does not
    * exist on the wire. Verified 2026-08-04 on GET /api/products/1390, which returns
@@ -109,6 +122,13 @@ export interface ApiProductDetail extends ApiProduct {
   productWidth?: string;
   productLength?: string;
   diameter?: string;
+  // Physical attributes both endpoints return but nothing read until the product
+  // pages started generating copy from them. Coverage across the 1,028-product
+  // catalogue as of 2026-08-08: materials 1003, lightSource 990, bodyColors 932,
+  // productHeight 728, diameter 159, wattage 53.
+  lightSource?: string | null;
+  wattage?: string | number | null;
+  weight?: string | null;
 }
 
 export interface ApiListResponse<T> {

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { fetchAllProducts, fetchCategories, slugify } from '@/lib/api/server'
+import { fetchCategories, resolvableProductSlugs } from '@/lib/api/server'
 import { rooms } from '@/lib/data'
 import { bandSlug, categories as lightCategories, categoryPath } from '@/lib/data/categories'
 import { getRoomSubPage } from '@/lib/data/category-rooms'
@@ -11,20 +11,21 @@ import { absoluteUrl } from '@/lib/site'
 // Revalidate daily — the catalog changes far slower than the 60s product TTL.
 export const revalidate = 86400
 
-/** Every product slug from the API, falling back to static data if it is down. */
+/**
+ * Every product slug from the API, falling back to static data if it is down.
+ *
+ * Taken from the resolver's own index rather than re-derived from product names:
+ * the two used to be computed independently and could disagree about the
+ * catalog, which put URLs in the sitemap that the product route answered with a
+ * 404 (/collections/dg-p184a, sampled 2026-08-08). A slug that came out of the
+ * resolver is resolvable by definition.
+ */
 async function allProductSlugs(): Promise<string[]> {
   try {
     // Shares the cached catalog with the product route — no extra API paging.
-    const products = await fetchAllProducts()
-    if (products.length === 0) return staticProducts.map(p => p.slug)
-
-    // slug is null on every API record today; derive it from the name exactly
-    // as mapApiProduct and findApiProductBySlug do.
-    const slugs = products
-      .map(p => p.slug ?? slugify(p.name))
-      .filter(s => s.length > 0)
-
-    return Array.from(new Set(slugs))
+    const slugs = await resolvableProductSlugs()
+    if (slugs.length === 0) return staticProducts.map(p => p.slug)
+    return slugs
   } catch {
     // ponytail: a dead API must not fail the build — ship the static catalog.
     return staticProducts.map(p => p.slug)

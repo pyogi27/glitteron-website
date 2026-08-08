@@ -4,7 +4,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import type { Product } from '@/lib/types'
 import { getProductBySlug, getRelatedProducts } from '@/lib/data/products'
-import { fetchProducts, fetchRelatedProducts, findApiProductBySlug, fetchProductById, mapApiProduct } from '@/lib/api/server'
+import { categoryIdOf, fetchProducts, fetchRelatedProducts, findApiProductBySlug, fetchProductById, mapApiProduct, resolveCategoryName } from '@/lib/api/server'
+import { productMetaDescription, productTitle } from '@/lib/seo/product-copy'
 import ProductGallery from '@/components/product/ProductGallery'
 import ProductInfo from '@/components/product/ProductInfo'
 import ProductTabs from '@/components/product/ProductTabs'
@@ -30,48 +31,37 @@ interface Props {
 export const dynamicParams = true
 export const revalidate = 3600
 
-/** Trim to a clean sentence boundary near the meta-description sweet spot. */
-function clampDescription(text: string, max = 155): string {
-  const clean = text.replace(/\s+/g, ' ').trim()
-  if (clean.length <= max) return clean
-  const cut = clean.slice(0, max)
-  return `${cut.slice(0, cut.lastIndexOf(' '))}…`
-}
-
 /**
- * Never fall back to the bare product name — a description identical to the
- * title gets rewritten by Google. Compose a real sentence from what we have.
+ * Titles and descriptions come from lib/seo/product-copy.ts, not from the bare
+ * catalogue name. 903 of 1,028 products are named with a model code, so this
+ * route used to emit "1011 | LitMeUp" against a meta description shared with
+ * every sibling — nothing a shopper would ever search for, and nothing Google
+ * would index.
  */
-function productDescription(name: string, category?: string, body?: string): string {
-  if (body && body.trim().length > 0) return clampDescription(body)
-  const kind = category ? category.toLowerCase() : 'lighting'
-  return clampDescription(
-    `${name} — handcrafted ${kind} from LitMeUp. Free shipping across India, 5-year warranty and easy returns.`,
-  )
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const canonical = `/collections/${slug}`
 
   const apiProduct = await findApiProductBySlug(slug)
   if (apiProduct) {
-    const description = productDescription(
-      apiProduct.name,
-      apiProduct.category?.name,
-      apiProduct.description,
-    )
+    const copy = {
+      ...apiProduct,
+      categoryName: resolveCategoryName(apiProduct),
+      price: Number(apiProduct.price) || 0,
+    }
+    const title = productTitle(copy)
+    const description = productMetaDescription(copy)
     const image = apiProduct.mainImage ?? apiProduct.thumbnailImage
     return {
-      title: apiProduct.name,
+      title,
       description,
       alternates: { canonical },
       openGraph: {
-        title: apiProduct.name,
+        title,
         description,
         url: canonical,
         type: 'website',
-        ...(image ? { images: [{ url: image, alt: apiProduct.name }] } : {}),
+        ...(image ? { images: [{ url: image, alt: title }] } : {}),
       },
     }
   }
@@ -80,21 +70,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = getProductBySlug(slug)
   if (!product) return { title: 'Product Not Found', robots: { index: false, follow: true } }
 
-  const description = productDescription(
-    product.name,
-    product.category,
-    product.description || product.subtitle,
-  )
+  const copy = {
+    name: product.name,
+    categoryName: product.category,
+    price: product.price,
+    sku: product.sku,
+    description: product.description || product.subtitle,
+  }
+  const title = productTitle(copy)
+  const description = productMetaDescription(copy)
   return {
-    title: product.name,
+    title,
     description,
     alternates: { canonical },
     openGraph: {
-      title: product.name,
+      title,
       description,
       url: canonical,
       type: 'website',
-      ...(product.images[0] ? { images: [{ url: product.images[0], alt: product.name }] } : {}),
+      ...(product.images[0] ? { images: [{ url: product.images[0], alt: title }] } : {}),
     },
   }
 }
@@ -124,8 +118,12 @@ export default async function ProductPage({ params }: Props) {
   let related = getRelatedProducts(product.id)
   if (apiProduct) {
     let apiRelated: Product[] = []
-    if (apiProduct.categoryId) {
-      apiRelated = await fetchRelatedProducts(apiProduct.categoryId, apiProduct.id, 4)
+    // categoryIdOf, not apiProduct.categoryId: the wire format is `category: "5"`,
+    // so this branch never ran and every product showed the same four unrelated
+    // pieces from the generic fallback below.
+    const categoryId = categoryIdOf(apiProduct)
+    if (categoryId) {
+      apiRelated = await fetchRelatedProducts(categoryId, apiProduct.id, 4)
     }
     if (apiRelated.length === 0) {
       // Fallback: fetch any real products excluding the current one

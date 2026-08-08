@@ -5,7 +5,7 @@ import InfiniteProductGrid from '@/components/collections/InfiniteProductGrid'
 import CrawlablePagination from '@/components/collections/CrawlablePagination'
 import JsonLd from '@/components/seo/JsonLd'
 import { breadcrumbSchema, itemListSchema } from '@/lib/seo/schema'
-import { fetchCategories, fetchProducts, mapApiProduct } from '@/lib/api/server'
+import { categoryIdOf, fetchCategories, fetchProducts, mapApiProduct } from '@/lib/api/server'
 import { products as staticProducts } from '@/lib/data/products'
 
 const INITIAL_BATCH = 100
@@ -99,7 +99,7 @@ export default async function CollectionView({
   const usingApi = apiProducts.length > 0 || categories.length > 0
 
   const products = apiProducts.length > 0
-    ? apiProducts.map(p => mapApiProduct(p, categoryMap.get(p.categoryId)))
+    ? apiProducts.map(p => mapApiProduct(p, categoryMap.get(categoryIdOf(p))))
     : staticProducts
 
   return (

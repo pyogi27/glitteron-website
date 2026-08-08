@@ -1,5 +1,13 @@
 import type { Product } from "@/lib/types";
 import { mapVariations } from "@/lib/variations";
+import {
+  normalizeDimension,
+  productBodyCopy,
+  productHeadline,
+  productSpecs,
+  splitList,
+  type ProductCopyInput,
+} from "@/lib/seo/product-copy";
 import type {
   ApiCategory,
   ApiProduct,
@@ -33,6 +41,67 @@ export function slugify(name: string): string {
 
 function extractImageUrl(img: string | { url: string }): string {
   return typeof img === "string" ? img : (img?.url ?? "");
+}
+
+/**
+ * Category id -> display name.
+ *
+ * Seeded from GET /api/categories as measured 2026-08-08 so that the synchronous
+ * mappers can resolve a name without awaiting a fetch, and refreshed by
+ * fetchCategories() whenever it runs. An id missing from both simply yields an
+ * empty category rather than a wrong one.
+ */
+const categoryNames = new Map<number, string>([
+  [1, "Wall Lights"],
+  [2, "Ceiling Lights"],
+  [3, "Floor Lamps"],
+  [4, "Chandelier Lights"],
+  [5, "Pendant Lights"],
+  [6, "Bulbs"],
+  [7, "Table Lamp"],
+]);
+
+/**
+ * The product's category id, whatever shape the backend used.
+ *
+ * The wire format is `category: "5"` — a stringified id, with no `categoryId`
+ * key at all. Callers that read `p.categoryId` directly got undefined for every
+ * product; go through here instead.
+ */
+export function categoryIdOf(p: Partial<ApiProduct>): number {
+  if (p.categoryId != null) return toNumber(p.categoryId);
+  const category = p.category;
+  if (category == null) return 0;
+  if (typeof category === "object") return toNumber(category.id);
+  return toNumber(category);
+}
+
+/** Display name for a product's category, or "" when the id is unknown. */
+export function resolveCategoryName(p: Partial<ApiProduct>): string {
+  if (typeof p.category === "object" && p.category?.name) return p.category.name;
+  return categoryNames.get(categoryIdOf(p)) ?? "";
+}
+
+/** The fields productCopy reads, lifted off an API record of either shape. */
+function copyInput(p: ApiProduct | ApiProductDetail): ProductCopyInput {
+  const detail = p as ApiProductDetail;
+  return {
+    name: p.name,
+    categoryName: resolveCategoryName(p),
+    materials: detail.materials,
+    bodyColors: detail.bodyColors,
+    lightSource: detail.lightSource,
+    wattage: detail.wattage,
+    productHeight: detail.productHeight,
+    productWidth: detail.productWidth,
+    productLength: detail.productLength,
+    diameter: detail.diameter,
+    weight: detail.weight,
+    price: toNumber(p.price),
+    sku: p.sku,
+    whereUsed: detail.whereUsed,
+    description: p.description,
+  };
 }
 
 // Backend serializes numeric columns as strings (e.g. price "7800.00").
@@ -105,13 +174,22 @@ export function mapApiProduct(p: ApiProduct, categoryName?: string): Product {
 
   const images = merged.length > 0 ? merged : [PLACEHOLDER_IMAGE];
 
+  // The catalogue names 903 of 1,028 products with a bare model code and leaves
+  // description and specs empty, so headline/description/specs are composed from
+  // the physical attributes instead. An authored description still wins — see
+  // productBodyCopy.
+  const copy = copyInput(p);
+  const resolvedCategory = categoryName ?? resolveCategoryName(p);
+  const generated = { ...copy, categoryName: resolvedCategory };
+
   return {
     id: String(p.id),
     slug: p.slug ?? slugify(p.name),
     apiProductId: p.id,
     name: p.name,
+    headline: productHeadline(generated),
     subtitle: p.description ?? "",
-    category: categoryName ?? p.category?.name ?? "",
+    category: resolvedCategory,
     badge: p.badge,
     price: toNumber(p.price),
     originalPrice: p.originalPrice != null ? toNumber(p.originalPrice) : undefined,
@@ -121,8 +199,8 @@ export function mapApiProduct(p: ApiProduct, categoryName?: string): Product {
     sku: p.sku ?? "",
     stock: resolveStock(p),
     images,
-    description: p.description ?? "",
-    specs: {},
+    description: productBodyCopy(generated),
+    specs: productSpecs(generated),
     variants: { sizes: [], finishes: [], crystalTones: [] },
     reviews: [],
     whereUsed: (p as ApiProductDetail).whereUsed,
@@ -141,6 +219,10 @@ export async function fetchCategories(): Promise<ApiCategory[]> {
     }
     const body = await res.json();
     const categories = extractArray<ApiCategory>(body, "data", "categories");
+    // Keep the synchronous id -> name seed honest as the taxonomy grows.
+    for (const c of categories) {
+      if (c.name) categoryNames.set(toNumber(c.id), c.name);
+    }
     console.log(
       `[fetchCategories] ${categories.length} categories from ${url}`,
     );
@@ -222,12 +304,36 @@ export async function fetchFeaturedProducts(
  * React's cache() collapses this to one pass per build/request.
  */
 let catalogPromise: Promise<ApiProduct[]> | null = null;
+let catalogFetchedAt = 0;
+/** Declared here rather than beside getSlugIndex: getCatalog invalidates it. */
+let slugIndexPromise: Promise<Map<string, ApiProduct>> | null = null;
+
+/**
+ * How long a memoised catalog stays authoritative.
+ *
+ * The memo used to live for the lifetime of the process, which meant a product
+ * added after the last deploy was never in the slug index — findApiProductBySlug
+ * returned null and the page called notFound(), while the sitemap (rebuilt daily)
+ * already listed the URL. Sampling 41 sitemap product URLs on 2026-08-08 caught
+ * one such 404 (/collections/dg-p184a, created that morning); a sitemap serving
+ * 404s costs crawl budget and trust.
+ *
+ * An hour matches the product route's own `revalidate`, so a new product is
+ * reachable within an hour of being added rather than requiring a redeploy.
+ */
+const CATALOG_TTL_MS = 60 * 60 * 1000;
 
 const getCatalog = (): Promise<ApiProduct[]> => {
   // Memoised on the module, not via React cache(): a build renders pages across
   // several worker processes and cache() is per-request, so it deduped nothing.
   // One in-flight promise per worker turns ~5000 requests into ~5 per worker.
+  if (catalogPromise && Date.now() - catalogFetchedAt > CATALOG_TTL_MS) {
+    catalogPromise = null;
+    slugIndexPromise = null;
+  }
+
   if (!catalogPromise) {
+    catalogFetchedAt = Date.now();
     catalogPromise = (async () => {
       const limit = 250;
       const firstPage = await fetchProducts({ page: 1, limit });
@@ -255,15 +361,17 @@ export async function fetchAllProducts(): Promise<ApiProduct[]> {
   return getCatalog();
 }
 
-/** Slug → product, built once per process from the memoised catalog. */
-let slugIndexPromise: Promise<Map<string, ApiProduct>> | null = null;
-
+/** Slug → product, rebuilt whenever the memoised catalog is refreshed. */
 const getSlugIndex = (): Promise<Map<string, ApiProduct>> => {
+  // Resolve the catalog first: an expired memo clears slugIndexPromise as a
+  // side effect, so this must run before the null check below.
+  const catalog = getCatalog();
+
   if (!slugIndexPromise) {
-    slugIndexPromise = getCatalog()
-      .then(catalog => {
+    slugIndexPromise = catalog
+      .then(products => {
         const index = new Map<string, ApiProduct>();
-        for (const p of catalog) {
+        for (const p of products) {
           const key = (p.slug ?? slugify(p.name)).trim().toLowerCase();
           if (key && !index.has(key)) index.set(key, p);
         }
@@ -279,20 +387,24 @@ const getSlugIndex = (): Promise<Map<string, ApiProduct>> => {
   return slugIndexPromise;
 };
 
+/**
+ * Every slug the product route can actually resolve.
+ *
+ * The sitemap derives its product URLs from this rather than re-deriving them
+ * from names: a slug taken straight from the resolver's own keys cannot 404,
+ * which a parallel `products.map(slugify)` demonstrably could when the two
+ * disagreed about the catalog.
+ */
+export async function resolvableProductSlugs(): Promise<string[]> {
+  const index = await getSlugIndex();
+  return [...index.keys()];
+}
+
 export async function findApiProductBySlug(
   slug: string,
 ): Promise<ApiProduct | null> {
   const index = await getSlugIndex();
   return index.get(slug.trim().toLowerCase()) ?? null;
-}
-
-// Split combined field values: "White+Golden", "White + Golden", "Black/Gold" -> ["White", "Golden"]
-function splitValues(raw?: string | null): string[] {
-  if (!raw) return [];
-  return raw
-    .split(/[+/,]|\s&\s/)
-    .map((s) => s.trim())
-    .filter(Boolean);
 }
 
 function dedupe(values: string[]): string[] {
@@ -324,25 +436,15 @@ function toHex(name: string): string {
   return COLOR_HEX[name.trim().toLowerCase()] ?? "#E8E8E8";
 }
 
-// Dimension fields are inconsistent: some rows carry a legacy letter prefix ("D90mm",
-// "H970mm"), others are bare numbers ("90", "1270"). Strip any legacy prefix (our own
-// L:/B:/H:/⌀: label supplies that now) and normalise to a united value.
-function normalizeDimensionValue(raw?: string): string {
-  const value = raw?.trim();
-  if (!value) return "";
-  const stripped = value.replace(/^[a-z]+/i, "").trim();
-  // Already carries a unit — trust it as authored.
-  if (/[a-z]/i.test(stripped)) return stripped;
-  return `${stripped}mm`;
-}
-
 // Build the "L: 300mm, B: 200mm, H: 150mm" / "⌀: 800mm" size label shown to shoppers.
+// Dimension fields are inconsistent ("D90mm" vs a bare "90"); normalizeDimension
+// strips any legacy prefix — our own L:/B:/H:/⌀: label supplies that now.
 function formatSizeLabel(p: ApiProductDetail): string {
   return [
-    p.productLength && `L: ${normalizeDimensionValue(p.productLength)}`,
-    p.productWidth && `B: ${normalizeDimensionValue(p.productWidth)}`,
-    p.productHeight && `H: ${normalizeDimensionValue(p.productHeight)}`,
-    p.diameter && `⌀: ${normalizeDimensionValue(p.diameter)}`,
+    p.productLength && `L: ${normalizeDimension(p.productLength)}`,
+    p.productWidth && `B: ${normalizeDimension(p.productWidth)}`,
+    p.productHeight && `H: ${normalizeDimension(p.productHeight)}`,
+    p.diameter && `⌀: ${normalizeDimension(p.diameter)}`,
   ].filter(Boolean).join(", ");
 }
 
@@ -375,7 +477,7 @@ function mapVariants(p: ApiProductDetail): Product["variants"] {
   const finishes = dedupe([
     ...(p.availableColors ?? []),
     ...(attrs.colors ?? []),
-    ...splitValues(p.bodyColors),
+    ...splitList(p.bodyColors),
   ]);
 
   const crystalTones = dedupe([
@@ -415,7 +517,7 @@ export async function fetchProductById(id: number): Promise<Product | null> {
 
     const mappedVariants = mapVariants(productData);
 
-    const product = mapApiProduct(productData, productData.category?.name);
+    const product = mapApiProduct(productData, resolveCategoryName(productData));
 
     // Build images for detail page: mainImage first (full-res), then additionalImages
     const mainImage = productData.mainImage;
@@ -426,10 +528,15 @@ export async function fetchProductById(id: number): Promise<Product | null> {
     ];
     const mergedImages = detailImages.length > 0 ? detailImages : product.images;
 
+    // `specs` comes back null on every product measured, so mapApiProduct's
+    // attribute-derived table is the real source. Authored specs still win when
+    // the backend starts sending them.
+    const authoredSpecs = productData.specs ?? {};
+
     return {
       ...product,
       images: mergedImages,
-      specs: productData.specs ?? {},
+      specs: Object.keys(authoredSpecs).length > 0 ? authoredSpecs : product.specs,
       variants: mappedVariants,
       variations: mapVariations(productData.variations),
       reviews,

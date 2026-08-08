@@ -2,7 +2,14 @@ export interface Product {
   id: string
   apiProductId?: number
   slug: string
+  /** The catalogue name — usually a bare model code ("1011", "DG-P184A"). */
   name: string
+  /**
+   * Descriptive name for the <h1> and structured data, composed from the
+   * product's attributes when `name` is only a model code. See
+   * lib/seo/product-copy.ts. Falls back to `name` for statically authored data.
+   */
+  headline?: string
   subtitle: string
   category: string
   badge?: 'new' | 'sale' | 'best'

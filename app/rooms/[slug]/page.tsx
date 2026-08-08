@@ -5,7 +5,7 @@ import RoomBanner from '@/components/rooms/RoomBanner'
 import RoomSwitcher from '@/components/rooms/RoomSwitcher'
 import RoomToolbar from '@/components/rooms/RoomToolbar'
 import InfiniteProductGrid from '@/components/collections/InfiniteProductGrid'
-import { fetchCategories, fetchProducts, mapApiProduct } from '@/lib/api/server'
+import { categoryIdOf, fetchCategories, fetchProducts, mapApiProduct } from '@/lib/api/server'
 import { rooms } from '@/lib/data'
 import JsonLd from '@/components/seo/JsonLd'
 import { breadcrumbSchema, itemListSchema } from '@/lib/seo/schema'
@@ -55,7 +55,7 @@ export default async function RoomPage({ params }: Props) {
   ])
 
   const categoryMap = new Map(categories.map(c => [c.id, c.name]))
-  const products = apiProducts.map(p => mapApiProduct(p, categoryMap.get(p.categoryId)))
+  const products = apiProducts.map(p => mapApiProduct(p, categoryMap.get(categoryIdOf(p))))
 
   return (
     <>

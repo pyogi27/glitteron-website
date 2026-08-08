@@ -191,12 +191,17 @@ export function productSchema(product: Product) {
   const url = absoluteUrl(`/collections/${product.slug}`)
   const inStock = product.stock > 0
 
+  // `name` is a bare model code for most of the catalogue, so the descriptive
+  // headline is what goes into structured data — a Product whose name and
+  // description were both "1011" gave Google nothing to match a query against.
+  // The model code is still carried by `sku` and `mpn`.
   const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: product.name,
+    name: product.headline || product.name,
     description: product.description || product.subtitle || product.name,
     sku: product.sku,
+    mpn: product.name,
     category: product.category,
     url,
     brand: { '@type': 'Brand', name: SITE_NAME },
@@ -216,6 +221,17 @@ export function productSchema(product: Product) {
   }
 
   if (product.images.length > 0) schema.image = product.images
+
+  // Physical attributes lift straight out of the generated spec table, so the
+  // markup carries the same facts the page shows.
+  const material = product.specs?.Material
+  const color = product.specs?.Finish
+  const width = product.specs?.Diameter ?? product.specs?.Width
+  const height = product.specs?.Height
+  if (material) schema.material = material
+  if (color) schema.color = color
+  if (width) schema.width = width
+  if (height) schema.height = height
 
   // Only emit review markup that a real review backs — Google penalises
   // aggregateRating with no reviewCount behind it.

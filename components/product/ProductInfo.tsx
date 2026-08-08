@@ -190,8 +190,10 @@ export default function ProductInfo({ product }: { product: Product }) {
       <div className="text-[10px] font-medium tracking-[0.18em] uppercase text-[#C4714A] mb-3">{product.category}</div>
 
       {/* Title */}
+      {/* The headline describes the piece; `name` is the model code and stays
+          visible on the SKU line below. */}
       <h1 className="font-serif text-[clamp(28px,3vw,40px)] font-light leading-[1.2] text-[#2C2825] mb-2">
-        {product.name}
+        {product.headline || product.name}
       </h1>
 
       {/* SKU + Stock */}

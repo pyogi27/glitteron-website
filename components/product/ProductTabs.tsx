@@ -6,9 +6,11 @@ import StarRating from '@/components/ui/StarRating'
 
 type Tab = 'desc' | 'specs' | 'reviews'
 
-/** Panels render blank on most of the catalogue — description, specs and reviews are
- *  all empty for every API product measured 2026-08-06. A blank panel reads as a
- *  broken page; a written empty state reads as a page with nothing to say yet. */
+/** Description and specs are now composed from the product's stored attributes
+ *  (see lib/seo/product-copy.ts), so these empty states only show for a record
+ *  with no attributes at all. Reviews are still genuinely empty catalogue-wide.
+ *  A blank panel reads as a broken page; a written empty state reads as a page
+ *  with nothing to say yet. */
 function Empty({ children }: { children: React.ReactNode }) {
   return (
     <p className="text-[13.5px] leading-[1.9] text-[#A09488] italic max-w-prose">{children}</p>
