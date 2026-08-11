@@ -1,15 +1,13 @@
 import { NextResponse } from 'next/server'
+import { SESv2Client, SendEmailCommand } from '@aws-sdk/client-sesv2'
+import { buildEnquiryEmail, type ContactPayload } from '@/lib/contact-email'
+import { COMPANY } from '@/lib/company'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 const MAX = { name: 120, email: 200, phone: 30, topic: 60, message: 4000 }
 
-interface ContactPayload {
-  name: string
-  email: string
-  phone: string
-  topic: string
-  message: string
-}
+// Credentials come from the App Runner instance role — no keys in env.
+const ses = new SESv2Client({ region: process.env.AWS_REGION ?? 'us-east-1' })
 
 function parse(body: unknown): ContactPayload | null {
   if (typeof body !== 'object' || body === null) return null
@@ -46,9 +44,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: 'Invalid submission' }, { status: 400 })
   }
 
-  // ponytail: enquiries go to the server log until a mail provider is wired up.
-  // Swap this line for a Resend/SES call — the validated `payload` is the contract.
-  console.info('[contact] enquiry', payload)
+  try {
+    await ses.send(new SendEmailCommand(buildEnquiryEmail(payload, COMPANY)))
+  } catch (error: unknown) {
+    // Log the whole enquiry so a send failure never loses the customer's
+    // message — it stays recoverable from App Runner logs.
+    console.error('[contact] send failed', error, payload)
+    return NextResponse.json(
+      { success: false, error: 'Could not send your message. Please try again or call us.' },
+      { status: 502 },
+    )
+  }
 
   return NextResponse.json({ success: true })
 }
