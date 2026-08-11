@@ -1,5 +1,17 @@
 import { Room } from '@/lib/types'
 
+/**
+ * Below this, a room-filtered grid is treated as "not tagged yet" and the page
+ * falls back to the wider catalogue rather than showing a near-empty shelf.
+ * Room tagging is being backfilled in the product catalogue; once a room has
+ * real coverage its pages narrow on their own, with no code change here.
+ *
+ * Measured 2026-08-11: `whereUsed` returns 0–4 products for every room, so every
+ * room grid is currently falling back. /rooms/kitchen and /rooms/home-office were
+ * rendering the "still curating" empty state to shoppers and to Googlebot.
+ */
+export const MIN_ROOM_PRODUCTS = 8
+
 export const rooms: Room[] = [
   {
     id: '1',

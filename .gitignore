@@ -46,3 +46,7 @@ CLAUDE.md
 
 .gstack/
 .video-originals/
+
+# Generated product descriptions awaiting review (scripts/generate-descriptions.mjs).
+# Not source: it is a reproducible model output, and it is large.
+scripts/out/

@@ -1,6 +1,5 @@
 import type { MetadataRoute } from 'next'
 import { fetchCategories, resolvableProductSlugs } from '@/lib/api/server'
-import { rooms } from '@/lib/data'
 import { bandSlug, categories as lightCategories, categoryPath } from '@/lib/data/categories'
 import { getRoomSubPage } from '@/lib/data/category-rooms'
 import { cities } from '@/lib/data/cities'
@@ -120,13 +119,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
-  const roomRoutes: MetadataRoute.Sitemap = rooms.map(room => ({
-    url: absoluteUrl(`/rooms/${room.slug}`),
-    lastModified: now,
-    changeFrequency: 'weekly',
-    priority: 0.7,
-  }))
-
+  /*
+   * `/rooms/[slug]` is deliberately absent.
+   *
+   * Those five pages carry `noindex` — see app/rooms/[slug]/page.tsx for why —
+   * and a noindexed URL in the sitemap is a contradictory signal that wastes
+   * crawl budget. `/rooms` itself stays listed and links to all five, so they
+   * are still discovered and still pass equity onward.
+   */
   // No updatedAt on the API product record, so lastModified is omitted rather
   // than stamped with a build time that would lie about freshness.
   const productRoutes: MetadataRoute.Sitemap = (await allProductSlugs()).map(slug => ({
@@ -141,7 +141,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...subTierRoutes,
     ...cityRoutes,
     ...guideRoutes,
-    ...roomRoutes,
     ...productRoutes,
   ]
 }

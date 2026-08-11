@@ -7,6 +7,7 @@ import RoomToolbar from '@/components/rooms/RoomToolbar'
 import InfiniteProductGrid from '@/components/collections/InfiniteProductGrid'
 import { categoryIdOf, fetchCategories, fetchProducts, mapApiProduct } from '@/lib/api/server'
 import { rooms } from '@/lib/data'
+import { MIN_ROOM_PRODUCTS } from '@/lib/data/rooms'
 import JsonLd from '@/components/seo/JsonLd'
 import { breadcrumbSchema, itemListSchema } from '@/lib/seo/schema'
 
@@ -30,6 +31,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${room.name} Lighting — Chandeliers & Pendants`,
     description,
     alternates: { canonical: `/rooms/${room.slug}` },
+    /*
+     * Navigational tier, not a ranking tier.
+     *
+     * `/rooms/living-room` competes with `/chandelier-lights/living-room`,
+     * `/wall-lights/living-room`, `/table-lamps/living-room`,
+     * `/floor-lamps/living-room` and `/guides/how-to-light-a-living-room` for the
+     * same intent, and it is the weakest of the six: it carries no prose of its
+     * own, and its grid is the untagged fallback rather than a curated set.
+     * Google agreed — all five room pages sat in "Crawled, currently not indexed"
+     * (GSC, 2026-08-11). Kept crawlable and `follow` so it still passes equity
+     * down to the category-room pages that do have the copy to rank.
+     *
+     * To make these indexable, give each room its own intro + FAQs the way
+     * lib/data/category-rooms.ts does, then drop this and re-add them to the
+     * sitemap.
+     */
+    robots: { index: false, follow: true },
     openGraph: {
       title: `${room.name} Lighting`,
       description,
@@ -45,14 +63,19 @@ export default async function RoomPage({ params }: Props) {
   const room = rooms.find(r => r.slug === slug)
   if (!room) notFound()
 
-  const [categories, { products: apiProducts, total, totalPages }] = await Promise.all([
+  const [categories, tagged] = await Promise.all([
     fetchCategories(),
-    fetchProducts({
-      whereUsed: room.whereUsed,
-      page: 1,
-      limit: INITIAL_BATCH,
-    }),
+    fetchProducts({ whereUsed: room.whereUsed, page: 1, limit: INITIAL_BATCH }),
   ])
+
+  // Room tag too sparse to fill a page — widen to the whole catalogue, the same
+  // rule CollectionView applies to /chandelier-lights/living-room and friends.
+  // Without it, kitchen and home-office rendered an empty shelf: the API tags
+  // 0–4 products per room while the backfill is still in progress.
+  const roomTagUsed = tagged.total >= MIN_ROOM_PRODUCTS
+  const { products: apiProducts, total, totalPages } = roomTagUsed
+    ? tagged
+    : await fetchProducts({ page: 1, limit: INITIAL_BATCH })
 
   const categoryMap = new Map(categories.map(c => [c.id, c.name]))
   const products = apiProducts.map(p => mapApiProduct(p, categoryMap.get(categoryIdOf(p))))
@@ -79,7 +102,10 @@ export default async function RoomPage({ params }: Props) {
               initialProducts={products}
               initialPage={1}
               totalPages={totalPages}
-              extraParams={{ whereUsed: room.whereUsed }}
+              // Must mirror the query that actually ran, or load-more contradicts
+              // page 1 — a room-tagged request against a widened grid comes back
+              // near-empty and the shelf stops dead after the first batch.
+              extraParams={roomTagUsed ? { whereUsed: room.whereUsed } : {}}
             />
           </>
         ) : (
