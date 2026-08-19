@@ -16,6 +16,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: 'Room Visualization — LitMeUp',
     description: `See how LitMeUp fixtures look in a real room. Share ID: ${id}`,
+    // Disallowed in robots.txt as well; this covers a fetch that reaches the
+    // page from a source the disallow does not gate.
+    robots: { index: false, follow: false },
     openGraph: {
       title: 'My Room Lighting Preview — LitMeUp',
       description: 'I used the LitMeUp AI visualizer to preview lighting in my room.',

@@ -203,3 +203,49 @@ descriptions — generated attribute copy makes a page indexable, not compelling
 not configuration: hand-write descriptions for the top ~50 sellers and check
 whether those specifically get picked up. That isolates "thin content" from
 "crawl budget" as the cause.
+
+---
+
+## Phase 5 — the coverage report, triaged 2026-08-19
+
+The GSC *Pages* report read: 10 `Alternate page with proper canonical tag`,
+3 `Blocked by robots.txt`, 1 `Excluded by 'noindex' tag`, 4 `Crawled - currently
+not indexed`. 18 URLs total. What each bucket actually is, verified by crawling
+production:
+
+| Bucket | What it is | Verdict |
+| --- | --- | --- |
+| Alternate, 10 | `/collections?category=<Name>` → the flat landing page, plus the account pages that inherited the layout's `canonical: '/'` | Working as designed for the first group; the second was a bug, now fixed |
+| Blocked by robots, 3 | `/login`, `/signup`, `/profile` — linked from the header, disallowed, so their `noindex` was never read | Bug, fixed: they are crawlable now and the meta tag does the excluding |
+| noindex, 1 | `/wishlist` | Correct, no action |
+| Crawled, not indexed, 4 | 4 of the 5 `/rooms/<slug>` pages (`dining-room` has impressions and is indexed) | Already handled in code — the `noindex` and the sitemap removal are **built but not deployed** |
+
+Fixed in code, ships on next deploy:
+
+- `app/robots.ts` — disallow reduced to `/api/` and `/room-visualizer/share/`.
+  Everything else with no search value carries `noindex` instead, which is a
+  definite exclusion rather than a URL Google may index from anchor text alone.
+- `app/layout.tsx` → `app/page.tsx` — `alternates: { canonical: '/' }` moved off
+  the root layout. Inherited, it made every page without its own canonical claim
+  the homepage: `/cart`, `/login`, `/checkout`, `/profile`, `/orders`,
+  `/wishlist` all sent `noindex` **and** a canonical pointing elsewhere.
+- `app/room-visualizer/share/[id]/page.tsx` — `noindex, nofollow` added.
+
+Verify after deploy:
+
+```bash
+curl -sS https://www.litmeup.in/robots.txt | grep -c Disallow          # expect 2
+curl -sS https://www.litmeup.in/cart | grep -c 'rel="canonical"'       # expect 0
+curl -sS https://www.litmeup.in/rooms/living-room | grep -o 'content="noindex[^"]*"'
+curl -sS https://www.litmeup.in/sitemap.xml | grep -c '/rooms/'        # expect 0
+```
+
+Expected movement: `Blocked by robots.txt` → 0, `Excluded by 'noindex'` → ~10,
+`Crawled - currently not indexed` → 0 for the room pages. A bigger noindex
+number is the goal here, not a regression — it means the exclusions are now
+stated rather than inferred.
+
+**Still open, and it is the biggest item on this page:** Phase 3 was never
+executed. `https://litmeup.in/` still returns 200 from the GoDaddy Website
+Builder site behind the certificate that expired 25 June 2026. The App Runner
+host is fixed (`308 → www.litmeup.in`, confirmed 2026-08-19); the apex is not.

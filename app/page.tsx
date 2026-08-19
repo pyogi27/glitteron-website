@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import HeroSection from '@/components/home/HeroSection'
 import TickerStrip from '@/components/home/TickerStrip'
 import CollectionsSection from '@/components/home/CollectionsSection'
@@ -11,6 +12,11 @@ import NewsletterStrip from '@/components/home/NewsletterStrip'
 import JsonLd from '@/components/seo/JsonLd'
 import { organizationSchema, websiteSchema } from '@/lib/seo/schema'
 import { fetchCategories, fetchFeaturedProducts } from '@/lib/api/server'
+
+// Moved off the root layout: there it was inherited by every page that did not
+// set its own canonical, so the account and cart pages each named the homepage
+// as their canonical while also sending noindex — two contradictory signals.
+export const metadata: Metadata = { alternates: { canonical: '/' } }
 
 export default async function HomePage() {
   const [apiCategories, featured] = await Promise.all([
