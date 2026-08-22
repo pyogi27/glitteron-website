@@ -33,6 +33,16 @@ export interface LightCategory {
   slug: string
   /** Backend category name. Changing this silently empties the grid. */
   name: string
+  /**
+   * Backend category names this page's grid spans, when it spans more than one.
+   *
+   * Only `/hanging-lights` uses it: "hanging lights" is the term Indian shoppers
+   * actually search, and it covers chandeliers and pendants together — the same
+   * grouping White Teak ranks with at /decorative-lights/hanging-lights/. The
+   * API ORs repeated `category` params, so this is one request, not two.
+   * Omitted everywhere else, where `name` alone is the whole grid.
+   */
+  names?: string[]
   /** H1. The plain category noun, not the stuffed title. */
   heading: string
   /** The noun people search with, used in price-band headings. */
@@ -53,6 +63,13 @@ export interface LightCategory {
   rooms: string[]
   /** Budget landing pages. Empty where the category is too small to slice. */
   priceBands: PriceBand[]
+  /**
+   * Material and finish landing pages — see lib/data/facets.ts.
+   *
+   * Listed only where the category holds enough of that attribute to fill a
+   * grid; the live counts behind each decision are in the comment beside it.
+   */
+  facets: string[]
 }
 
 export const categories: LightCategory[] = [
@@ -61,14 +78,22 @@ export const categories: LightCategory[] = [
     name: 'Chandelier Lights',
     heading: 'Chandelier Lights',
     shortName: 'Chandeliers',
-    title: 'Buy Chandeliers Online in India — Handcrafted',
+    // "Jhoomar" is not decoration here. Every site ahead of us for these
+    // queries carries it in the title tag — White Teak ships "Chandelier: Buy
+    // Chandeliers (Jhoomar) Online In India", Lights & Living "Buy Chandelier
+    // Online | Jhoomar Lights India", Jainsons "Chandelier, Small Jhoomar for
+    // Hall & Double Height Chandelier". It is the word a large share of Indian
+    // shoppers types, it was absent from every page on this site, and no amount
+    // of ranking for "chandelier" answers a search for "jhoomar".
+    title: 'Buy Chandeliers (Jhoomar) Online in India — Handcrafted',
     description:
-      'Buy handcrafted chandeliers online in India — brass, hand-blown glass and crystal, in twelve finishes. Free shipping, 5-year warranty, 7-day returns.',
-    subtitle: 'Handcrafted chandeliers in brass, hand-blown glass and solid steel.',
+      'Buy handcrafted chandeliers and jhoomar lights online in India — brass, hand-blown glass and crystal. Free shipping, 5-year warranty, 7-day returns.',
+    subtitle: 'Handcrafted chandeliers and jhoomars in brass, hand-blown glass and solid steel.',
     intro: [
       'A chandelier is the one fixture in a room that people look up at, so it is worth getting the scale right before the style. The usual rule: add the room’s length and width in feet, and the answer in inches is a sensible diameter. A 14 by 16 foot living room takes a 30-inch chandelier comfortably.',
       'Every chandelier here is assembled and inspected in our Surat workshop — brass turned and plated in-house, glass hand-blown, steel cut to size. All fixtures are dimmable as standard, so the same piece can carry a dinner party and a quiet Tuesday.',
       'Hang height matters as much as diameter. Over a dining table, the bottom of the fixture sits 30–36 inches above the surface. In an open room, keep at least 7 feet of clearance underneath.',
+      'Jhoomar and chandelier mean the same fixture, and both words are used here for that reason. If you are shopping for a jhoomar for a hall, a double-height chandelier for an entrance, or a small jhoomar for a bedroom, they are all on this page — filter by size and by finish rather than by which word you started with.',
     ],
     faqs: [
       {
@@ -85,6 +110,11 @@ export const categories: LightCategory[] = [
         question: 'Are your chandeliers dimmable?',
         answer:
           'Yes. Every LitMeUp fixture is dimmable as standard, and works with the trailing-edge dimmers common in Indian homes.',
+      },
+      {
+        question: 'What is the difference between a jhoomar and a chandelier?',
+        answer:
+          'None — jhoomar is the Hindi and Gujarati word for a chandelier, and the two are used interchangeably in Indian lighting. A jhoomar for a hall usually means a larger multi-tier fixture, and a small jhoomar a single-tier one for a bedroom or a passage, but both are chandeliers and both are on this page.',
       },
       {
         question: 'Do you deliver chandeliers across India?',
@@ -108,6 +138,9 @@ export const categories: LightCategory[] = [
         note: 'Multi-tier and larger-span pieces built for double-height entrances and long dining tables — 36 inches and up, heavier brass, and more hand-work in the glass.',
       },
     ],
+    // Live counts, 2026-08-21: glass 124, gold 134, black 64. Wood (13) and
+    // marble (15) are real keywords with too little stock behind them here.
+    facets: ['glass', 'gold', 'black'],
   },
   {
     slug: 'pendant-lights',
@@ -156,6 +189,8 @@ export const categories: LightCategory[] = [
         note: 'Statement single pendants and larger clusters — bigger glass, heavier brass, and shades wide enough to light a dining table on their own.',
       },
     ],
+    // Live counts, 2026-08-21: glass 147, gold 81, black 58, wood 32, marble 22.
+    facets: ['glass', 'gold', 'black', 'wood', 'marble'],
   },
   {
     slug: 'ceiling-lights',
@@ -200,6 +235,9 @@ export const categories: LightCategory[] = [
         note: 'Semi-flush fixtures with more shape to them, and the wider diameters a large bedroom or an open living area needs from a single ceiling source.',
       },
     ],
+    // 47 ceiling lights in total. Every attribute slice lands under 30, which is
+    // a thin page pretending to be a category — add these as the range grows.
+    facets: [],
   },
   {
     slug: 'wall-lights',
@@ -248,6 +286,8 @@ export const categories: LightCategory[] = [
         note: 'Larger wall lights and picture arms — heavier brass, wider shades, and pieces substantial enough to carry a bare wall on their own.',
       },
     ],
+    // Live counts, 2026-08-21: gold 141, glass 102, black 59, marble 24.
+    facets: ['gold', 'glass', 'black', 'marble'],
   },
   {
     slug: 'table-lamps',
@@ -287,6 +327,7 @@ export const categories: LightCategory[] = [
     // Fourteen table lamps in the catalogue. Slicing that by price would leave
     // a landing page with single digits on it — add bands when the range grows.
     priceBands: [],
+    facets: [],
   },
   {
     slug: 'floor-lamps',
@@ -327,6 +368,69 @@ export const categories: LightCategory[] = [
         note: 'Reading and task lamps in brass and solid steel, tall enough to light a chair properly — the range most living rooms and studies buy from.',
       },
     ],
+    // 25 floor lamps. Same reason as ceiling lights: no slice fills a grid.
+    facets: [],
+  },
+  {
+    /*
+     * The umbrella page: chandeliers and pendants under one roof.
+     *
+     * "Hanging lights" is the term Indian shoppers use for the whole class, and
+     * it was on no page of this site. White Teak ranks with exactly this
+     * grouping at /decorative-lights/hanging-lights/, describing it as "a wide
+     * range of decorative hanging lights consisting of chandeliers and pendant
+     * lights"; Jainsons runs `hanging-light`, `led-hanging-lights`,
+     * `cluster-hanging-lights` and a dozen more.
+     *
+     * It overlaps its two children completely, which is what a parent category
+     * is. The copy answers the question the parent term is actually asked —
+     * chandelier or pendant — rather than restating either child page, and it
+     * carries no sub-tiers of its own so it never competes with them.
+     */
+    slug: 'hanging-lights',
+    // Primary for anything that needs a single name; `names` is what the grid uses.
+    name: 'Pendant Lights',
+    names: ['Chandelier Lights', 'Pendant Lights'],
+    heading: 'Hanging Lights',
+    shortName: 'Hanging Lights',
+    title: 'Buy Hanging Lights Online in India — Chandeliers & Pendants',
+    description:
+      'Buy handcrafted hanging lights online in India — chandeliers, jhoomars, pendants and clusters. Free shipping, 5-year warranty, 7-day returns.',
+    subtitle: 'Chandeliers, jhoomars, pendants and clusters — everything that hangs.',
+    intro: [
+      'Hanging light is the whole family: anything suspended from the ceiling on a rod, chain or cable. In practice it splits two ways. A chandelier — jhoomar — carries several lamps on one frame and is bought to be the thing you look at. A pendant carries one, and is bought to light what is underneath it. Everything else, clusters and linear bars included, is one of those two repeated.',
+      'Which one a room wants is usually settled by what is under it rather than by taste. A dining table, a kitchen island, a bedside, a reading chair — anywhere with a defined surface — takes pendants, sized and spaced to that surface. A room with no single focus, or a double-height entrance, takes a chandelier, sized to the room: add the length and width in feet and read the answer in inches.',
+      'The hang height is the same for both and is the thing most often got wrong. Over any surface you eat or work at, the bottom of the fixture sits 30 to 36 inches above it. Anywhere people walk underneath, leave at least seven feet of clearance from the floor. Get those two numbers right and almost any fixture in this range will look deliberate.',
+      'All of it is assembled in our Surat workshop, dimmable as standard, and shipped free anywhere in India.',
+    ],
+    faqs: [
+      {
+        question: 'What is the difference between a hanging light, a pendant and a chandelier?',
+        answer:
+          'Hanging light is the umbrella term for any ceiling-suspended fixture. A pendant is a hanging light with a single lamp and shade, used to light a specific surface. A chandelier — jhoomar — is a hanging light with several lamps on one frame, used to light and furnish a whole room. All three are on this page.',
+      },
+      {
+        question: 'How high should a hanging light be hung?',
+        answer:
+          'Thirty to thirty-six inches from the tabletop or countertop to the bottom of the fixture over any surface, and at least seven feet of floor clearance anywhere people walk beneath it. Rod and cable drops are adjustable at installation, so the fitted height is set to your ceiling.',
+      },
+      {
+        question: 'How many hanging lights do I need over a kitchen island or dining table?',
+        answer:
+          'Divide the length in inches by 24 to 30 and round down — a 48-inch island takes two, a 72-inch island three — keeping the end fixtures about 12 inches in from each edge. One wide pendant covers a table up to about 48 inches; past that, use a run of two or three, or a single chandelier sized to half or two-thirds of the table width.',
+      },
+      {
+        question: 'Are hanging lights suitable for a low ceiling?',
+        answer:
+          'Under about nine feet, a hanging light only works where nobody walks under it — over a table, an island or a bedside. Elsewhere in a low room, a flush or semi-flush ceiling light is the right fixture instead.',
+      },
+    ],
+    guides: ['what-size-chandelier', 'how-high-to-hang-a-dining-light', 'how-many-pendants-over-a-kitchen-island'],
+    // No sub-tiers. The children already own the room and budget cuts; giving the
+    // parent its own would put two of our pages on the same query.
+    rooms: [],
+    priceBands: [],
+    facets: [],
   },
 ]
 

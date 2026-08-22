@@ -21,6 +21,15 @@ const MIN_ROOM_PRODUCTS = 8
 interface Props {
   /** Backend category name. Omitted on the unfiltered grid. */
   categoryName?: string
+  /**
+   * Several backend category names, for an umbrella page whose grid spans more
+   * than one (/hanging-lights). Takes precedence over `categoryName`.
+   */
+  categoryNames?: string[]
+  /** Comma-joined backend `materials` values, on material facet pages. */
+  materials?: string
+  /** Comma-joined backend `bodyColors` values, on finish facet pages. */
+  bodyColors?: string
   /** Backend `whereUsed` room tag, e.g. 'Dining Room'. */
   whereUsed?: string
   heading: string
@@ -44,6 +53,9 @@ interface Props {
  */
 export default async function CollectionView({
   categoryName,
+  categoryNames,
+  materials,
+  bodyColors,
   whereUsed,
   heading,
   subtitle,
@@ -64,10 +76,23 @@ export default async function CollectionView({
     ? categories.find(c => c.name === categoryName)
     : undefined
 
+  // Umbrella page: resolve every name it spans. Unknown names drop out rather
+  // than widening the grid to the whole catalogue.
+  const selectedCategoryIds = (categoryNames ?? [])
+    .flatMap(name => {
+      const match = categories.find(c => c.name === name)
+      return match ? [match.id] : []
+    })
+
   const query = {
     page,
     limit: INITIAL_BATCH,
-    categoryId: selectedCategory?.id,
+    // categoryIds wins where it is populated; sending both would AND a single
+    // category against a set that contains it and narrow the grid by accident.
+    categoryId: selectedCategoryIds.length > 0 ? undefined : selectedCategory?.id,
+    categoryIds: selectedCategoryIds.length > 0 ? selectedCategoryIds : undefined,
+    materials,
+    bodyColors,
     minPrice,
     maxPrice,
   }
@@ -88,7 +113,13 @@ export default async function CollectionView({
   // The backend matches `category` on id, not name. This used to send the name,
   // so every load-more on a filtered listing came back empty and the grid
   // stopped dead at the first 100 products.
-  if (selectedCategory) gridParams.set('category', String(selectedCategory.id))
+  if (selectedCategoryIds.length > 0) {
+    for (const id of selectedCategoryIds) gridParams.append('category', String(id))
+  } else if (selectedCategory) {
+    gridParams.set('category', String(selectedCategory.id))
+  }
+  if (materials) gridParams.set('materials', materials)
+  if (bodyColors) gridParams.set('bodyColors', bodyColors)
   if (whereUsed && roomTagUsed) gridParams.set('whereUsed', whereUsed)
   if (minPrice !== undefined && Number.isFinite(minPrice)) gridParams.set('minPrice', String(minPrice))
   if (maxPrice !== undefined && Number.isFinite(maxPrice)) gridParams.set('maxPrice', String(maxPrice))

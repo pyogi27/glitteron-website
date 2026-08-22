@@ -67,6 +67,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       <JsonLd data={faqSchema(cat.faqs, `/${cat.slug}`)} />
       <CollectionView
         categoryName={cat.name}
+        categoryNames={cat.names}
         heading={cat.heading}
         subtitle={cat.subtitle}
         page={page}

@@ -235,6 +235,20 @@ export async function fetchCategories(): Promise<ApiCategory[]> {
 
 export async function fetchProducts(params?: {
   categoryId?: number;
+  /**
+   * Several categories at once, for the /hanging-lights umbrella. The backend
+   * ORs repeated `category` params (verified 2026-08-21: `category=4&category=5`
+   * returns 658, the sum of chandeliers and pendants). A comma-joined list is
+   * NOT understood — `category=4,5` returns 0 — so these must be repeated keys.
+   */
+  categoryIds?: number[];
+  /**
+   * Backend attribute filters, ANDed with the category and with each other.
+   * Comma-joined values inside one param are ORed (`materials=Glass,Wood` → 454).
+   * Both verified against the live API 2026-08-21.
+   */
+  materials?: string;
+  bodyColors?: string;
   search?: string;
   page?: number;
   limit?: number;
@@ -244,6 +258,9 @@ export async function fetchProducts(params?: {
 }): Promise<{ products: ApiProduct[]; total: number; totalPages: number }> {
   const qs = new URLSearchParams();
   if (params?.categoryId) qs.set("category", String(params.categoryId));
+  for (const id of params?.categoryIds ?? []) qs.append("category", String(id));
+  if (params?.materials) qs.set("materials", params.materials);
+  if (params?.bodyColors) qs.set("bodyColors", params.bodyColors);
   if (params?.search) qs.set("search", params.search);
   if (params?.whereUsed) qs.set("whereUsed", params.whereUsed);
   if (params?.page) qs.set("page", String(params.page));

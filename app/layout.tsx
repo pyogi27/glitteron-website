@@ -29,8 +29,11 @@ const outfit = Outfit({
 // "Buy … Online in India" is the head-term shape every competitor ranking for
 // these queries uses; the old title led with a craft claim nobody searches for.
 const TITLE = 'Buy Decorative Lights Online in India | LitMeUp'
+// "Jhoomar" and "hanging lights" are the words a large share of Indian shoppers
+// actually types; both were absent from the whole site while every competitor
+// ranking above us carries them in the title tag or a parent category.
 const DESCRIPTION =
-  'Buy handcrafted chandeliers, pendant lights, ceiling and wall lights online in India. 500+ designs, free shipping, 5-year warranty, 7-day returns.'
+  'Buy handcrafted chandeliers and jhoomars, hanging and pendant lights, ceiling and wall lights online in India. Free shipping, 5-year warranty, 7-day returns.'
 
 export const metadata: Metadata = {
   // Makes every relative OG/Twitter/canonical URL absolute.

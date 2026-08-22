@@ -14,7 +14,10 @@ export default function ProductGallery({ images, name, lightOnImage }: Props) {
   const [litFailed, setLitFailed] = useState(false)
 
   // The lit shot only corresponds to the primary image, so the overlay is
-  // suppressed once the user browses to another angle.
+  // suppressed once the user browses to another angle. When it does show, the
+  // off shot underneath fades out: both are alpha PNGs framed slightly
+  // differently, so a base left at full opacity outlined a second lamp around
+  // the lit one.
   const litSrc = litFailed ? undefined : lightOnImage
   const showLit = lightOn && Boolean(litSrc) && active === 0
   const showLitInLightbox = lightOn && Boolean(litSrc) && lightboxIndex === 0
@@ -98,7 +101,8 @@ export default function ProductGallery({ images, name, lightOnImage }: Props) {
           <div
             ref={trackRef}
             onScroll={onTrackScroll}
-            className="lg:hidden absolute inset-0 flex overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className={`lg:hidden absolute inset-0 flex overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
+              transition-opacity duration-500 ${showLit ? 'opacity-0' : 'opacity-100'}`}
           >
             {images.map((src, i) => (
               <div key={i} className="relative w-full h-full flex-shrink-0 snap-center">
@@ -118,7 +122,7 @@ export default function ProductGallery({ images, name, lightOnImage }: Props) {
             src={images[active]}
             alt={name}
             fill
-            className="hidden lg:block object-cover transition-opacity duration-300"
+            className={`hidden lg:block object-cover transition-opacity duration-500 ${showLit ? 'opacity-0' : 'opacity-100'}`}
             sizes="50vw"
             priority={active === 0}
           />
@@ -195,7 +199,7 @@ export default function ProductGallery({ images, name, lightOnImage }: Props) {
               src={images[lightboxIndex]}
               alt={`${name} ${lightboxIndex + 1}`}
               fill
-              className="object-contain"
+              className={`object-contain transition-opacity duration-500 ${showLitInLightbox ? 'opacity-0' : 'opacity-100'}`}
               sizes="100vw"
             />
             {litSrc && (

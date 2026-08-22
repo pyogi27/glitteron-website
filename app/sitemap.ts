@@ -3,6 +3,7 @@ import { fetchCategories, resolvableProductSlugs } from '@/lib/api/server'
 import { rooms } from '@/lib/data'
 import { bandSlug, categories as lightCategories, categoryPath } from '@/lib/data/categories'
 import { getRoomSubPage } from '@/lib/data/category-rooms'
+import { getFacet } from '@/lib/data/facets'
 import { cities } from '@/lib/data/cities'
 import { guides } from '@/lib/data/guides'
 import { products as staticProducts } from '@/lib/data/products'
@@ -57,12 +58,14 @@ async function categoryUrls(): Promise<string[]> {
 }
 
 /**
- * Room and price-band pages beneath each category. Local data, so no API call
- * and no failure mode — a room pairing without copy is simply not listed.
+ * Room, price-band and facet pages beneath each category. Local data, so no API
+ * call and no failure mode — a room pairing without copy, or a facet slug with
+ * no entry in the registry, is simply not listed.
  */
 function subTierUrls(): string[] {
   return lightCategories.flatMap(category => [
     ...category.priceBands.map(band => `/${category.slug}/${bandSlug(band)}`),
+    ...category.facets.filter(getFacet).map(facet => `/${category.slug}/${facet}`),
     ...category.rooms
       .filter(room => getRoomSubPage(category.slug, room))
       .map(room => `/${category.slug}/${room}`),
