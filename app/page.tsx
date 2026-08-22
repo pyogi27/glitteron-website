@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import HeroSection from '@/components/home/HeroSection'
 import TickerStrip from '@/components/home/TickerStrip'
 import CollectionsSection from '@/components/home/CollectionsSection'

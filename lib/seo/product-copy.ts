@@ -220,12 +220,29 @@ export function productTitle(p: ProductCopyInput): string {
 }
 
 /**
- * Meta description. Leads with the physical facts a shopper is scanning for,
- * closes on the two commercial terms that differentiate us in the SERP.
+ * Meta description.
+ *
+ * An authored description wins, but only if it survives the SERP budget whole.
+ * The backfilled descriptions (scripts/generate-descriptions.mjs) run 300-600
+ * characters of body copy, and clamping one to 158 yields a sentence cut mid-clause
+ * with an ellipsis — strictly worse in the SERP than the attribute build below,
+ * which is written to fit and closes on price, delivery and warranty. So: take the
+ * whole thing if it fits, else its first complete sentence if that fits, else build
+ * from attributes.
  */
 export function productMetaDescription(p: ProductCopyInput): string {
-  if (p.description?.trim()) return clamp(p.description, MAX_DESCRIPTION_LENGTH)
+  const authored = p.description?.trim().replace(/\s+/g, ' ')
+  if (authored) {
+    if (authored.length <= MAX_DESCRIPTION_LENGTH) return authored
+    const firstSentence = authored.match(/^[^.!?]*[.!?]/)?.[0]?.trim()
+    if (firstSentence && firstSentence.length <= MAX_DESCRIPTION_LENGTH) return firstSentence
+  }
 
+  return attributeMetaDescription(p)
+}
+
+/** The composed fallback: physical facts first, commercial terms last. */
+function attributeMetaDescription(p: ProductCopyInput): string {
   const noun = categoryNoun(p.categoryName).toLowerCase()
   const size = primarySize(p)
   const finish = splitList(p.bodyColors)[0]?.toLowerCase()

@@ -7,16 +7,9 @@ import JsonLd from '@/components/seo/JsonLd'
 import { breadcrumbSchema, itemListSchema } from '@/lib/seo/schema'
 import { categoryIdOf, fetchCategories, fetchProducts, mapApiProduct } from '@/lib/api/server'
 import { products as staticProducts } from '@/lib/data/products'
+import { MIN_ROOM_PRODUCTS } from '@/lib/data/rooms'
 
 const INITIAL_BATCH = 100
-
-/**
- * Below this, a room-filtered grid is treated as "not tagged yet" and the page
- * falls back to the whole category rather than showing a near-empty shelf.
- * Room tagging is being backfilled in the product catalogue; once a room has
- * real coverage its pages narrow on their own, with no code change here.
- */
-const MIN_ROOM_PRODUCTS = 8
 
 interface Props {
   /** Backend category name. Omitted on the unfiltered grid. */

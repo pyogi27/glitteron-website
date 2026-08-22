@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "check": "node scripts/generate-descriptions.mjs selftest && node --experimental-strip-types scripts/check-meta-description.mts",
+    "descriptions": "node scripts/generate-descriptions.mjs"
   },
   "dependencies": {
     "gsap": "^3.14.2",
