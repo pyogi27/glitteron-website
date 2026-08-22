@@ -14,6 +14,7 @@ import {
   type LightCategory,
 } from '@/lib/data/categories'
 import { getRoomSubPage } from '@/lib/data/category-rooms'
+import { facetQueryValue, getFacet } from '@/lib/data/facets'
 import { rooms } from '@/lib/data/rooms'
 
 interface Props {
@@ -41,6 +42,10 @@ interface Resolved {
   whereUsed?: string
   /** Price ceiling in INR, on band pages only. */
   maxPrice?: string
+  /** Comma-joined backend `materials` values, on material facet pages. */
+  materials?: string
+  /** Comma-joined backend `bodyColors` values, on finish facet pages. */
+  bodyColors?: string
   siblings: { label: string; href: string }[]
   siblingsLabel: string
 }
@@ -90,7 +95,46 @@ function resolve(category: LightCategory, sub: string): Resolved | undefined {
     }
   }
 
-  // Not a band — try a room pairing this category has copy for.
+  // Not a band — try a material or finish facet this category has stock for.
+  const facet = category.facets.includes(sub) ? getFacet(sub) : undefined
+  if (facet) {
+    const heading = `${facet.adjective} ${category.shortName}`
+    const lower = category.shortName.toLowerCase()
+    return {
+      title: `Buy ${heading} Online in India — Handcrafted`,
+      description: `Buy handcrafted ${facet.adjective.toLowerCase()} ${lower} online in India. Free shipping, 5-year warranty, 7-day returns, dimmable as standard.`,
+      heading,
+      subtitle: `Handcrafted ${lower} in ${facet.noun}.`,
+      intro: [
+        ...facet.note,
+        `Everything on this page is ${lower} in ${facet.noun}, assembled and inspected in our Surat workshop, dimmable as standard, and shipped free anywhere in India under the same 5-year warranty as the rest of the range.`,
+      ],
+      faqs: facet.faqs,
+      ...(facet.kind === 'materials'
+        ? { materials: facetQueryValue(facet) }
+        : { bodyColors: facetQueryValue(facet) }),
+      siblings: [
+        ...category.facets
+          .filter(other => other !== sub)
+          .flatMap(other => {
+            const sibling = getFacet(other)
+            return sibling
+              ? [{
+                  label: `${sibling.adjective} ${category.shortName}`,
+                  href: `/${category.slug}/${other}`,
+                }]
+              : []
+          }),
+        ...category.priceBands.map(band => ({
+          label: `${category.shortName} under ${formatInr(band.max)}`,
+          href: `/${category.slug}/${bandSlug(band)}`,
+        })),
+      ],
+      siblingsLabel: 'Other finishes and materials',
+    }
+  }
+
+  // Not a facet either — try a room pairing this category has copy for.
   if (!category.rooms.includes(sub)) return undefined
   const roomPage = getRoomSubPage(category.slug, sub)
   const room = rooms.find(r => r.slug === sub)
@@ -118,6 +162,9 @@ function resolve(category: LightCategory, sub: string): Resolved | undefined {
 export function generateStaticParams() {
   return categories.flatMap(category => [
     ...category.priceBands.map(band => ({ category: category.slug, sub: bandSlug(band) })),
+    ...category.facets
+      .filter(facet => getFacet(facet))
+      .map(facet => ({ category: category.slug, sub: facet })),
     ...category.rooms
       .filter(room => getRoomSubPage(category.slug, room))
       .map(room => ({ category: category.slug, sub: room })),
@@ -145,12 +192,14 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 }
 
 /**
- * Sub-tier landing page: `/chandelier-lights/dining-room` (room intent) or
- * `/chandelier-lights/under-25000` (budget intent).
+ * Sub-tier landing page: `/chandelier-lights/dining-room` (room intent),
+ * `/chandelier-lights/under-25000` (budget intent) or `/chandelier-lights/glass`
+ * (material and finish intent).
  *
- * One route for both because they are the same page with a different filter
- * and different copy, and a slug is only ever one of the two. Anything else
- * 404s — there is no auto-generated variant.
+ * One route for all three because they are the same page with a different filter
+ * and different copy, and a slug is only ever one of them. Anything else 404s —
+ * there is no auto-generated variant, and a facet is only reachable where the
+ * category declares it, which is only where the stock is there to fill it.
  */
 export default async function CategorySubPage({ params, searchParams }: Props) {
   const { category: categorySlug, sub } = await params
@@ -165,7 +214,10 @@ export default async function CategorySubPage({ params, searchParams }: Props) {
       <JsonLd data={faqSchema(resolved.faqs, `/${category.slug}/${sub}`)} />
       <CollectionView
         categoryName={category.name}
+        categoryNames={category.names}
         whereUsed={resolved.whereUsed}
+        materials={resolved.materials}
+        bodyColors={resolved.bodyColors}
         maxPrice={resolved.maxPrice}
         heading={resolved.heading}
         subtitle={resolved.subtitle}

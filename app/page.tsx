@@ -18,6 +18,11 @@ import { fetchCategories, fetchFeaturedProducts } from '@/lib/api/server'
 // as their canonical while also sending noindex — two contradictory signals.
 export const metadata: Metadata = { alternates: { canonical: '/' } }
 
+// Merchandising order for the homepage "Shop by Collection" grid, by category
+// id: Pendant, Chandelier, Wall, Table, Floor, Bulb. Ceiling Lights (2) is
+// deliberately left out — six cards fill the grid.
+const COLLECTION_ORDER = [5, 4, 1, 7, 3, 6]
+
 export default async function HomePage() {
   const [apiCategories, featured] = await Promise.all([
     fetchCategories(),
@@ -42,6 +47,10 @@ export default async function HomePage() {
     return true
   })
 
+  // flatMap over the ids, not a sort on the API order: an id the backend drops
+  // just yields one fewer card.
+  const collections = COLLECTION_ORDER.flatMap(id => apiCategories.filter(c => Number(c.id) === id))
+
   const newArrivals = catalog.slice(0, 8)
   const bestsellers = catalog.slice(8, 24)
   const curated = catalog.slice(24, 29)
@@ -52,15 +61,15 @@ export default async function HomePage() {
       <JsonLd data={websiteSchema()} />
       <TickerStrip />
       <HeroSection />
-      <CollectionsSection categories={apiCategories.length > 0 ? apiCategories.slice(0, 6) : undefined} />
-      <ProductCarousel titlePrefix="New" titleHighlight="Arrivals" label="Just In" products={newArrivals} />
-      <StatsDivider />
-      <ProductCarousel titlePrefix="Bestselling" titleHighlight="Lights" label="Most Loved" products={bestsellers} />
-      <RoomGrid />
+      <CollectionsSection categories={collections.length > 0 ? collections : undefined} />
       {/* A deck of one or two cards isn't a deck. Falling back to New Arrivals
           here would just reintroduce the duplication this split exists to fix,
           so a thin catalog drops the section instead. */}
       {curated.length >= 3 && <ShuffleDeck products={curated} />}
+      <ProductCarousel titlePrefix="New" titleHighlight="Arrivals" label="Just In" products={newArrivals} />
+      <StatsDivider />
+      <ProductCarousel titlePrefix="Bestselling" titleHighlight="Lights" label="Most Loved" products={bestsellers} />
+      <RoomGrid />
       <SocialGrid />
       <ReviewsSection />
       <NewsletterStrip />

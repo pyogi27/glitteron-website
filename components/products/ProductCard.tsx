@@ -41,8 +41,11 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
   const [litFailed, setLitFailed] = useState(false)
   useEffect(() => { setMounted(true) }, [])
   const isWishlisted = mounted && has(product.id)
-  // Lit layer sits above the base image and crossfades in; products without a
-  // lightOnImage simply keep showing the off state.
+  // Lit layer sits above the base image and crossfades in — and the base fades
+  // OUT as it does. Both shots are alpha PNGs framed slightly differently, so
+  // leaving the base at full opacity underneath showed its silhouette around
+  // the lit one: one lamp rendered as two. Products without a lightOnImage
+  // simply keep showing the off state.
   const litSrc = !litFailed ? product.lightOnImage : undefined
   const showLit = lightOn && Boolean(litSrc)
   // The lit layer is invisible until the lights-on toggle is used, but it was
@@ -88,7 +91,8 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
             src={imgSrc}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-[650ms] [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.07]"
+            className={`object-cover transition-[transform,opacity] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.07]
+              ${showLit ? 'opacity-0' : 'opacity-100'}`}
             sizes="220px"
             priority={priority}
             onError={() => setImgSrc(FALLBACK_IMAGE)}
@@ -158,7 +162,8 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
           src={imgSrc}
           alt={product.name}
           fill
-          className="product-card-img object-cover transition-transform duration-[650ms] [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]"
+          className={`product-card-img object-cover transition-[transform,opacity] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]
+            ${showLit ? 'opacity-0' : 'opacity-100'}`}
           sizes={variant === 'related' ? '(max-width: 768px) 50vw, 25vw' : '(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw'}
           priority={priority}
           onError={() => setImgSrc(FALLBACK_IMAGE)}

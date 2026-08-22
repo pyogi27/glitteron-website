@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { bandSlug, categories, formatInr, type LightCategory } from '@/lib/data/categories'
 import { getRoomSubPage } from '@/lib/data/category-rooms'
+import { getFacet } from '@/lib/data/facets'
 import { guides } from '@/lib/data/guides'
 import { rooms } from '@/lib/data/rooms'
 
@@ -83,24 +84,52 @@ export default function CategorySeoContent({ category }: { category: LightCatego
             </ul>
           </div>
 
-          <div>
-            <h3 className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#A85B3B] mb-4">
-              Shop by room
-            </h3>
-            <ul className="space-y-2.5">
-              {linkedRooms.map(room => (
-                <li key={room.href}>
-                  <Link
-                    href={room.href}
-                    className="text-[14px] font-light text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
-                  >
-                    {room.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* /hanging-lights carries no room pairings of its own — its children
+              own those — so the heading would otherwise sit above nothing. */}
+          {linkedRooms.length > 0 && (
+            <div>
+              <h3 className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#A85B3B] mb-4">
+                Shop by room
+              </h3>
+              <ul className="space-y-2.5">
+                {linkedRooms.map(room => (
+                  <li key={room.href}>
+                    <Link
+                      href={room.href}
+                      className="text-[14px] font-light text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
+                    >
+                      {room.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
+
+        {category.facets.length > 0 && (
+          <>
+            <h3 className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#A85B3B] mt-14 mb-4">
+              Shop by material and finish
+            </h3>
+            <ul className="flex flex-wrap gap-x-6 gap-y-2.5">
+              {category.facets.map(slug => {
+                const facet = getFacet(slug)
+                if (!facet) return null
+                return (
+                  <li key={slug}>
+                    <Link
+                      href={`/${category.slug}/${slug}`}
+                      className="text-[14px] font-light text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
+                    >
+                      {facet.adjective} {category.shortName}
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          </>
+        )}
 
         {category.priceBands.length > 0 && (
           <>
