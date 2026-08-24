@@ -283,7 +283,15 @@ export function productBodyCopy(p: ProductCopyInput): string {
   const model = hasRealWords(p.name) ? '' : p.name.trim()
   const sentences: string[] = []
 
-  sentences.push(model ? `${model} is a ${headline}.` : `A ${headline}.`)
+  // ponytail: article(), not a hardcoded "a" — headline starts with the colour
+  // ("olive green glass wall light", "amber glass pendant"), so this read
+  // "is a olive green..." on every page whose colour begins with a vowel.
+  const an = article(headline)
+  sentences.push(
+    model
+      ? `${model} is ${an} ${headline}.`
+      : `${an === 'an' ? 'An' : 'A'} ${headline}.`
+  )
 
   // Square pieces report the same number as diameter and width; listing it twice
   // ("850mm across and 850mm wide") reads like a mistake, so keep first mention.

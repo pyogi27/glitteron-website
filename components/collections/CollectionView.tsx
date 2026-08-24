@@ -30,6 +30,12 @@ interface Props {
   page: number
   minPrice?: string
   maxPrice?: string
+  /**
+   * Price ceiling implied by the slug on a band sub-page (/pendant-lights/under-10000).
+   * Filters the grid but never enters a URL — the path already says it, and
+   * repeating it as ?maxPrice= gave every paginated page a parameterised twin.
+   */
+  priceCeiling?: string
   /** Path the pagination links hang off. */
   basePath: string
   /** Canonical path for the ItemList. */
@@ -55,13 +61,15 @@ export default async function CollectionView({
   page,
   minPrice: minPriceStr,
   maxPrice: maxPriceStr,
+  priceCeiling,
   basePath,
   listPath,
   breadcrumb,
   children,
 }: Props) {
   const minPrice = minPriceStr ? Number(minPriceStr) : undefined
-  const maxPrice = maxPriceStr ? Number(maxPriceStr) : undefined
+  const maxPriceRaw = maxPriceStr ?? priceCeiling
+  const maxPrice = maxPriceRaw ? Number(maxPriceRaw) : undefined
 
   const categories = await fetchCategories()
 

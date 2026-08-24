@@ -218,7 +218,7 @@ export default async function CategorySubPage({ params, searchParams }: Props) {
         whereUsed={resolved.whereUsed}
         materials={resolved.materials}
         bodyColors={resolved.bodyColors}
-        maxPrice={resolved.maxPrice}
+        priceCeiling={resolved.maxPrice}
         heading={resolved.heading}
         subtitle={resolved.subtitle}
         page={page}

@@ -50,3 +50,6 @@ CLAUDE.md
 # Generated product descriptions awaiting review (scripts/generate-descriptions.mjs).
 # Not source: it is a reproducible model output, and it is large.
 scripts/out/
+
+# Claude Code worktrees are local scratch, never repo content.
+.claude/worktrees/
