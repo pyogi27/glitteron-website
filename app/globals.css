@@ -663,6 +663,28 @@
 }
 
 /* ─────────────────────────────────────────────────────────────
+   Listing headroom
+
+   On product listings, scrolling down tucks the header and the category bar
+   out of view so the grid has the whole screen; scrolling up brings them back.
+   Toolbar.tsx sets data-chrome-hidden on <html>.
+
+   translate only — nothing reflows, so the grid never jumps.
+
+   A bar holding keyboard focus stays put, and an open header menu or filter
+   panel holds both in place — the panel hangs off the toolbar, so nothing
+   slides away from under the user.
+   ───────────────────────────────────────────────────────────── */
+html[data-chrome-hidden]:not(:has(:is(.site-header, .collection-toolbar) [aria-expanded="true"])) .site-header:not(:has(:focus-visible)) {
+  translate: 0 -100%;
+}
+
+/* Pinned below the header, so it clears the header's height as well as its own. */
+html[data-chrome-hidden]:not(:has(:is(.site-header, .collection-toolbar) [aria-expanded="true"])) .collection-toolbar:not(:has(:focus-visible)) {
+  translate: 0 calc(-100% - var(--spacing-header));
+}
+
+/* ─────────────────────────────────────────────────────────────
    Reduced motion
 
    The site had no prefers-reduced-motion handling at all while running five

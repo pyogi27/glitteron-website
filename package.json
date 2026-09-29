@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "check": "node scripts/generate-descriptions.mjs selftest && node --experimental-strip-types scripts/check-meta-description.mts",
+    "check": "node scripts/generate-descriptions.mjs selftest && node --experimental-strip-types scripts/check-meta-description.mts && node --experimental-strip-types lib/data/filters.test.mjs",
     "descriptions": "node scripts/generate-descriptions.mjs"
   },
   "dependencies": {

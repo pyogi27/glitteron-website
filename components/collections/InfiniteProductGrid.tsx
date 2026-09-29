@@ -210,26 +210,18 @@ function InfiniteProductGridInner({
     return () => observer.disconnect()
   }, [hasMore, fetchNextPage])
 
-  const { materials, sortBy, viewMode } = useFilterStore()
+  const { sortBy, viewMode } = useFilterStore()
 
+  // Material and colour filter on the server now (?materials=, ?bodyColors=);
+  // only the sort is still applied here.
   const sorted = useMemo(() => {
-    let filtered = products
-    if (materials.length > 0) {
-      filtered = filtered.filter(p =>
-        materials.some(m =>
-          p.name.toLowerCase().includes(m.toLowerCase()) ||
-          p.subtitle.toLowerCase().includes(m.toLowerCase()) ||
-          p.category.toLowerCase().includes(m.toLowerCase())
-        )
-      )
-    }
-    return [...filtered].sort((a, b) => {
+    return [...products].sort((a, b) => {
       if (sortBy === 'price-asc') return a.price - b.price
       if (sortBy === 'price-desc') return b.price - a.price
       if (sortBy === 'rating') return b.rating - a.rating
       return 0
     })
-  }, [products, materials, sortBy])
+  }, [products, sortBy])
 
   return (
     <div className="flex-1 p-4 sm:p-8 overflow-visible">
@@ -240,7 +232,7 @@ function InfiniteProductGridInner({
         </div>
       ) : (
         <div className={viewMode === 'grid'
-          ? 'cards-track grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 pt-4'
+          ? 'cards-track grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 pt-4'
           : 'flex flex-col gap-4'
         }>
           {sorted.map((p, i) => (

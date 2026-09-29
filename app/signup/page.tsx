@@ -29,6 +29,11 @@ function EyeIcon({ open }: { open: boolean }) {
   );
 }
 
+/** +91 XXXXX 43210 */
+function maskPhone(phone: string) {
+  return `+91 XXXXX ${phone.slice(-5)}`;
+}
+
 function getPasswordStrength(password: string): 0 | 1 | 2 | 3 {
   if (password.length === 0) return 0;
   let score = 0;
@@ -135,7 +140,7 @@ export default function SignupPage() {
 
       setDetailsLoading(true);
       try {
-        await sendOtp(form.email);
+        await sendOtp(form.phone, form.email);
         setStep('otp');
         setCountdown(60);
         setOtp('');
@@ -162,8 +167,8 @@ export default function SignupPage() {
     setOtpError('');
     try {
       const { accessToken, user } = await verifyOtp({
-        email: form.email,
         phone: form.phone,
+        email: form.email,
         otp,
         firstName: form.firstName,
         lastName: form.lastName,
@@ -174,8 +179,12 @@ export default function SignupPage() {
     } catch (err: unknown) {
       const e = err as ApiError;
       if (e.status === 409) {
-        // Email conflict — send back to step 1 highlighting the email field
-        setErrors({ email: 'This email is already in use. Try a different one.' });
+        // Could be either the phone or the email — the backend says which, so
+        // surface its message rather than always blaming the email (which sent
+        // the user back to edit a field that could not fix a phone collision).
+        const msg = e.message ?? 'This phone number or email is already registered.';
+        const emailOnly = /email/i.test(msg) && !/phone/i.test(msg);
+        setErrors(emailOnly ? { email: msg } : { form: msg });
         setStep('details');
       } else {
         setOtpError(e.message ?? 'Invalid OTP. Please try again.');
@@ -197,7 +206,7 @@ export default function SignupPage() {
     setResendLoading(true);
     setOtpError('');
     try {
-      await sendOtp(form.email);
+      await sendOtp(form.phone, form.email);
       setCountdown(60);
       setOtp('');
     } catch (err: unknown) {
@@ -206,7 +215,7 @@ export default function SignupPage() {
     } finally {
       setResendLoading(false);
     }
-  }, [form.phone]);
+  }, [form.phone, form.email]);
 
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -557,8 +566,8 @@ export default function SignupPage() {
                     Enter Code
                   </h1>
                   <p className="font-sans text-[12.5px] font-light leading-[1.7]" style={{ color: '#A09488' }}>
-                    We sent a 6-digit code to{' '}
-                    <span className="font-medium" style={{ color: '#2C2825' }}>{form.email}</span>
+                    We sent a 6-digit code on WhatsApp to{' '}
+                    <span className="font-medium" style={{ color: '#2C2825' }}>{maskPhone(form.phone)}</span>
                   </p>
                 </div>
 

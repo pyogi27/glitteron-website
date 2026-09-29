@@ -89,11 +89,12 @@ export interface ApiVariation {
 }
 
 export interface ApiReview {
-  id: number;
+  id: number | string;
   author: string;
   location: string;
   date: string;
   rating: number;
+  title?: string | null;
   text: string;
   verified: boolean;
 }

@@ -340,7 +340,7 @@ function LoginForm() {
                     Enter Code
                   </h1>
                   <p className="font-sans text-[12.5px] font-light leading-[1.7]" style={{ color: '#A09488' }}>
-                    We sent a 6-digit code to{' '}
+                    We sent a 6-digit code on WhatsApp to{' '}
                     <span className="font-medium" style={{ color: '#2C2825' }}>{maskPhone(phone)}</span>
                   </p>
                 </div>

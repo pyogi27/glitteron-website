@@ -62,6 +62,8 @@ export interface Review {
   location: string
   date: string
   rating: number
+  /** Optional headline the reviewer gave; absent on older/imported reviews. */
+  title?: string | null
   text: string
   verified: boolean
 }

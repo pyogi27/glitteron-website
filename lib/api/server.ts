@@ -528,6 +528,7 @@ export async function fetchProductById(id: number): Promise<Product | null> {
         location: r.location,
         date: r.date,
         rating: r.rating,
+        title: r.title ?? null,
         text: r.text,
         verified: r.verified ?? false,
       })) ?? [];

@@ -30,15 +30,17 @@ POST /auth/send-otp
 
 **Body:**
 ```json
-{ "phone": "9876543210" }
+{ "phone": "9876543210", "email": "john@example.com" }
 ```
 
 **Response `200`:**
 ```json
-{ "success": true, "message": "OTP sent" }
+{ "success": true, "message": "OTP sent successfully" }
 ```
 
 **Notes:**
+- The OTP is delivered on **WhatsApp** to `phone`
+- `email` is optional and used only as the `OTP_CHANNEL=email` fallback destination
 - 10-digit phone only
 - Rate limited: 1 OTP per 60 seconds per phone
 - After 3 failed verifications → 15-minute lockout
@@ -63,8 +65,10 @@ POST /auth/verify-otp
 }
 ```
 
-- `firstName`, `lastName` required on first signup
-- `email`, `password` optional
+- `firstName`, `lastName`, `email`, `password` are all required on first signup
+  (email is unique on `website_users`, is the password-reset channel, and is the
+  `OTP_CHANNEL=email` fallback address)
+- Ignored for an existing phone — that is just a login
 
 **Response `200`:**
 ```json
@@ -99,7 +103,7 @@ POST /auth/login
 
 **Response `200`:**
 ```json
-{ "success": true, "message": "OTP sent to registered phone" }
+{ "success": true, "message": "OTP sent to your WhatsApp number" }
 ```
 
 ---

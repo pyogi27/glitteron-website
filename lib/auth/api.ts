@@ -59,17 +59,23 @@ async function authedReq<T>(path: string, opts: RequestInit = {}): Promise<T> {
 
 // ─── Public endpoints ─────────────────────────────────────────────────────────
 
-/** Signup step 1 — sends OTP to email */
-export const sendOtp = (email: string) =>
+/**
+ * Signup step 1 — sends the OTP to the phone number over WhatsApp.
+ *
+ * `email` rides along as the fallback destination the backend uses when it is
+ * switched to OTP_CHANNEL=email (a WhatsApp ban or gateway outage). The OTP is
+ * always keyed on the phone number regardless of which channel carries it.
+ */
+export const sendOtp = (phone: string, email?: string) =>
   req<OtpSentResponse>('/send-otp', {
     method: 'POST',
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ phone, email }),
   });
 
-/** Signup step 2 — verify OTP + create account */
+/** Signup step 2 — verify the WhatsApp OTP + create account */
 export const verifyOtp = (payload: {
-  email: string;
   phone: string;
+  email: string;
   otp: string;
   firstName: string;
   lastName: string;
@@ -80,7 +86,7 @@ export const verifyOtp = (payload: {
     body: JSON.stringify(payload),
   });
 
-/** Login step 1 — validate phone + password, triggers OTP SMS */
+/** Login step 1 — validate phone + password, triggers the WhatsApp OTP */
 export const login = (phone: string, password: string) =>
   req<OtpSentResponse>('/login', {
     method: 'POST',
@@ -415,3 +421,43 @@ export const getWebsiteOrders = (page = 1, limit = 10) =>
 
 export const getWebsiteOrder = (id: number) =>
   authedReq<{ success: true; order: WebsiteOrder }>(`/orders/${id}`)
+
+// ─── Product reviews ──────────────────────────────────────────────────────────
+
+/**
+ * Reviews are gated on a paid order containing the product, so every review the
+ * storefront displays is a real purchase — `verified` is always true.
+ *
+ * The published list arrives with the product itself (fetchProductById maps
+ * productData.reviews); these calls only cover the caller's own review, which is
+ * per-user and therefore uncacheable.
+ */
+export interface MyReviewState {
+  hasPurchased: boolean
+  canReview: boolean
+  review: {
+    id: string
+    rating: number
+    title: string | null
+    text: string
+    date: string
+    isPublished: boolean
+  } | null
+}
+
+export const getMyProductReview = (productId: number) =>
+  authedFetch<{ success: true } & MyReviewState>(`/api/reviews/${productId}/mine`);
+
+export const submitProductReview = (payload: {
+  productId: number
+  rating: number
+  text: string
+  title?: string
+}) =>
+  authedFetch<{ success: true; updated: boolean; aggregates: { rating: number | null; reviewCount: number } }>(
+    '/api/reviews',
+    { method: 'POST', body: JSON.stringify(payload) },
+  );
+
+export const deleteProductReview = (reviewId: string) =>
+  authedFetch<{ success: true }>(`/api/reviews/${reviewId}`, { method: 'DELETE' });

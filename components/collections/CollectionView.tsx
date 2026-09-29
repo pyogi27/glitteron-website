@@ -1,6 +1,5 @@
 import PageBanner from '@/components/collections/PageBanner'
 import Toolbar from '@/components/collections/Toolbar'
-import FilterSidebar from '@/components/collections/FilterSidebar'
 import InfiniteProductGrid from '@/components/collections/InfiniteProductGrid'
 import CrawlablePagination from '@/components/collections/CrawlablePagination'
 import JsonLd from '@/components/seo/JsonLd'
@@ -8,6 +7,7 @@ import { breadcrumbSchema, itemListSchema } from '@/lib/seo/schema'
 import { categoryIdOf, fetchCategories, fetchProducts, mapApiProduct } from '@/lib/api/server'
 import { products as staticProducts } from '@/lib/data/products'
 import { MIN_ROOM_PRODUCTS } from '@/lib/data/rooms'
+import { backendValues, COLORS, MATERIALS, type ListingFilters } from '@/lib/data/filters'
 
 const INITIAL_BATCH = 100
 
@@ -19,10 +19,10 @@ interface Props {
    * than one (/hanging-lights). Takes precedence over `categoryName`.
    */
   categoryNames?: string[]
-  /** Comma-joined backend `materials` values, on material facet pages. */
-  materials?: string
-  /** Comma-joined backend `bodyColors` values, on finish facet pages. */
-  bodyColors?: string
+  /** Comma-joined MATERIALS slugs: a facet page's own, or the shopper's picks. */
+  material?: string
+  /** Comma-joined COLORS slugs. */
+  color?: string
   /** Backend `whereUsed` room tag, e.g. 'Dining Room'. */
   whereUsed?: string
   heading: string
@@ -32,6 +32,12 @@ interface Props {
   maxPrice?: string
   /** Path the pagination links hang off. */
   basePath: string
+  /**
+   * Where the filter panel navigates. A page that reads material, color and
+   * price from its own query passes its path; the rest hand off to /collections,
+   * which names the category in its query.
+   */
+  filterPath?: string
   /** Canonical path for the ItemList. */
   listPath: string
   breadcrumb: { name: string; path: string }[]
@@ -47,8 +53,8 @@ interface Props {
 export default async function CollectionView({
   categoryName,
   categoryNames,
-  materials,
-  bodyColors,
+  material,
+  color,
   whereUsed,
   heading,
   subtitle,
@@ -56,12 +62,15 @@ export default async function CollectionView({
   minPrice: minPriceStr,
   maxPrice: maxPriceStr,
   basePath,
+  filterPath = '/collections',
   listPath,
   breadcrumb,
   children,
 }: Props) {
   const minPrice = minPriceStr ? Number(minPriceStr) : undefined
   const maxPrice = maxPriceStr ? Number(maxPriceStr) : undefined
+  const materials = backendValues(MATERIALS, material)
+  const bodyColors = backendValues(COLORS, color)
 
   const categories = await fetchCategories()
 
@@ -126,6 +135,19 @@ export default async function CollectionView({
     ? apiProducts.map(p => mapApiProduct(p, categoryMap.get(categoryIdOf(p))))
     : staticProducts
 
+  // What this page shows, in the query terms of `filterPath`. The filter panel
+  // starts from it and every change lands on `filterPath`. A room tag has no
+  // query equivalent there and drops out.
+  const filters: ListingFilters = {
+    // Only /collections names the category in its query; elsewhere the path
+    // does, including /hanging-lights, whose two categories one param cannot.
+    category: filterPath === '/collections' ? categoryName : undefined,
+    material,
+    color,
+    minPrice: minPriceStr,
+    maxPrice: maxPriceStr,
+  }
+
   return (
     <>
       <JsonLd data={breadcrumbSchema(breadcrumb)} />
@@ -139,16 +161,9 @@ export default async function CollectionView({
           { num: '5yr', label: 'Warranty' },
         ]}
       />
-      <Toolbar categories={categories} total={total} />
-      <div className="flex items-start min-h-screen bg-[#EDE8E0]">
-        {/* ponytail: sticky lives on the flex child, not the <aside>. A wrapper sized
-            to its own content gives sticky no travel room, so it scrolls away. */}
-        {/* ponytail: relative z-10 — .cards-track is an isolated stacking context
-            painted after this sibling, so hovered cards (scale 1.04) drew over
-            the sidebar. z-10 puts the filters back on top. */}
-        <div className="hidden lg:block sticky top-header-ticker relative z-10">
-          <FilterSidebar />
-        </div>
+      {/* The filter panel lives in the toolbar now, overlaying the grid on demand. */}
+      <Toolbar categories={categories} total={total} filters={filters} filterPath={filterPath} />
+      <div className="min-h-screen bg-[#EDE8E0]">
         <InfiniteProductGrid
           initialProducts={products}
           initialPage={usingApi ? page : 1}
@@ -160,7 +175,13 @@ export default async function CollectionView({
         page={page}
         totalPages={usingApi ? totalPages : 1}
         basePath={basePath}
-        params={{ category: basePath === '/collections' ? categoryName : undefined, minPrice: minPriceStr, maxPrice: maxPriceStr }}
+        params={{
+          // Filters ride in the query only where the page reads them from there;
+          // on a facet page the path already carries them.
+          ...(filterPath === basePath && { category: filters.category, material, color }),
+          minPrice: minPriceStr,
+          maxPrice: maxPriceStr,
+        }}
       />
       {children}
     </>

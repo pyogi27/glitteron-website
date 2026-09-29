@@ -14,7 +14,7 @@ import {
   type LightCategory,
 } from '@/lib/data/categories'
 import { getRoomSubPage } from '@/lib/data/category-rooms'
-import { facetQueryValue, getFacet } from '@/lib/data/facets'
+import { getFacet } from '@/lib/data/facets'
 import { rooms } from '@/lib/data/rooms'
 
 interface Props {
@@ -42,10 +42,10 @@ interface Resolved {
   whereUsed?: string
   /** Price ceiling in INR, on band pages only. */
   maxPrice?: string
-  /** Comma-joined backend `materials` values, on material facet pages. */
-  materials?: string
-  /** Comma-joined backend `bodyColors` values, on finish facet pages. */
-  bodyColors?: string
+  /** MATERIALS slug, on material facet pages. */
+  material?: string
+  /** COLORS slug, on finish facet pages. */
+  color?: string
   siblings: { label: string; href: string }[]
   siblingsLabel: string
 }
@@ -110,9 +110,7 @@ function resolve(category: LightCategory, sub: string): Resolved | undefined {
         `Everything on this page is ${lower} in ${facet.noun}, assembled and inspected in our Surat workshop, dimmable as standard, and shipped free anywhere in India under the same 5-year warranty as the rest of the range.`,
       ],
       faqs: facet.faqs,
-      ...(facet.kind === 'materials'
-        ? { materials: facetQueryValue(facet) }
-        : { bodyColors: facetQueryValue(facet) }),
+      ...(facet.kind === 'materials' ? { material: facet.slug } : { color: facet.slug }),
       siblings: [
         ...category.facets
           .filter(other => other !== sub)
@@ -216,8 +214,8 @@ export default async function CategorySubPage({ params, searchParams }: Props) {
         categoryName={category.name}
         categoryNames={category.names}
         whereUsed={resolved.whereUsed}
-        materials={resolved.materials}
-        bodyColors={resolved.bodyColors}
+        material={resolved.material}
+        color={resolved.color}
         maxPrice={resolved.maxPrice}
         heading={resolved.heading}
         subtitle={resolved.subtitle}

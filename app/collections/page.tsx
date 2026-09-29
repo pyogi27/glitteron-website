@@ -1,12 +1,17 @@
 import type { Metadata } from 'next'
 import CollectionView from '@/components/collections/CollectionView'
 import { categoryPath } from '@/lib/data/categories'
+import { COLORS, MATERIALS, pickSlugs } from '@/lib/data/filters'
 
 interface Props {
   searchParams: Promise<{
     category?: string
     minPrice?: string
     maxPrice?: string
+    /** Comma-joined MATERIALS slugs; a repeated key arrives as an array. */
+    material?: string | string[]
+    /** Comma-joined COLORS slugs. */
+    color?: string | string[]
     page?: string
   }>
 }
@@ -44,9 +49,10 @@ function canonicalFor(category: string | undefined, page: number): string {
 }
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  const { category, minPrice, maxPrice, page: pageParam } = await searchParams
+  const { category, minPrice, maxPrice, material, color, page: pageParam } = await searchParams
   const page = parsePage(pageParam)
   const canonical = canonicalFor(category, page)
+  const filtered = minPrice || maxPrice || pickSlugs(MATERIALS, material) || pickSlugs(COLORS, color)
 
   const pageSuffix = page > 1 ? ` — Page ${page}` : ''
   const title = category
@@ -61,14 +67,14 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     title,
     description,
     alternates: { canonical },
-    // Price-filtered slices add no unique value to the index.
-    ...(minPrice || maxPrice ? { robots: { index: false, follow: true } } : {}),
+    // Filtered slices add no unique value to the index.
+    ...(filtered ? { robots: { index: false, follow: true } } : {}),
     openGraph: { title, description, url: canonical, type: 'website' },
   }
 }
 
 export default async function CollectionsPage({ searchParams }: Props) {
-  const { category, minPrice, maxPrice, page: pageParam } = await searchParams
+  const { category, minPrice, maxPrice, material, color, page: pageParam } = await searchParams
   // Honour ?page= so the crawlable pagination links resolve to real, distinct
   // result sets. Previously this was hardcoded to 1, so every ?page=N returned
   // page 1 — duplicate content behind different URLs.
@@ -97,6 +103,8 @@ export default async function CollectionsPage({ searchParams }: Props) {
       page={page}
       minPrice={minPrice}
       maxPrice={maxPrice}
+      material={pickSlugs(MATERIALS, material)}
+      color={pickSlugs(COLORS, color)}
       basePath="/collections"
       listPath="/collections"
       breadcrumb={breadcrumb}

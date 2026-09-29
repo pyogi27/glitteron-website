@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Product } from '@/lib/types'
 import StarRating from '@/components/ui/StarRating'
+import ReviewForm from '@/components/product/ReviewForm'
 
 type Tab = 'desc' | 'specs' | 'reviews'
 
@@ -130,6 +131,9 @@ export default function ProductTabs({ product }: { product: Product }) {
                     <span className="text-[11px] text-[#A09488]">{r.date}</span>
                   </div>
                   <StarRating rating={r.rating} size={12} />
+                  {r.title && (
+                    <p className="text-[13.5px] font-medium text-[#2C2825] mt-2">{r.title}</p>
+                  )}
                   <p className="font-serif text-[16px] italic mt-2 text-[#4A4540] leading-[1.8]">{r.text}</p>
                 </div>
               ))}
@@ -141,6 +145,10 @@ export default function ProductTabs({ product }: { product: Product }) {
             </Empty>
           )
         }
+
+        {/* Only renders for a signed-in customer whose paid order contained this
+            product — see ReviewForm. */}
+        <ReviewForm productId={product.apiProductId} />
       </div>
     </div>
   )

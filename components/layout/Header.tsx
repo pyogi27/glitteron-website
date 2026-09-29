@@ -51,6 +51,7 @@ function ProfileButton({ isLight }: { isLight: boolean }) {
           type="button"
           onClick={() => setOpen(v => !v)}
           aria-label="Account menu"
+          aria-expanded={open}
           className="w-8 h-8 rounded-full flex items-center justify-center font-sans text-[11px] font-semibold transition-all duration-200 hover:brightness-110"
           style={{ background: '#C4714A', color: '#EDE8E0' }}
         >
@@ -61,6 +62,7 @@ function ProfileButton({ isLight }: { isLight: boolean }) {
           type="button"
           onClick={() => setOpen(v => !v)}
           aria-label="Account menu"
+          aria-expanded={open}
           className={`w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 border-none bg-transparent ${
             isLight
               ? 'text-white/80 hover:text-gold'
@@ -230,8 +232,9 @@ export default function Header({ transparent }: HeaderProps) {
   const isLight = isTransparent && !scrolled
 
   return (
+    // site-header: listing pages slide it away while scrolling down (see Toolbar headroom).
     <header
-      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
+      className={`site-header fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
         isLight
           ? 'border-b border-transparent bg-transparent'
           : 'border-b border-warm-gray/40 bg-white/96 backdrop-blur-xl'
@@ -292,6 +295,7 @@ export default function Header({ transparent }: HeaderProps) {
             type="button"
             onClick={() => setMenuOpen(prev => !prev)}
             aria-label="Toggle menu"
+            aria-expanded={menuOpen}
             className={`md:hidden w-9 h-9 flex items-center justify-center transition-colors ${
               isLight ? 'text-white' : 'text-[#2C2825]'
             }`}

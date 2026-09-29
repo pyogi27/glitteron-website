@@ -23,18 +23,13 @@ import type { CategoryFaq } from './categories'
 export type FacetKind = 'materials' | 'bodyColors'
 
 export interface Facet {
-  /** URL segment beneath the category. */
+  /**
+   * URL segment beneath the category. Also the slug of the MATERIALS or COLORS
+   * option in filters.ts that holds the backend spellings this page filters on.
+   */
   slug: string
   /** Which backend attribute this filters on. */
   kind: FacetKind
-  /**
-   * Exact backend values, OR-ed by the API when passed comma-separated.
-   *
-   * The catalogue's attribute values are hand-typed and drifted: "Marbel" for
-   * Marble, "GOLD" for Golden, "Black Smokey" and "Black smoky" side by side.
-   * Every spelling has to be listed or the page silently loses that stock.
-   */
-  values: string[]
   /** Adjective in the heading: "Glass Chandeliers". */
   adjective: string
   /** Noun for prose: "glass", "a gold finish". */
@@ -48,7 +43,6 @@ const FACETS: Facet[] = [
   {
     slug: 'glass',
     kind: 'materials',
-    values: ['Glass'],
     adjective: 'Glass',
     noun: 'glass',
     note: [
@@ -77,7 +71,6 @@ const FACETS: Facet[] = [
   {
     slug: 'gold',
     kind: 'bodyColors',
-    values: ['Golden', 'GOLD', 'Brass Gold', 'Antique Brass'],
     adjective: 'Gold',
     noun: 'a gold finish',
     note: [
@@ -106,7 +99,6 @@ const FACETS: Facet[] = [
   {
     slug: 'black',
     kind: 'bodyColors',
-    values: ['Black', 'Gun Black', 'Black Smokey', 'Black smoky'],
     adjective: 'Black',
     noun: 'a black finish',
     note: [
@@ -135,7 +127,6 @@ const FACETS: Facet[] = [
   {
     slug: 'wood',
     kind: 'materials',
-    values: ['Wood'],
     adjective: 'Wooden',
     noun: 'wood',
     note: [
@@ -164,7 +155,6 @@ const FACETS: Facet[] = [
   {
     slug: 'marble',
     kind: 'materials',
-    values: ['Marble', 'Marbel'],
     adjective: 'Marble',
     noun: 'marble',
     note: [
@@ -196,9 +186,4 @@ export const facetSlugs = FACETS.map(f => f.slug)
 
 export function getFacet(slug: string): Facet | undefined {
   return FACETS.find(f => f.slug === slug)
-}
-
-/** Comma-joined attribute value list, as the API's `materials`/`bodyColors` param wants it. */
-export function facetQueryValue(facet: Facet): string {
-  return facet.values.join(',')
 }
