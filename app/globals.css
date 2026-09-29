@@ -223,9 +223,11 @@
     outline-offset: 2px;
   }
 
+  /* At rest the card shows its outline, a warm hairline on the page colour, so
+     the grid reads as a grid. Hover turns the edge clay and lifts the card. */
   .product-card {
     border-radius: 20px;
-    border: 1px solid transparent;
+    border: 1px solid #D8D0C4;
     overflow: visible;
     will-change: transform;
     transition:

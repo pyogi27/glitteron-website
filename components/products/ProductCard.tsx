@@ -246,7 +246,7 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
           get the clean image-only card. It has to exist for phones and tablets:
           with no hover there is otherwise no name, no price and no way to add
           to cart anywhere on the card. */}
-      <div className="product-card-info pt-3 pb-1 px-1">
+      <div className="product-card-info p-3">
         {/* API products can have an empty category — don't render a blank eyebrow. */}
         {product.category && (
           <div className="text-[10px] text-[#A8552C] tracking-[0.14em] uppercase font-medium mb-1">{product.category}</div>
