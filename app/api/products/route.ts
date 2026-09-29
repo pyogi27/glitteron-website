@@ -4,6 +4,9 @@ const BACKEND = process.env.API_URL ?? 'http://localhost:3000'
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(req.url)
+  // Browser-side listings (infinite scroll, visualizer) get the same in-stock-only
+  // view as the server-rendered pages — see fetchProducts in lib/api/server.ts.
+  searchParams.set('stockStatus', 'in_stock')
   const url = `${BACKEND}/api/products?${searchParams.toString()}`
 
   try {

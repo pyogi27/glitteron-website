@@ -255,8 +255,16 @@ export async function fetchProducts(params?: {
   minPrice?: number;
   maxPrice?: number;
   whereUsed?: string;
+  /**
+   * Listings ask the backend for `stockStatus=in_stock`, so an out-of-stock product
+   * never lists and `total`/`totalPages` count only what can be bought. The catalog
+   * below opts out: a product page must still resolve (showing "out of stock") for
+   * Google, shared links and wishlists while the product waits for a restock.
+   */
+  includeOutOfStock?: boolean;
 }): Promise<{ products: ApiProduct[]; total: number; totalPages: number }> {
   const qs = new URLSearchParams();
+  if (!params?.includeOutOfStock) qs.set("stockStatus", "in_stock");
   if (params?.categoryId) qs.set("category", String(params.categoryId));
   for (const id of params?.categoryIds ?? []) qs.append("category", String(id));
   if (params?.materials) qs.set("materials", params.materials);
@@ -353,7 +361,7 @@ const getCatalog = (): Promise<ApiProduct[]> => {
     catalogFetchedAt = Date.now();
     catalogPromise = (async () => {
       const limit = 250;
-      const firstPage = await fetchProducts({ page: 1, limit });
+      const firstPage = await fetchProducts({ page: 1, limit, includeOutOfStock: true });
       if (firstPage.products.length === 0) {
         catalogPromise = null; // let a transient failure be retried
         return [];
@@ -361,7 +369,7 @@ const getCatalog = (): Promise<ApiProduct[]> => {
 
       const rest: ApiProduct[] = [];
       for (let page = 2; page <= firstPage.totalPages; page += 1) {
-        const { products } = await fetchProducts({ page, limit });
+        const { products } = await fetchProducts({ page, limit, includeOutOfStock: true });
         rest.push(...products);
       }
       return [...firstPage.products, ...rest];
