@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Cormorant_Garamond, Outfit } from 'next/font/google'
+import { Newsreader, Jost } from 'next/font/google'
 import './globals.css'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
@@ -9,21 +9,24 @@ import NewsletterPopup from '@/components/ui/NewsletterPopup'
 import SessionRestorer from '@/components/auth/SessionRestorer'
 import { SITE_NAME, SITE_URL } from '@/lib/site'
 
-// Self-hosted, preloaded, swap-on-fallback. Weights match the old Google
-// Fonts request exactly so nothing shifts visually.
-const cormorant = Cormorant_Garamond({
+// Self-hosted, preloaded, swap-on-fallback. Both are variable fonts, so one
+// file per style covers every weight the site uses (300–600).
+// Newsreader's opsz axis lets the browser pick a display cut for the 92px hero
+// and a text cut for 20px card names automatically (font-optical-sizing: auto).
+const newsreader = Newsreader({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
   style: ['normal', 'italic'],
+  axes: ['opsz'],
   display: 'swap',
-  variable: '--font-cormorant',
+  variable: '--font-newsreader',
 })
 
-const outfit = Outfit({
+// Jost is the logotype face (see LitMeUp brand-assets/README.txt), so UI text
+// and the wordmark now share one voice.
+const jost = Jost({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
   display: 'swap',
-  variable: '--font-outfit',
+  variable: '--font-jost',
 })
 
 // "Buy … Online in India" is the head-term shape every competitor ranking for
@@ -61,7 +64,7 @@ export const metadata: Metadata = {
 // manual <link rel="preload"> is needed in <head>.
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-IN" className={`${cormorant.variable} ${outfit.variable}`}>
+    <html lang="en-IN" className={`${newsreader.variable} ${jost.variable}`}>
       <body className="bg-white text-dark font-sans font-light leading-relaxed overflow-x-hidden" suppressHydrationWarning>
         <SessionRestorer />
         <CustomCursor />

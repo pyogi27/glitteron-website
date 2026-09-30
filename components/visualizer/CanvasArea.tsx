@@ -305,13 +305,12 @@ export default function CanvasArea() {
 
             {/* Heading + per-fixture progress + rotating sub-message */}
             <div>
-              <p style={{ color: '#fff', fontFamily: 'var(--font-cormorant, serif)', fontSize: 20, lineHeight: 1.2, margin: 0 }}>
+              <p className="font-serif" style={{ color: '#fff', fontSize: 20, lineHeight: 1.2, margin: 0 }}>
                 Generating AI Preview
               </p>
               {generationProgress && (
-                <p style={{
+                <p className="font-sans" style={{
                   color: '#C4714A', fontSize: 11, letterSpacing: '1px', marginTop: 8,
-                  fontFamily: 'var(--font-outfit, sans-serif)',
                 }}>
                   {generationProgress.productName}
                   {generationProgress.total > 1 &&
@@ -320,10 +319,10 @@ export default function CanvasArea() {
               )}
               <p
                 key={msgIdx}
+                className="font-sans"
                 style={{
                   color: 'rgba(255,255,255,0.55)', fontSize: 10, letterSpacing: '1.5px',
                   textTransform: 'uppercase', marginTop: 8,
-                  fontFamily: 'var(--font-outfit, sans-serif)',
                   transition: 'opacity 0.4s',
                 }}
               >
@@ -336,7 +335,7 @@ export default function CanvasArea() {
               <div className="viz-progress-bar" />
             </div>
 
-            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 9, letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'var(--font-outfit, sans-serif)', marginTop: -8 }}>
+            <p className="font-sans" style={{ color: 'rgba(255,255,255,0.3)', fontSize: 9, letterSpacing: '1px', textTransform: 'uppercase', marginTop: -8 }}>
               This may take up to 60 seconds
             </p>
           </div>

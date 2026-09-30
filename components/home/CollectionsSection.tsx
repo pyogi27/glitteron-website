@@ -77,7 +77,9 @@ export default function CollectionsSection({ categories = STATIC_CATEGORIES }: P
         {/* Cards grid */}
         <div
           ref={cardsRef}
-          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4"
+          // Flex-wrap rather than grid so an odd card count (7 today) centres the
+          // last row instead of leaving an orphan hanging off the left edge.
+          className="flex flex-wrap justify-center gap-4"
         >
           {categories.map((cat, i) => (
             <Link
@@ -85,7 +87,7 @@ export default function CollectionsSection({ categories = STATIC_CATEGORIES }: P
               // Flat landing page where we have one; the filter view is the fallback
               // for any category the backend adds before we write copy for it.
               href={categoryPath(cat.name) ?? `/collections?category=${encodeURIComponent(cat.name)}`}
-              className="group relative flex flex-col overflow-hidden rounded-2xl aspect-[3/4] cursor-pointer"
+              className="group relative flex flex-col overflow-hidden rounded-2xl aspect-[3/4] cursor-pointer w-[calc((100%-16px)/2)] md:w-[calc((100%-48px)/4)] lg:w-[calc((100%-96px)/7)]"
             >
               {/* Image */}
               <img

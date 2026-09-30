@@ -320,3 +320,10 @@ size selector.
   "you might also like" recommendation work.
 - Wishlist pagination UI — the query is bounded (LIMIT 100, newest first); add controls only when
   someone actually hits the cap.
+- Horizontal scroll at 375px, found by `/design-review` on 2026-09-30 during the Newsreader + Jost
+  swap (both existed before the swap). `/collections`: the 3 stat chips ("5yr Warranty" etc.) push
+  the page 46px wide (37px under Cormorant; the wider serif adds 9px). `/collections/[slug]`: the
+  tab row ("Reviews") overflows by 24px. Fix is layout (wrap or scroll the row), not type.
+- 9px uppercase labels (room-grid tags like "Chandelier Lights", filter "Min"/"Max") are below the
+  brand guide's 11–12px floor for caps labels, and Jost's smaller x-height makes 9px read smaller
+  than it did in Outfit.

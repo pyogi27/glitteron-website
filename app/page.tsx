@@ -19,9 +19,8 @@ import { fetchCategories, fetchFeaturedProducts } from '@/lib/api/server'
 export const metadata: Metadata = { alternates: { canonical: '/' } }
 
 // Merchandising order for the homepage "Shop by Collection" grid, by category
-// id: Pendant, Chandelier, Wall, Table, Floor, Bulb. Ceiling Lights (2) is
-// deliberately left out — six cards fill the grid.
-const COLLECTION_ORDER = [5, 4, 1, 7, 3, 6]
+// id: Pendant, Chandelier, Ceiling, Wall, Table, Floor, Bulb.
+const COLLECTION_ORDER = [5, 4, 2, 1, 7, 3, 6]
 
 export default async function HomePage() {
   const [apiCategories, featured] = await Promise.all([
