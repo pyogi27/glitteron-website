@@ -78,12 +78,23 @@ export const COLORS: FilterOption[] = [
 /** A listing's filter state, in the query params `/collections` reads. */
 export interface ListingFilters {
   category?: string
+  /** Header search term; the backend matches it against product name and SKU. */
+  q?: string
   /** Comma-joined MATERIALS slugs. */
   material?: string
   /** Comma-joined COLORS slugs. */
   color?: string
   minPrice?: string
   maxPrice?: string
+}
+
+/** Longest search term kept; a longer ?q= is cut rather than rejected. */
+export const MAX_SEARCH_LENGTH = 100
+
+/** The trimmed ?q= term, undefined when blank. A repeated key keeps the first. */
+export function parseSearch(raw?: string | string[]): string | undefined {
+  const first = Array.isArray(raw) ? raw[0] : raw
+  return first?.trim().slice(0, MAX_SEARCH_LENGTH).trim() || undefined
 }
 
 /**

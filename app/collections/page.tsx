@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 import CollectionView from '@/components/collections/CollectionView'
 import { categoryPath } from '@/lib/data/categories'
-import { COLORS, MATERIALS, pickSlugs } from '@/lib/data/filters'
+import { COLORS, MATERIALS, parseSearch, pickSlugs } from '@/lib/data/filters'
 
 interface Props {
   searchParams: Promise<{
     category?: string
+    /** Header search term, matched by the backend against name and SKU. */
+    q?: string | string[]
     minPrice?: string
     maxPrice?: string
     /** Comma-joined MATERIALS slugs; a repeated key arrives as an array. */
@@ -49,13 +51,16 @@ function canonicalFor(category: string | undefined, page: number): string {
 }
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  const { category, minPrice, maxPrice, material, color, page: pageParam } = await searchParams
+  const { category, q, minPrice, maxPrice, material, color, page: pageParam } = await searchParams
   const page = parsePage(pageParam)
+  const search = parseSearch(q)
   const canonical = canonicalFor(category, page)
-  const filtered = minPrice || maxPrice || pickSlugs(MATERIALS, material) || pickSlugs(COLORS, color)
+  const filtered = search || minPrice || maxPrice || pickSlugs(MATERIALS, material) || pickSlugs(COLORS, color)
 
   const pageSuffix = page > 1 ? ` — Page ${page}` : ''
-  const title = category
+  const title = search
+    ? `Search results for “${search}”${pageSuffix}`
+    : category
     ? `Buy ${category} Online in India${pageSuffix}`
     : `Buy Lights Online in India — 500+ Handcrafted Designs${pageSuffix}`
 
@@ -67,14 +72,15 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     title,
     description,
     alternates: { canonical },
-    // Filtered slices add no unique value to the index.
+    // Filtered slices and search results add no unique value to the index.
     ...(filtered ? { robots: { index: false, follow: true } } : {}),
     openGraph: { title, description, url: canonical, type: 'website' },
   }
 }
 
 export default async function CollectionsPage({ searchParams }: Props) {
-  const { category, minPrice, maxPrice, material, color, page: pageParam } = await searchParams
+  const { category, q, minPrice, maxPrice, material, color, page: pageParam } = await searchParams
+  const search = parseSearch(q)
   // Honour ?page= so the crawlable pagination links resolve to real, distinct
   // result sets. Previously this was hardcoded to 1, so every ?page=N returned
   // page 1 — duplicate content behind different URLs.
@@ -94,9 +100,12 @@ export default async function CollectionsPage({ searchParams }: Props) {
   return (
     <CollectionView
       categoryName={category}
-      heading={category ?? 'All Collections'}
+      search={search}
+      heading={search ? `Results for “${search}”` : category ?? 'All Collections'}
       subtitle={
-        category
+        search
+          ? `Handcrafted ${category?.toLowerCase() ?? 'lights'} matching your search.`
+          : category
           ? `Handcrafted ${category.toLowerCase()} for spaces that deserve to glow.`
           : '500+ handcrafted chandeliers & pendant lights for spaces that deserve to glow.'
       }

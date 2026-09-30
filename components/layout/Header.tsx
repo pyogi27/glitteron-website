@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import Logo from '@/components/ui/Logo'
 import CartButton from './CartButton'
 import WishlistButton from './WishlistButton'
+import SearchButton, { HeaderSearch } from './SearchButton'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { logoutApi } from '@/lib/auth/api'
 
@@ -205,6 +206,13 @@ interface HeaderProps {
 export default function Header({ transparent }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLElement>(null)
+  // Once a search from the menu runs, the menu shrinks to its search row so the
+  // results it is filtering stay visible underneath.
+  const [menuSearching, setMenuSearching] = useState(false)
+  useEffect(() => {
+    if (!menuOpen) setMenuSearching(false)
+  }, [menuOpen])
   const pathname = usePathname()
   const user = useAuthStore(s => s.user)
 
@@ -224,8 +232,11 @@ export default function Header({ transparent }: HeaderProps) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [isTransparent])
 
-  // Close mobile menu on route change
+  // Close mobile menu on route change — unless the route changed because the
+  // shopper is typing in the menu's live search, which would swallow the rest
+  // of the term.
   useEffect(() => {
+    if (menuRef.current?.contains(document.activeElement)) return
     setMenuOpen(false)
   }, [pathname])
 
@@ -267,21 +278,11 @@ export default function Header({ transparent }: HeaderProps) {
         </nav>
 
         <div className="flex items-center gap-3 md:gap-5">
-          {/* Search — desktop only. It has no onClick yet, and at 320px the row cannot
-              hold five controls; a dead button does not get to outrank a working one. */}
-          <button
-            className={`cursor-none border-none bg-transparent w-9 h-9 items-center justify-center rounded-full transition-all duration-200 hidden md:flex ${
-              isLight
-                ? 'text-white/80 hover:text-gold'
-                : 'text-dark opacity-70 hover:opacity-100 hover:text-gold-dark'
-            }`}
-            aria-label="Search"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <circle cx="11" cy="11" r="7" />
-              <path d="M21 21l-4.35-4.35" />
-            </svg>
-          </button>
+          {/* Search — desktop only: at 320px the row cannot hold five controls, so
+              mobile gets the search field at the top of the hamburger menu. */}
+          <div className="hidden md:block">
+            <SearchButton isLight={isLight} />
+          </div>
 
           {/* Wishlist */}
           <WishlistButton isLight={isLight} />
@@ -314,8 +315,9 @@ export default function Header({ transparent }: HeaderProps) {
       </div>
 
       {menuOpen && (
-        <nav className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-[#D8D0C4] shadow-lg py-4 px-6 flex flex-col gap-3">
-          {navLinks.map(({ href, label }) => (
+        <nav ref={menuRef} className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-[#D8D0C4] shadow-lg py-4 px-6 flex flex-col gap-3">
+          <HeaderSearch onNavigate={() => setMenuSearching(true)} onSubmit={() => setMenuOpen(false)} />
+          {!menuSearching && navLinks.map(({ href, label }) => (
             <Link
               key={href}
               href={href}

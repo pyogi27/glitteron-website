@@ -139,8 +139,9 @@ export default function FilterSidebar({ filters, filterPath, onNavigate }: Props
 
   function handleClearAll() {
     clearAll()
-    // The category belongs to the toolbar tabs, not to this panel, so it stays.
-    apply({ category: filters.category })
+    // The category belongs to the toolbar tabs and the search to the header, not
+    // to this panel, so both stay.
+    apply({ category: filters.category, q: filters.q })
   }
 
   /**

@@ -16,18 +16,18 @@ const FALLBACK_IMAGES = [
 ]
 
 const STATIC_CATEGORIES = [
-  { name: 'Crystal Chandelier', description: 'Opulent K9 crystal masterpieces' },
-  { name: 'Pendant Light',      description: 'Contemporary suspended elegance' },
-  { name: 'Sputnik Light',      description: 'Mid-century modern icons' },
-  { name: 'Dome Light',         description: 'Sculptural minimalist shades' },
-  { name: 'Cage & Industrial',  description: 'Raw geometry, refined craft' },
-  { name: 'Wall Light',         description: 'Ambient accent lighting' },
+  { name: 'Crystal Chandelier' },
+  { name: 'Pendant Light' },
+  { name: 'Sputnik Light' },
+  { name: 'Dome Light' },
+  { name: 'Cage & Industrial' },
+  { name: 'Wall Light' },
 ]
 
 export interface CollectionCategory {
   id?: number
   name: string
-  description?: string
+  image?: string | null
 }
 
 interface Props {
@@ -89,7 +89,7 @@ export default function CollectionsSection({ categories = STATIC_CATEGORIES }: P
             >
               {/* Image */}
               <img
-                src={FALLBACK_IMAGES[i % FALLBACK_IMAGES.length]}
+                src={cat.image?.trim() || FALLBACK_IMAGES[i % FALLBACK_IMAGES.length]}
                 alt={cat.name}
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 [@media(hover:hover)]:group-hover:scale-105"
               />
@@ -100,12 +100,7 @@ export default function CollectionsSection({ categories = STATIC_CATEGORIES }: P
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
               {/* Text */}
               <div className="relative mt-auto p-4 text-white">
-                <p className="font-serif text-[16px] font-light leading-tight mb-1">{cat.name}</p>
-                {/* The API sends description === name, which rendered every card as
-                    "Bulbs / Bulbs". Only show a description that adds something. */}
-                {cat.description && cat.description !== cat.name && (
-                  <p className="text-[12px] text-white/85 tracking-wide">{cat.description}</p>
-                )}
+                <p className="font-serif text-[16px] font-light leading-tight">{cat.name}</p>
               </div>
               {/* Hover border */}
               <div className="absolute inset-0 rounded-2xl ring-1 ring-white/0 [@media(hover:hover)]:group-hover:ring-white/30 transition-all duration-300" />

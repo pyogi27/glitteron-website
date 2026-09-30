@@ -19,6 +19,8 @@ interface Props {
    * than one (/hanging-lights). Takes precedence over `categoryName`.
    */
   categoryNames?: string[]
+  /** Header search term, sent as the backend `search` (a name/SKU match). */
+  search?: string
   /** Comma-joined MATERIALS slugs: a facet page's own, or the shopper's picks. */
   material?: string
   /** Comma-joined COLORS slugs. */
@@ -53,6 +55,7 @@ interface Props {
 export default async function CollectionView({
   categoryName,
   categoryNames,
+  search,
   material,
   color,
   whereUsed,
@@ -93,6 +96,7 @@ export default async function CollectionView({
     // category against a set that contains it and narrow the grid by accident.
     categoryId: selectedCategoryIds.length > 0 ? undefined : selectedCategory?.id,
     categoryIds: selectedCategoryIds.length > 0 ? selectedCategoryIds : undefined,
+    search,
     materials,
     bodyColors,
     minPrice,
@@ -120,6 +124,7 @@ export default async function CollectionView({
   } else if (selectedCategory) {
     gridParams.set('category', String(selectedCategory.id))
   }
+  if (search) gridParams.set('search', search)
   if (materials) gridParams.set('materials', materials)
   if (bodyColors) gridParams.set('bodyColors', bodyColors)
   if (whereUsed && roomTagUsed) gridParams.set('whereUsed', whereUsed)
@@ -131,7 +136,10 @@ export default async function CollectionView({
   const categoryMap = new Map(categories.map(c => [c.id, c.name]))
   const usingApi = apiProducts.length > 0 || categories.length > 0
 
-  const products = apiProducts.length > 0
+  // The static catalogue stands in only when the backend is unreachable. An
+  // empty result from a reachable backend (a search or filter with no match)
+  // must show as empty, not as a grid of unrelated demo products.
+  const products = usingApi
     ? apiProducts.map(p => mapApiProduct(p, categoryMap.get(categoryIdOf(p))))
     : staticProducts
 
@@ -142,6 +150,7 @@ export default async function CollectionView({
     // Only /collections names the category in its query; elsewhere the path
     // does, including /hanging-lights, whose two categories one param cannot.
     category: filterPath === '/collections' ? categoryName : undefined,
+    q: filterPath === '/collections' ? search : undefined,
     material,
     color,
     minPrice: minPriceStr,
@@ -178,7 +187,7 @@ export default async function CollectionView({
         params={{
           // Filters ride in the query only where the page reads them from there;
           // on a facet page the path already carries them.
-          ...(filterPath === basePath && { category: filters.category, material, color }),
+          ...(filterPath === basePath && { category: filters.category, q: filters.q, material, color }),
           minPrice: minPriceStr,
           maxPrice: maxPriceStr,
         }}

@@ -2,6 +2,8 @@ export interface ApiCategory {
   id: number;
   name: string;
   description?: string;
+  /** Absolute S3 URL, or null when no image has been uploaded. */
+  image?: string | null;
   productCount?: number;
 }
 

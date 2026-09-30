@@ -1,10 +1,11 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { useFilterStore } from '@/lib/stores/filterStore'
+import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import LightToggle from '@/components/ui/LightToggle'
 import FilterSidebar from '@/components/collections/FilterSidebar'
-import type { ListingFilters } from '@/lib/data/filters'
+import { listingHref, type ListingFilters } from '@/lib/data/filters'
 
 /** Pixels a scroll must travel before the chrome reacts — swallows trackpad jitter. */
 const SCROLL_TOLERANCE = 8
@@ -236,6 +237,21 @@ export default function Toolbar({ categories = [], total, filters, filterPath }:
                 : <>&nbsp;</>
               }
             </span>
+
+            {/* The active header search, with a one-tap way out of it. */}
+            {filters.q && (
+              <Link
+                href={listingHref({ ...filters, q: undefined }, filterPath)}
+                scroll={false}
+                aria-label={`Clear search for ${filters.q}`}
+                className="inline-flex items-center gap-1.5 h-7 max-w-[180px] pl-3 pr-2 rounded-full bg-[#2C2825] text-[#EDE8E0] text-[12px] no-underline transition-colors hover:bg-[#A85B3B] outline-none focus-visible:ring-2 focus-visible:ring-[#C4714A] focus-visible:ring-offset-1"
+              >
+                <span className="truncate">“{filters.q}”</span>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden="true" className="flex-shrink-0">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </Link>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <LightToggle on={lightOn} onChange={setLightOn} />
