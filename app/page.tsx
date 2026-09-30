@@ -3,6 +3,7 @@ import HeroSection from '@/components/home/HeroSection'
 import TickerStrip from '@/components/home/TickerStrip'
 import CollectionsSection from '@/components/home/CollectionsSection'
 import ProductCarousel from '@/components/home/ProductCarousel'
+import VideoCarousel from '@/components/home/VideoCarousel'
 import StatsDivider from '@/components/home/StatsDivider'
 import RoomGrid from '@/components/home/RoomGrid'
 import ShuffleDeck from '@/components/home/ShuffleDeck'
@@ -10,8 +11,8 @@ import SocialGrid from '@/components/home/SocialGrid'
 import ReviewsSection from '@/components/home/ReviewsSection'
 import NewsletterStrip from '@/components/home/NewsletterStrip'
 import JsonLd from '@/components/seo/JsonLd'
-import { organizationSchema, websiteSchema } from '@/lib/seo/schema'
-import { fetchCategories, fetchFeaturedProducts } from '@/lib/api/server'
+import { organizationSchema, videoObjectSchema, websiteSchema } from '@/lib/seo/schema'
+import { fetchCategories, fetchFeaturedProducts, fetchProductVideos } from '@/lib/api/server'
 
 // Moved off the root layout: there it was inherited by every page that did not
 // set its own canonical, so the account and cart pages each named the homepage
@@ -23,11 +24,12 @@ export const metadata: Metadata = { alternates: { canonical: '/' } }
 const COLLECTION_ORDER = [5, 4, 2, 1, 7, 3, 6]
 
 export default async function HomePage() {
-  const [apiCategories, featured] = await Promise.all([
+  const [apiCategories, featured, videos] = await Promise.all([
     fetchCategories(),
     // 29 cards are laid out below (8 + 16 + 5) and the API returns duplicates,
     // so over-fetch to leave room for the dedupe pass.
     fetchFeaturedProducts(45),
+    fetchProductVideos(12),
   ])
 
   // Three sections used to slice from index 0, so New Arrivals, Bestselling and
@@ -54,6 +56,10 @@ export default async function HomePage() {
   const bestsellers = catalog.slice(8, 24)
   const curated = catalog.slice(24, 29)
 
+  // Same rule as the shuffle deck: one or two videos read as a broken rail, so a
+  // thin (or failed) response drops the section.
+  const showVideos = videos.length >= 3
+
   return (
     <>
       <JsonLd data={organizationSchema()} />
@@ -66,6 +72,11 @@ export default async function HomePage() {
           so a thin catalog drops the section instead. */}
       {curated.length >= 3 && <ShuffleDeck products={curated} />}
       <ProductCarousel titlePrefix="New" titleHighlight="Arrivals" label="Just In" products={newArrivals} />
+      {showVideos && videos.map(v => {
+        const schema = videoObjectSchema(v)
+        return schema && <JsonLd key={v.productId} data={schema} />
+      })}
+      {showVideos && <VideoCarousel items={videos} />}
       <StatsDivider />
       <ProductCarousel titlePrefix="Bestselling" titleHighlight="Lights" label="Most Loved" products={bestsellers} />
       <RoomGrid />

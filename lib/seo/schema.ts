@@ -1,4 +1,5 @@
 import type { Product } from '@/lib/types'
+import type { VideoItem } from '@/lib/api/videos'
 import { SITE_NAME, SITE_URL, absoluteUrl } from '@/lib/site'
 import { COMPANY } from '@/lib/company'
 
@@ -274,5 +275,28 @@ export function itemListSchema(products: Product[], listUrl: string) {
       url: absoluteUrl(`/collections/${p.slug}`),
       name: p.name,
     })),
+  }
+}
+
+/**
+ * A Watch & Shop video. Google requires name, thumbnailUrl and uploadDate, so a
+ * video missing a real date or image gets no node (null) rather than an
+ * invented one. The home page is not a watch page, so this describes the page;
+ * it will not earn video rich results.
+ *
+ * uploadDate is the product row's updatedAt — the API has no per-video date.
+ * It is never earlier than the upload, but moves when the product is edited.
+ */
+export function videoObjectSchema(video: VideoItem) {
+  if (!video.uploadDate || !video.poster) return null
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    name: `${video.name} video`,
+    thumbnailUrl: [video.poster],
+    uploadDate: video.uploadDate,
+    contentUrl: video.src,
+    publisher: { '@id': `${SITE_URL}/#organization` },
+    about: { '@type': 'Product', name: video.name, url: absoluteUrl(`/collections/${video.slug}`) },
   }
 }

@@ -1,5 +1,7 @@
 import type { Product } from "@/lib/types";
 import { mapVariations } from "@/lib/variations";
+import { slugify } from "./slug";
+import { toVideoItems, type VideoItem } from "./videos";
 import {
   normalizeDimension,
   productBodyCopy,
@@ -25,19 +27,7 @@ const DEFAULT_MAX_QTY = 99;
 const PLACEHOLDER_IMAGE =
   "https://images.pexels.com/photos/1123262/pexels-photo-1123262.jpeg?auto=compress&cs=tinysrgb&w=800&h=900&fit=crop";
 
-/**
- * The API returns slug: null for every product, so product URLs are derived
- * from the name. Exported so the sitemap builds the exact same slugs that
- * findApiProductBySlug resolves — a divergent copy would emit 404s.
- */
-export function slugify(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .trim();
-}
+export { slugify };
 
 function extractImageUrl(img: string | { url: string }): string {
   return typeof img === "string" ? img : (img?.url ?? "");
@@ -348,6 +338,9 @@ let slugIndexPromise: Promise<Map<string, ApiProduct>> | null = null;
  */
 const CATALOG_TTL_MS = 60 * 60 * 1000;
 
+/** Past this the home page renders without Watch & Shop rather than wait. */
+const VIDEOS_TIMEOUT_MS = 5_000;
+
 const getCatalog = (): Promise<ApiProduct[]> => {
   // Memoised on the module, not via React cache(): a build renders pages across
   // several worker processes and cache() is per-request, so it deduped nothing.
@@ -430,6 +423,56 @@ export async function findApiProductBySlug(
 ): Promise<ApiProduct | null> {
   const index = await getSlugIndex();
   return index.get(slug.trim().toLowerCase()) ?? null;
+}
+
+/**
+ * Watch & Shop cards from GET /api/products/videos (limit is capped at 50 by
+ * the backend). Never throws: a failure logs and yields [], and the home page
+ * drops the section.
+ *
+ * Unlike /api/products, the videos endpoint does not apply the show_on_website
+ * or hidden-category filters, so it can return a product whose page 404s. Keep
+ * only cards whose slug the product route resolves — the same guard the
+ * sitemap relies on. The catalog is only fetched when there are videos.
+ *
+ * Time-boxed: this is the one optional section on the home page, and a
+ * stalled endpoint used to hold the whole render (and a build's prerender).
+ */
+export async function fetchProductVideos(limit: number = 12): Promise<VideoItem[]> {
+  const url = `${BACKEND}/api/products/videos?page=1&limit=${limit}`;
+  try {
+    const res = await fetch(url, {
+      next: { revalidate: 60 },
+      signal: AbortSignal.timeout(VIDEOS_TIMEOUT_MS),
+    });
+    if (!res.ok) {
+      console.error(`[fetchProductVideos] ${res.status} from ${url}`);
+      return [];
+    }
+    const body = await res.json();
+    const items = toVideoItems(extractArray<unknown>(body, "products", "data"));
+    if (items.length === 0) return [];
+
+    // Same slug, same product: two products sharing a name share a slug, and
+    // the route serves the first. The check (a catalog crawl when cold) shares
+    // the time box; running out drops the section rather than wait.
+    const owners = await Promise.race([
+      Promise.all(items.map((v) => findApiProductBySlug(v.slug))),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), VIDEOS_TIMEOUT_MS)),
+    ]);
+    if (!owners) {
+      console.error(`[fetchProductVideos] slug check timed out; hiding the section`);
+      return [];
+    }
+    const linkable = items.filter((v, i) => Number(owners[i]?.id) === v.productId);
+    console.log(
+      `[fetchProductVideos] ${linkable.length} of ${items.length} video cards linkable from ${url}`,
+    );
+    return linkable;
+  } catch (err) {
+    console.error(`[fetchProductVideos] failed to reach ${url}:`, err);
+    return [];
+  }
 }
 
 function dedupe(values: string[]): string[] {

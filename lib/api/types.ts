@@ -70,8 +70,8 @@ export interface ApiProduct {
  *
  * This is a WIDE row (~20 columns), not an attribute tuple. Only the fields the
  * storefront actually reads are declared here; the rest (material, wattage, weight,
- * dimensions, mainImage, additionalImages, arImages, sku, sortOrder, createdAt,
- * updatedAt, reservedQuantity) are returned but unused. See TODOS.md for trimming the
+ * dimensions, arImages, sku, sortOrder, createdAt, updatedAt, reservedQuantity) are
+ * returned but unused. See TODOS.md for trimming the
  * payload server-side.
  *
  *   size + color together identify the variation the shopper picked.
@@ -88,6 +88,11 @@ export interface ApiVariation {
   quantity?: number;
   inStock?: boolean;
   isActive?: boolean;
+  // Per-variation photography. Verified 2026-09-30 on GET /api/products/1337: every
+  // row carries these keys; additionalImages is an array (often empty).
+  mainImage?: string | null;
+  additionalImages?: string[] | null;
+  lightOnImage?: string | null;
 }
 
 export interface ApiReview {

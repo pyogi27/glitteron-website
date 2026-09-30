@@ -2,7 +2,8 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Product } from '@/lib/types'
+import Image from 'next/image'
+import type { Product, ProductVariation } from '@/lib/types'
 import StarRating from '@/components/ui/StarRating'
 import VariantSelector from './VariantSelector'
 import QuantityControl from './QuantityControl'
@@ -14,9 +15,11 @@ import {
   finishOptions,
   unavailableFinishes,
   unlabelledVariations,
+  finishImage,
 } from '@/lib/variations'
 import { parseWhereUsed } from '@/lib/data/visualizer'
 import RoomVisualizerModal from './RoomVisualizerModal'
+import ProductDetails from './ProductDetails'
 
 const PERKS = [
   {
@@ -36,7 +39,13 @@ const PERKS = [
   },
 ]
 
-export default function ProductInfo({ product }: { product: Product }) {
+interface Props {
+  product: Product
+  /** Fired on every pick with the row it resolved to, so the gallery can follow. */
+  onVariationChange?: (variation: ProductVariation | null) => void
+}
+
+export default function ProductInfo({ product, onVariationChange }: Props) {
   // Options come from the real variation rows when the product has them, and fall back to
   // the denormalised summary strings otherwise (products with no variations, or when the
   // detail endpoint was not the source). Row-derived options are always purchasable; the
@@ -59,6 +68,8 @@ export default function ProductInfo({ product }: { product: Product }) {
    * across 5 products were previously unbuyable, the worst worth 18,300 per unit.
    */
   const [pickedVariationId, setPickedVariationId] = useState<number | undefined>(undefined)
+  /** The gallery shows product photos until the first pick, and the cart line follows it. */
+  const [hasPicked, setHasPicked] = useState(false)
 
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
@@ -102,22 +113,37 @@ export default function ProductInfo({ product }: { product: Product }) {
   const namedOnly = unlabelledVariations(product.variations)
 
   /**
-   * Finish is presented ONCE, as either swatches or text — never both.
-   *
-   * `crystalTones` was measured to be a strict subset of `finishes`, never carrying a
-   * value the finish list lacks, so rendering both showed the shopper the same choice
-   * twice. Swatches win where they cover every offered finish: on a lighting product,
-   * seeing the finish beats reading its name. Where a finish has no swatch (composite
-   * names like "Frosted + Gloden" have no hex), fall back to the text selector so no
-   * option becomes unreachable.
+   * Finish is ONE control. Each option shows the best picture the data allows: the
+   * variation's own photo, else its `crystalTones` colour dot, else just its name.
+   * `crystalTones` was measured to be a strict subset of `finishes`, so the dot is a
+   * picture of a finish, never a second axis.
    */
-  const swatches = (product.variants.crystalTones ?? []).filter(ct =>
-    finishes.includes(ct.name),
-  )
-  const swatchesCoverAllFinishes =
-    swatches.length > 0 && finishes.every(f => swatches.some(s => s.name === f))
-  const showSwatches = swatchesCoverAllFinishes
-  const showFinishText = !swatchesCoverAllFinishes && finishes.length > 0
+  const toneHex = new Map((product.variants.crystalTones ?? []).map(ct => [ct.name, ct.hex]))
+  const finishVisual = (f: string) => {
+    const photo = finishImage(product.variations, f, size)
+    if (photo) {
+      return (
+        <Image
+          src={photo}
+          alt=""
+          width={40}
+          height={40}
+          className="w-10 h-10 rounded-full object-cover bg-[#E2DAD0] flex-shrink-0"
+        />
+      )
+    }
+    const hex = toneHex.get(f)
+    if (hex) {
+      return (
+        <span
+          aria-hidden="true"
+          className="w-[22px] h-[22px] ml-2 rounded-full border border-[#D8D0C4] flex-shrink-0"
+          style={{ backgroundColor: hex }}
+        />
+      )
+    }
+    return null
+  }
 
   // The variation the current selection points at. An explicit id (from a name-labelled
   // option) wins; otherwise size + finish are matched against the rows. null means no
@@ -130,17 +156,24 @@ export default function ProductInfo({ product }: { product: Product }) {
   )
 
   // Picking a size or finish supersedes a previously picked name-labelled option.
+  // Each pick reports the row it lands on from the handler itself, not an effect, so the
+  // first paint keeps the product's own photos and only a real pick swaps them.
   const selectSize = (value: string) => {
     setSize(value)
     setPickedVariationId(undefined)
     // If the current finish is not available for the new size, move to one that is.
     const available = finishOptions(product.variations, value)
-    if (available.length && !available.includes(finish)) setFinish(available[0])
+    const nextFinish = available.length && !available.includes(finish) ? available[0] : finish
+    setFinish(nextFinish)
+    setHasPicked(true)
+    onVariationChange?.(resolveVariation(product.variations, value, nextFinish))
   }
   const selectFinish = (value: string) => {
     if (finishesUnavailable.includes(value)) return
     setFinish(value)
     setPickedVariationId(undefined)
+    setHasPicked(true)
+    onVariationChange?.(resolveVariation(product.variations, size, value))
   }
 
   // Show the price that will actually be charged. Checkout re-reads variation.price
@@ -153,7 +186,8 @@ export default function ProductInfo({ product }: { product: Product }) {
       productId: product.id,
       name: product.name,
       price: effectivePrice,
-      image: product.images[0],
+      // Same picture the gallery is showing (see ProductHero).
+      image: (hasPicked && selectedVariation?.images?.[0]) || product.images[0],
       quantity: qty,
       size,
       finish,
@@ -236,15 +270,15 @@ export default function ProductInfo({ product }: { product: Product }) {
 
       {/* Variants */}
       <VariantSelector label="Size" value={size} options={sizes} onChange={selectSize} />
-      {showFinishText && (
-        <VariantSelector
-          label="Finish"
-          value={finish}
-          options={finishes}
-          disabledOptions={finishesUnavailable}
-          onChange={selectFinish}
-        />
-      )}
+      <VariantSelector
+        label="Finish"
+        value={finish}
+        options={finishes}
+        disabledOptions={finishesUnavailable}
+        disabledReason={`not available in ${size}`}
+        visual={finishVisual}
+        onChange={selectFinish}
+      />
 
       {/* Variation rows whose size and colour are both blank cannot be reached by the
           selectors above — their identity is the name. Offering them here is what makes
@@ -260,54 +294,10 @@ export default function ProductInfo({ product }: { product: Product }) {
             const row = namedOnly.find(v => v.name === name)
             if (!row) return
             setPickedVariationId(row.id)
+            setHasPicked(true)
+            onVariationChange?.(row)
           }}
         />
-      )}
-
-      {/* Finish, as swatches — the primary presentation when every offered finish has one.
-          Measured 2026-08-04: `crystalTones` is a strict SUBSET of `finishes` and never
-          carries a value the finish list lacks, and all 84 real `variation.color` values
-          appear in the finish list. So this was never a separate variant axis. It used to
-          render alongside the text selector as a second control for the same attribute,
-          with state nothing read — never sent to the cart, never affecting price. Now it
-          IS the finish control, and the text selector only appears when some finish has no
-          swatch. Swatches unavailable for the chosen size disable rather than resolving to
-          no row and silently falling back to the parent price. */}
-      {showSwatches && (
-        <div className="mb-5">
-          <div className="text-[11px] font-semibold tracking-[0.14em] uppercase text-[#2C2825] mb-3">
-            Finish
-            <span className="text-[#A09488] font-light tracking-[0.04em] normal-case ml-1.5">— {finish}</span>
-          </div>
-          <div className="flex gap-2.5">
-            {swatches.map(ct => {
-              const selectable = finishes.includes(ct.name) && !finishesUnavailable.includes(ct.name)
-              return (
-                <button
-                  key={ct.name}
-                  type="button"
-                  title={selectable ? ct.name : `${ct.name} — not available`}
-                  aria-label={ct.name}
-                  aria-pressed={finish === ct.name}
-                  disabled={!selectable}
-                  onClick={() => selectFinish(ct.name)}
-                  // 44px hit area, 26px visible dot — the swatch was a 24px target.
-                  className="w-11 h-11 flex items-center justify-center rounded-full cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-                >
-                  <span
-                    aria-hidden="true"
-                    className={`w-[26px] h-[26px] rounded-full border-2 transition-colors ${
-                      finish === ct.name
-                        ? 'border-[#C4714A] ring-2 ring-[#C4714A]/30'
-                        : 'border-[#D8D0C4] hover:border-[#C4714A]'
-                    }`}
-                    style={{ backgroundColor: ct.hex }}
-                  />
-                </button>
-              )
-            })}
-          </div>
-        </div>
       )}
 
       {/* Quantity + Actions */}
@@ -353,6 +343,8 @@ export default function ProductInfo({ product }: { product: Product }) {
           </svg>
           View in Room
         </button>
+
+      <ProductDetails product={product} />
 
       {/* Perks */}
       <div className="grid grid-cols-3 gap-4 py-5 border-y border-[#D8D0C4] mb-7">

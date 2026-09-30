@@ -139,7 +139,29 @@ export function mapVariation(v: ApiVariation): ProductVariation {
     price: Number.isFinite(price) ? price : 0,
     // The API sends `inStock` derived from quantity; fall back to quantity when absent.
     inStock: v.inStock ?? (v.quantity ?? 0) > 0,
+    images: [v.mainImage, ...(Array.isArray(v.additionalImages) ? v.additionalImages : [])]
+      .filter((src): src is string => typeof src === 'string' && src.trim() !== ''),
+    lightOnImage: v.lightOnImage || undefined,
   }
+}
+
+/**
+ * Photo for a finish option: the photo of the exact row a click would select, so the
+ * chip never promises a picture the gallery then fails to show. A matching row with no
+ * photos yields undefined (the chip falls back to its colour dot or name), exactly as
+ * the gallery falls back to the product photos.
+ */
+export function finishImage(
+  variations: ProductVariation[] | undefined,
+  finish: string,
+  forSize: string,
+): string | undefined {
+  const row = resolveVariation(variations, forSize, finish)
+  if (row) return row.images?.[0]
+  // Not offered in this size, so the chip is disabled and cannot be clicked: any row of
+  // that colour is a fair picture of the finish.
+  return variations?.find(v => normalise(v.color) === normalise(finish) && v.images?.length)
+    ?.images?.[0]
 }
 
 export function mapVariations(rows: ApiVariation[] | undefined): ProductVariation[] {

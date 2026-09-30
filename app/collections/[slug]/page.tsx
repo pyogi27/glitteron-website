@@ -6,9 +6,8 @@ import type { Product } from '@/lib/types'
 import { getProductBySlug, getRelatedProducts } from '@/lib/data/products'
 import { categoryIdOf, fetchProducts, fetchRelatedProducts, findApiProductBySlug, fetchProductById, mapApiProduct, resolveCategoryName } from '@/lib/api/server'
 import { productMetaDescription, productTitle } from '@/lib/seo/product-copy'
-import ProductGallery from '@/components/product/ProductGallery'
-import ProductInfo from '@/components/product/ProductInfo'
-import ProductTabs from '@/components/product/ProductTabs'
+import ProductHero from '@/components/product/ProductHero'
+import ProductReviews from '@/components/product/ProductReviews'
 import RelatedProducts from '@/components/product/RelatedProducts'
 import JsonLd from '@/components/seo/JsonLd'
 import { breadcrumbSchema, productSchema } from '@/lib/seo/schema'
@@ -160,18 +159,13 @@ export default async function ProductPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Split layout — gallery sticks, buy box scrolls with the page.
-          One scroll container for the whole route. */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 items-start">
-        <ProductGallery images={product.images} name={product.name} lightOnImage={product.lightOnImage} />
-        <ProductInfo product={product} />
-      </div>
+      <ProductHero product={product} />
 
-      {/* Description / specs / reviews run full width below the fold rather than
-          inside the narrow buy column, where they used to force a nested scroll. */}
+      {/* Description and specs sit in the buy column (ProductDetails); reviews run
+          full width below. */}
       <section className="bg-white border-t border-[#D8D0C4] px-5 lg:px-12 py-10 lg:py-14">
         <div className="max-w-5xl mx-auto">
-          <ProductTabs product={product} />
+          <ProductReviews product={product} />
         </div>
       </section>
 

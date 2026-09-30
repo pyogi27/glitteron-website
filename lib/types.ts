@@ -54,6 +54,9 @@ export interface ProductVariation {
   color: string
   price: number
   inStock: boolean
+  /** mainImage first, then additionalImages. Empty when the row has no photography. */
+  images?: string[]
+  lightOnImage?: string
 }
 
 export interface Review {
