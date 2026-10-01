@@ -1,5 +1,5 @@
 import type { Product } from "@/lib/types";
-import { mapVariations } from "@/lib/variations";
+import { availableStock, DEFAULT_MAX_QTY, mapVariations } from "@/lib/variations";
 import { slugify } from "./slug";
 import { toVideoItems, type VideoItem } from "./videos";
 import {
@@ -17,12 +17,6 @@ import type {
 } from "./types";
 
 const BACKEND = process.env.API_URL ?? "http://localhost:3000";
-
-/**
- * Ceiling for the quantity stepper when the API gives no numeric stock but says the
- * product is in stock. Matches QuantityControl's own default.
- */
-const DEFAULT_MAX_QTY = 99;
 
 const PLACEHOLDER_IMAGE =
   "https://images.pexels.com/photos/1123262/pexels-photo-1123262.jpeg?auto=compress&cs=tinysrgb&w=800&h=900&fit=crop";
@@ -113,13 +107,9 @@ function resolveStock(p: Partial<ApiProduct>): number {
   const totalStock = p.totalStock != null ? toNumber(p.totalStock, -1) : -1;
   if (p.hasVariations && totalStock >= 0) return totalStock;
 
-  if (p.quantity != null) {
-    const onHand = toNumber(p.quantity);
-    const reserved = toNumber(p.reservedQuantity);
-    // Negative stock exists in this catalogue (9 products measured 2026-08-04); clamp
-    // so callers never see a negative max.
-    return Math.max(0, onHand - reserved);
-  }
+  // Negative stock exists in this catalogue (9 products measured 2026-08-04);
+  // availableStock clamps so callers never see a negative max.
+  if (p.quantity != null) return availableStock(p.quantity, p.reservedQuantity);
 
   if (totalStock >= 0) return totalStock;
   // Nothing numeric available: trust the boolean, but we cannot know the real ceiling.

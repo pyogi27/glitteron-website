@@ -53,6 +53,9 @@ export interface ProductVariation {
   size: string
   color: string
   price: number
+  /** Units available to sell: quantity - reservedQuantity, never below 0. */
+  stock: number
+  /** stock > 0. Derived, so it can never disagree with `stock`. */
   inStock: boolean
   /** mainImage first, then additionalImages. Empty when the row has no photography. */
   images?: string[]

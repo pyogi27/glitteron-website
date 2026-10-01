@@ -21,6 +21,9 @@ import { parseWhereUsed } from '@/lib/data/visualizer'
 import RoomVisualizerModal from './RoomVisualizerModal'
 import ProductDetails from './ProductDetails'
 
+/** At or below this many units the buy box says "Only N left". */
+const LOW_STOCK = 5
+
 const PERKS = [
   {
     label: 'Free Delivery',
@@ -50,16 +53,23 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
   // the denormalised summary strings otherwise (products with no variations, or when the
   // detail endpoint was not the source). Row-derived options are always purchasable; the
   // summary strings include phantoms split out of the decorative `bodyColors` field.
-  const rowSizes = sizeOptions(product.variations)
+  //
+  // Sold-out rows are not offered at all. hasRowVariations still counts them, so a
+  // product whose variations are all sold out shows no selectors (and Out of Stock)
+  // instead of falling back to the summary strings.
+  const rows = product.variations?.filter(v => v.inStock)
+  const rowSizes = sizeOptions(rows)
   const hasRowVariations = (product.variations?.length ?? 0) > 0
 
   const [qty, setQty] = useState(1)
+  // Shown when an add was cut down because the cart already holds what is in stock.
+  const [capNote, setCapNote] = useState<string | null>(null)
   const [size, setSize] = useState(
     (hasRowVariations ? rowSizes[0] : product.variants.sizes[0]) ?? '',
   )
   const [finish, setFinish] = useState(
     (hasRowVariations
-      ? finishOptions(product.variations, rowSizes[0])[0]
+      ? finishOptions(rows, rowSizes[0])[0]
       : product.variants.finishes[0]) ?? '',
   )
   /**
@@ -102,15 +112,15 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
   // Options for the selectors, narrowed so every offered pair maps to a real row.
   const sizes = hasRowVariations ? rowSizes : product.variants.sizes
   const finishes = hasRowVariations
-    ? finishOptions(product.variations)
+    ? finishOptions(rows)
     : product.variants.finishes
   // Finishes that exist but not for the chosen size — shown struck-through rather than
   // hidden, so options do not silently appear and disappear as the size changes.
   const finishesUnavailable = hasRowVariations
-    ? unavailableFinishes(product.variations, size)
+    ? unavailableFinishes(rows, size)
     : []
   // Rows reachable only by name.
-  const namedOnly = unlabelledVariations(product.variations)
+  const namedOnly = unlabelledVariations(rows)
 
   /**
    * Finish is ONE control. Each option shows the best picture the data allows: the
@@ -120,7 +130,7 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
    */
   const toneHex = new Map((product.variants.crystalTones ?? []).map(ct => [ct.name, ct.hex]))
   const finishVisual = (f: string) => {
-    const photo = finishImage(product.variations, f, size)
+    const photo = finishImage(rows, f, size)
     if (photo) {
       return (
         <Image
@@ -149,11 +159,27 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
   // option) wins; otherwise size + finish are matched against the rows. null means no
   // match, so no id is sent and the backend prices from the parent product.
   const selectedVariation = resolveVariation(
-    product.variations,
+    rows,
     size,
     finish,
     pickedVariationId,
   )
+
+  // A variation carries its own stock; with no row resolved, the product total applies.
+  const stock = selectedVariation ? selectedVariation.stock : product.stock
+  const inStock = stock > 0
+  // Ceiling for the quantity stepper. The backend still re-checks at checkout
+  // (CreateCheckout locks the row and rejects if quantity - reserved is short).
+  const maxQty = stock > 0 ? stock : undefined
+
+  // Every pick funnels through here: lower qty to the new row's stock in the handler
+  // (not a syncing effect), then tell the gallery which row was landed on.
+  const landOn = (row: ProductVariation | null) => {
+    const limit = row ? row.stock : product.stock
+    if (limit > 0 && qty > limit) setQty(limit)
+    setCapNote(null)
+    onVariationChange?.(row)
+  }
 
   // Picking a size or finish supersedes a previously picked name-labelled option.
   // Each pick reports the row it lands on from the handler itself, not an effect, so the
@@ -162,18 +188,18 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
     setSize(value)
     setPickedVariationId(undefined)
     // If the current finish is not available for the new size, move to one that is.
-    const available = finishOptions(product.variations, value)
+    const available = finishOptions(rows, value)
     const nextFinish = available.length && !available.includes(finish) ? available[0] : finish
     setFinish(nextFinish)
     setHasPicked(true)
-    onVariationChange?.(resolveVariation(product.variations, value, nextFinish))
+    landOn(resolveVariation(rows, value, nextFinish))
   }
   const selectFinish = (value: string) => {
     if (finishesUnavailable.includes(value)) return
     setFinish(value)
     setPickedVariationId(undefined)
     setHasPicked(true)
-    onVariationChange?.(resolveVariation(product.variations, size, value))
+    landOn(resolveVariation(rows, size, value))
   }
 
   // Show the price that will actually be charged. Checkout re-reads variation.price
@@ -182,7 +208,7 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
   const effectivePrice = selectedVariation?.price ?? product.price
 
   const handleAddToCart = () => {
-    addItem({
+    const added = addItem({
       productId: product.id,
       name: product.name,
       price: effectivePrice,
@@ -193,7 +219,9 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
       finish,
       apiProductId: product.apiProductId,
       productVariationId: selectedVariation?.id,
+      maxQty,
     })
+    setCapNote(added < qty ? `Only ${stock} available — your cart now has all of them.` : null)
   }
 
   // Buy Now used to call handleAddToCart and stay put — same behaviour as Add to Cart
@@ -204,16 +232,6 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
   }
 
   const emi = Math.round(effectivePrice / 12)
-
-  // A variation carries its own stock. Fall back to the product-level count when the
-  // selection has not resolved to a row.
-  const inStock = selectedVariation ? selectedVariation.inStock : product.stock > 0
-
-  // Ceiling for the quantity stepper. A resolved variation has its own stock but the
-  // API's variation rows do not expose a usable count here, so cap by the product total
-  // rather than pinning to 1 — the backend re-checks availability at checkout anyway
-  // (CreateCheckout locks the row and rejects if quantity - reserved is short).
-  const maxQty = product.stock > 0 ? product.stock : undefined
 
   return (
     // ponytail: no overflow/height here — the buy box flows in the page scroll.
@@ -234,7 +252,10 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
       <div className="flex items-center gap-4 text-[11px] text-[#A09488] mb-4 mt-3">
         <span>SKU: {product.sku}</span>
         {inStock ? (
-          <span className="text-green-600 font-medium">in stock</span>
+          <span className="text-green-600 font-medium">
+            in stock
+            {stock <= LOW_STOCK && <span className="text-[#C4714A]"> · Only {stock} left</span>}
+          </span>
         ) : (
           <span className="text-[#C4714A] font-medium">out of stock</span>
         )}
@@ -295,14 +316,14 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
             if (!row) return
             setPickedVariationId(row.id)
             setHasPicked(true)
-            onVariationChange?.(row)
+            landOn(row)
           }}
         />
       )}
 
       {/* Quantity + Actions */}
       <div ref={actionsRef} className="flex items-center gap-3 mb-4">
-        <QuantityControl value={qty} max={maxQty} onChange={setQty} />
+        <QuantityControl value={qty} max={maxQty} onChange={q => { setQty(q); setCapNote(null) }} />
         <button
           type="button"
           onClick={handleAddToCart}
@@ -322,6 +343,7 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
           </svg>
         </button>
       </div>
+      <p role="status" className="text-[12px] text-[#C4714A] mb-3 empty:hidden">{capNote}</p>
       <button
         type="button"
         onClick={handleBuyNow}

@@ -85,7 +85,10 @@ export interface ApiVariation {
   size?: string | null;
   color?: string | null;
   price: number | string;
-  quantity?: number;
+  // Real per-row counts, verified 2026-10-01 on GET /api/products/1645 (11 rows,
+  // 6..24 units each). available = quantity - reservedQuantity, as for products.
+  quantity?: number | string;
+  reservedQuantity?: number | string;
   inStock?: boolean;
   isActive?: boolean;
   // Per-variation photography. Verified 2026-09-30 on GET /api/products/1337: every

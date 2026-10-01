@@ -190,8 +190,8 @@ export default function CartPageClient() {
                         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                           <QuantityControl
                             value={item.quantity}
-                            max={99}
-                            onChange={(qty) => updateQty({ productId: item.productId, size: item.size, finish: item.finish }, qty)}
+                            max={item.maxQty}
+                            onChange={(qty) => updateQty({ productId: item.productId, size: item.size, finish: item.finish, productVariationId: item.productVariationId }, qty)}
                           />
 
                           <div className="flex items-center gap-4">
@@ -201,7 +201,7 @@ export default function CartPageClient() {
                             </div>
                             <button
                               type="button"
-                              onClick={() => removeItem({ productId: item.productId, size: item.size, finish: item.finish })}
+                              onClick={() => removeItem({ productId: item.productId, size: item.size, finish: item.finish, productVariationId: item.productVariationId })}
                               className="h-10 px-4 rounded-full border border-[#D8D0C4] text-[11px] uppercase tracking-[0.08em] text-[#A09488] hover:text-[#2C2825] hover:border-[#C4714A] hover:bg-[#E2DAD0] transition-all"
                             >
                               Remove

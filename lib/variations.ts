@@ -59,12 +59,18 @@ export function finishOptions(
   forSize?: string,
 ): string[] {
   if (!variations?.length) return []
+  const all = dedupePreserving(variations.map(v => v.color))
   const scoped = forSize
     ? variations.filter(v => normalise(v.size) === normalise(forSize))
-    : variations
+    : []
   // Fall back to the full set when the size filter matches nothing, so the selector
   // never renders empty mid-interaction.
-  return dedupePreserving((scoped.length ? scoped : variations).map(v => v.color))
+  if (!scoped.length) return all
+  // Return the full list's spelling, not the scoped rows': product 1645 spells it
+  // "Yellow " on the 300mm row and "Yellow" on the 400mm one, and callers compare these
+  // strings raw — the mismatch struck Yellow through as "not available in 400".
+  const keys = new Set(scoped.map(v => normalise(v.color)))
+  return all.filter(f => keys.has(normalise(f)))
 }
 
 /**
@@ -128,17 +134,40 @@ function normalise(value: string | null | undefined): string {
     .replace(/mm$/, '')
 }
 
+/**
+ * Ceiling for the quantity stepper when the API gives no numeric stock but says the
+ * item is in stock. Matches QuantityControl's own default.
+ */
+export const DEFAULT_MAX_QTY = 99
+
+/**
+ * Units available to sell: on hand minus held by pending payments, never below 0
+ * (negative stock exists in this catalogue). Shared by products and variations.
+ */
+export function availableStock(quantity: unknown, reserved: unknown): number {
+  const num = (x: unknown) => (Number.isFinite(Number(x)) ? Number(x) : 0)
+  return Math.max(0, num(quantity) - num(reserved))
+}
+
+/** A variation row's available stock; trusts the boolean only when no count was sent. */
+export function variationStock(v: ApiVariation): number {
+  if (v.quantity != null) return availableStock(v.quantity, v.reservedQuantity)
+  return v.inStock ? DEFAULT_MAX_QTY : 0
+}
+
 /** Map the API's wide variation row onto the narrow shape the storefront uses. */
 export function mapVariation(v: ApiVariation): ProductVariation {
   const price = typeof v.price === 'string' ? parseFloat(v.price) : v.price
+  const stock = variationStock(v)
   return {
     id: v.id,
     name: v.name ?? '',
     size: v.size ?? '',
     color: v.color ?? '',
     price: Number.isFinite(price) ? price : 0,
-    // The API sends `inStock` derived from quantity; fall back to quantity when absent.
-    inStock: v.inStock ?? (v.quantity ?? 0) > 0,
+    stock,
+    // Not the API's own `inStock`: that ignores reservations.
+    inStock: stock > 0,
     images: [v.mainImage, ...(Array.isArray(v.additionalImages) ? v.additionalImages : [])]
       .filter((src): src is string => typeof src === 'string' && src.trim() !== ''),
     lightOnImage: v.lightOnImage || undefined,
