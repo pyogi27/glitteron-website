@@ -1,5 +1,6 @@
 import type { Product } from "@/lib/types";
 import { availableStock, DEFAULT_MAX_QTY, mapVariations } from "@/lib/variations";
+import { sanitizeKeyFeatures } from "@/lib/keyFeatures";
 import { slugify } from "./slug";
 import { toVideoItems, type VideoItem } from "./videos";
 import {
@@ -600,6 +601,7 @@ export async function fetchProductById(id: number): Promise<Product | null> {
       variations: mapVariations(productData.variations),
       reviews,
       whereUsed: productData.whereUsed,
+      keyFeatures: sanitizeKeyFeatures(productData.keyFeatures) ?? undefined,
     };
   } catch (err) {
     console.error(`[fetchProductById] failed to reach ${url}:`, err);

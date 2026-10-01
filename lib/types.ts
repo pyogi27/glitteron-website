@@ -22,6 +22,11 @@ export interface Product {
   stock: number
   images: string[]
   description: string
+  /**
+   * Sanitized key-features HTML (lib/keyFeatures.ts), safe for innerHTML. Undefined
+   * when the product has none, including the editor's empty "<p></p>". Detail page only.
+   */
+  keyFeatures?: string
   specs: Record<string, string>
   variants: {
     sizes: string[]

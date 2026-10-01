@@ -114,6 +114,8 @@ export interface ApiProductDetail extends ApiProduct {
   specs?: Record<string, string>;
   reviews?: ApiReview[];
   whereUsed?: string;
+  /** Admin-authored rich text, sanitized by the backend; null when never set. Untrusted here. */
+  keyFeatures?: string | null;
   additionalImages?: string[];
   mainImage?: string;
   // Denormalised variant summaries the backend also returns. These are convenient for

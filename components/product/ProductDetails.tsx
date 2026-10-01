@@ -2,7 +2,7 @@
 import type { Product } from '@/lib/types'
 
 /**
- * Description and specifications, directly under the buy controls. Native
+ * Key features, description and specifications, directly under the buy controls. Native
  * <details>: no state, keyboard and screen-reader support for free, and collapsed
  * content still ships in the server HTML, so crawlers see the specs either way.
  *
@@ -15,6 +15,15 @@ export default function ProductDetails({ product }: { product: Product }) {
 
   return (
     <div className="border-t border-[#D8D0C4] mb-7">
+      {product.keyFeatures && (
+        <Section title="Key Features" open>
+          {/* Sanitized in lib/api/server.ts (lib/keyFeatures.ts allowlist); never pass raw API HTML here. */}
+          <div
+            className="text-[13.5px] leading-[1.9] text-[#4A4540] [&_p]:mb-2 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ol]:list-decimal [&_ul,&_ol]:pl-5 [&_ul,&_ol]:mb-2 [&_li]:pl-1 [&_li::marker]:text-[#C4714A] [&_h2,&_h3]:font-serif [&_h2]:text-[17px] [&_h3]:text-[15px] [&_h2,&_h3]:text-[#2C2825] [&_h2,&_h3]:mt-3 [&_h2,&_h3]:mb-1 [&_strong,&_b]:font-semibold [&_strong,&_b]:text-[#2C2825] [&_a]:underline [&_a]:underline-offset-2 [&_a]:text-[#8B5E3C] [&_a:hover]:text-[#C4714A]"
+            dangerouslySetInnerHTML={{ __html: product.keyFeatures }}
+          />
+        </Section>
+      )}
       {description && (
         <Section title="Description" open>
           <p className="text-[13.5px] leading-[1.9] text-[#4A4540]">{description}</p>

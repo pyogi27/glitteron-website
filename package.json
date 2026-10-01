@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "check": "node scripts/generate-descriptions.mjs selftest && node --experimental-strip-types scripts/check-meta-description.mts && node --experimental-strip-types lib/data/filters.test.mjs && node --experimental-strip-types lib/api/videos.test.mjs && node --test lib/stock.test.mjs lib/variations.test.mjs",
+    "check": "node scripts/generate-descriptions.mjs selftest && node --experimental-strip-types scripts/check-meta-description.mts && node --experimental-strip-types lib/data/filters.test.mjs && node --experimental-strip-types lib/api/videos.test.mjs && node --test lib/stock.test.mjs lib/variations.test.mjs lib/keyFeatures.test.mjs",
     "descriptions": "node scripts/generate-descriptions.mjs"
   },
   "dependencies": {
@@ -15,6 +15,7 @@
     "openai": "^6.41.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "sanitize-html": "^2.18.0",
     "zustand": "^5.0.11"
   },
   "devDependencies": {
@@ -22,6 +23,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/sanitize-html": "^2.16.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
