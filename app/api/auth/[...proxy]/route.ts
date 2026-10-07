@@ -15,12 +15,9 @@ async function proxyRequest(req: NextRequest, ctx: RouteContext): Promise<NextRe
     'Content-Type': 'application/json',
   };
 
+  // Clerk bearer token only; the backend no longer reads cookies on these routes.
   const authorization = req.headers.get('authorization');
   if (authorization) headers['authorization'] = authorization;
-
-  // Forward the browser cookie so /refresh and /logout work
-  const cookie = req.headers.get('cookie');
-  if (cookie) headers['cookie'] = cookie;
 
   const init: RequestInit = { method: req.method, headers };
 
@@ -37,22 +34,10 @@ async function proxyRequest(req: NextRequest, ctx: RouteContext): Promise<NextRe
   }
 
   const body = await backendRes.text();
-  const response = new NextResponse(body, {
+  return new NextResponse(body, {
     status: backendRes.status,
     headers: { 'Content-Type': 'application/json' },
   });
-
-  // Forward Set-Cookie so the httpOnly refresh token cookie reaches the browser
-  const setCookies =
-    typeof backendRes.headers.getSetCookie === 'function'
-      ? backendRes.headers.getSetCookie()
-      : backendRes.headers.get('set-cookie')
-        ? [backendRes.headers.get('set-cookie')!]
-        : [];
-
-  setCookies.forEach(c => response.headers.append('set-cookie', c));
-
-  return response;
 }
 
 export const GET    = (req: NextRequest, ctx: RouteContext) => proxyRequest(req, ctx);

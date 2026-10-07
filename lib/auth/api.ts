@@ -1,116 +1,51 @@
-import type { ApiError, AuthSuccessResponse, OtpSentResponse, WebsiteUser } from './types';
-import { useAuthStore } from '@/lib/stores/authStore';
+import type { ApiError, WebsiteUser } from './types';
 
 const AUTH = '/api/auth';
 
-// ─── Raw request (no auth header) ────────────────────────────────────────────
+// ─── Clerk session token ──────────────────────────────────────────────────────
 
-async function req<T>(path: string, opts: RequestInit = {}): Promise<T> {
-  const res = await fetch(`${AUTH}${path}`, {
+// SessionRestorer registers Clerk's getToken here. Clerk session tokens live ~60s
+// and Clerk refreshes them itself, so fetch one per request — never cache it.
+let tokenGetter: (() => Promise<string | null>) | null = null;
+
+export const setTokenGetter = (getter: () => Promise<string | null>) => {
+  tokenGetter = getter;
+};
+
+export const getAuthToken = async (): Promise<string | null> => (tokenGetter ? tokenGetter() : null);
+
+// ─── Authenticated fetch ──────────────────────────────────────────────────────
+
+async function authedFetch<T>(fullPath: string, opts: RequestInit = {}): Promise<T> {
+  const token = await getAuthToken();
+  const res = await fetch(fullPath, {
     ...opts,
-    credentials: 'include', // sends website_refresh_token cookie automatically
-    headers: { 'Content-Type': 'application/json', ...opts.headers },
+    headers: {
+      'Content-Type': 'application/json',
+      ...opts.headers,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
   });
 
+  if (res.status === 204) return { success: true } as T;
   const data = await res.json().catch(() => ({ message: 'Unexpected server error' }));
-
+  // No redirect on 401: a signed-in Clerk user the backend rejects would bounce
+  // between /login and here forever. Clerk sign-out flows through SessionRestorer.
   if (!res.ok) {
     const err: ApiError = { status: res.status, message: data.message ?? 'Something went wrong' };
     throw err;
   }
-
   return data as T;
 }
 
-// ─── Authenticated request (auto-refreshes on 401) ───────────────────────────
+const authedReq = <T>(path: string, opts: RequestInit = {}) => authedFetch<T>(`${AUTH}${path}`, opts);
 
-async function authedReq<T>(path: string, opts: RequestInit = {}): Promise<T> {
-  const token = useAuthStore.getState().accessToken;
+// ─── Profile ──────────────────────────────────────────────────────────────────
+// Sign-in, sign-up, sign-out and password reset are Clerk's (see app/login, app/signup).
 
-  const withBearer = (t: string): RequestInit => ({
-    ...opts,
-    headers: { ...opts.headers, Authorization: `Bearer ${t}` },
-  });
+/** Backend profile for the signed-in Clerk user (created/linked on first call). */
+export const getMe = () => authedReq<{ success: true; user: WebsiteUser }>('/me');
 
-  try {
-    return await req<T>(path, withBearer(token ?? ''));
-  } catch (err: unknown) {
-    const apiErr = err as ApiError;
-    if (apiErr.status !== 401) throw err;
-
-    // Try to refresh the token once
-    try {
-      const { accessToken: fresh } = await req<{ success: true; accessToken: string }>(
-        '/refresh',
-        { method: 'POST' },
-      );
-      const { user } = await req<{ success: true; user: WebsiteUser }>('/me', {
-        headers: { Authorization: `Bearer ${fresh}` },
-      });
-      useAuthStore.getState().setAuth(fresh, user);
-      return req<T>(path, withBearer(fresh));
-    } catch {
-      useAuthStore.getState().clearAuth();
-      if (typeof window !== 'undefined') window.location.href = '/login';
-      throw err;
-    }
-  }
-}
-
-// ─── Public endpoints ─────────────────────────────────────────────────────────
-
-/**
- * Signup step 1 — sends the OTP to the phone number over WhatsApp.
- *
- * `email` rides along as the fallback destination the backend uses when it is
- * switched to OTP_CHANNEL=email (a WhatsApp ban or gateway outage). The OTP is
- * always keyed on the phone number regardless of which channel carries it.
- */
-export const sendOtp = (phone: string, email?: string) =>
-  req<OtpSentResponse>('/send-otp', {
-    method: 'POST',
-    body: JSON.stringify({ phone, email }),
-  });
-
-/** Signup step 2 — verify the WhatsApp OTP + create account */
-export const verifyOtp = (payload: {
-  phone: string;
-  email: string;
-  otp: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-}) =>
-  req<AuthSuccessResponse>('/verify-otp', {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  });
-
-/** Login step 1 — validate phone + password, triggers the WhatsApp OTP */
-export const login = (phone: string, password: string) =>
-  req<OtpSentResponse>('/login', {
-    method: 'POST',
-    body: JSON.stringify({ phone, password }),
-  });
-
-/** Login step 2 — verify OTP, issues tokens */
-export const loginVerifyOtp = (phone: string, otp: string) =>
-  req<AuthSuccessResponse>('/login/verify-otp', {
-    method: 'POST',
-    body: JSON.stringify({ phone, otp }),
-  });
-
-/** Restore session — uses httpOnly refresh cookie, returns new accessToken */
-export const refreshToken = () =>
-  req<{ success: true; accessToken: string }>('/refresh', { method: 'POST' });
-
-/** Get user profile using a specific token (used in SessionRestorer) */
-export const getMe = (token: string) =>
-  req<{ success: true; user: WebsiteUser }>('/me', {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-/** Update own profile — auto-refreshes token if expired */
 export const updateMe = (
   data: Partial<Pick<WebsiteUser, 'firstName' | 'lastName' | 'address' | 'city' | 'state' | 'zipCode'>>,
 ) =>
@@ -118,66 +53,6 @@ export const updateMe = (
     method: 'PATCH',
     body: JSON.stringify(data),
   });
-
-/** Logout — clears httpOnly cookie */
-export const logoutApi = () =>
-  req<{ success: true; message: string }>('/logout', { method: 'POST' });
-
-/** Send password-reset email */
-export const forgotPassword = (email: string) =>
-  req<{ success: true; message: string }>('/forgot-password', {
-    method: 'POST',
-    body: JSON.stringify({ email }),
-  });
-
-/** Reset password using OTP sent to email */
-export const resetPassword = (email: string, otp: string, password: string) =>
-  req<{ success: true; message: string }>('/reset-password', {
-    method: 'POST',
-    body: JSON.stringify({ email, otp, password }),
-  });
-
-// ─── Authenticated fetch (full path, no /api/auth prefix) ─────────────────────
-
-async function authedFetch<T>(fullPath: string, opts: RequestInit = {}): Promise<T> {
-  const token = useAuthStore.getState().accessToken;
-
-  const withBearer = (t: string): RequestInit => ({
-    ...opts,
-    credentials: 'include' as RequestCredentials,
-    headers: { 'Content-Type': 'application/json', ...opts.headers, Authorization: `Bearer ${t}` },
-  });
-
-  const doFetch = (t: string) =>
-    fetch(fullPath, withBearer(t)).then(async (res) => {
-      if (res.status === 204) return { success: true } as T;
-      const data = await res.json().catch(() => ({ message: 'Unexpected server error' }));
-      if (!res.ok) {
-        const err: ApiError = { status: res.status, message: data.message ?? 'Something went wrong' };
-        throw err;
-      }
-      return data as T;
-    });
-
-  try {
-    return await doFetch(token ?? '');
-  } catch (err: unknown) {
-    const apiErr = err as ApiError;
-    if (apiErr.status !== 401) throw err;
-    try {
-      const { accessToken: fresh } = await req<{ success: true; accessToken: string }>('/refresh', { method: 'POST' });
-      const { user } = await req<{ success: true; user: WebsiteUser }>('/me', {
-        headers: { Authorization: `Bearer ${fresh}` },
-      });
-      useAuthStore.getState().setAuth(fresh, user);
-      return doFetch(fresh);
-    } catch {
-      useAuthStore.getState().clearAuth();
-      if (typeof window !== 'undefined') window.location.href = '/login';
-      throw err;
-    }
-  }
-}
 
 // ─── Visualizer usage ──────────────────────────────────────────────────────────
 

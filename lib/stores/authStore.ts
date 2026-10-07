@@ -2,23 +2,20 @@ import { create } from 'zustand';
 import type { WebsiteUser } from '@/lib/auth/types';
 
 interface AuthState {
-  /** Short-lived JWT — kept in memory only, never persisted */
-  accessToken: string | null;
+  /** Backend profile of the signed-in Clerk user; null when signed out. */
   user: WebsiteUser | null;
-  /** True once SessionRestorer has finished (success or failure) */
+  /** True once SessionRestorer knows whether a Clerk session exists (and loaded its profile). */
   hydrated: boolean;
-  setAuth: (token: string, user: WebsiteUser) => void;
+  setUser: (user: WebsiteUser) => void;
   clearAuth: () => void;
   setHydrated: () => void;
 }
 
-// No `persist` middleware — the API requires the token to stay in-memory.
-// Session is restored on mount via POST /refresh (httpOnly cookie).
+// No `persist` — Clerk owns the session; tokens come from getAuthToken() per request.
 export const useAuthStore = create<AuthState>()((set) => ({
-  accessToken: null,
   user: null,
   hydrated: false,
-  setAuth: (accessToken, user) => set({ accessToken, user }),
-  clearAuth: () => set({ accessToken: null, user: null }),
+  setUser: (user) => set({ user }),
+  clearAuth: () => set({ user: null }),
   setHydrated: () => set({ hydrated: true }),
 }));

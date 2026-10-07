@@ -22,7 +22,7 @@ export default function CartPageClient() {
   const updateQty = useCartStore((s) => s.updateQty)
   const clearCart = useCartStore((s) => s.clearCart)
   const router = useRouter()
-  const { accessToken } = useAuthStore()
+  const signedIn = useAuthStore(s => !!s.user)
 
   const [serverCart, setServerCart] = useState<WebsiteCartSummary | null>(null)
   const [summaryLoading, setSummaryLoading] = useState(false)
@@ -43,7 +43,7 @@ export default function CartPageClient() {
   // Sync local cart → server, then fetch live totals.
   // Debounced so rapid quantity changes don't flood the API.
   useEffect(() => {
-    if (!accessToken || items.length === 0) {
+    if (!signedIn || items.length === 0) {
       setServerCart(null)
       setSyncProblem(null)
       return
@@ -92,7 +92,7 @@ export default function CartPageClient() {
       setSummaryLoading(false)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accessToken, items, retryNonce])
+  }, [signedIn, items, retryNonce])
 
   // Totals — server values when available, local fallback otherwise.
   // `hasServer` still requires items, because zero-item server totals are all zeroes and

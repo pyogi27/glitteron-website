@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, useParams, useSearchParams, usePathname } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useAuthStore } from '@/lib/stores/authStore'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { getWebsiteOrder, type WebsiteOrder } from '@/lib/auth/api'
 
 function formatDate(iso: string) {
@@ -44,8 +44,6 @@ function PaymentStatusBadge({ status }: { status: WebsiteOrder['payment']['statu
 }
 
 export default function OrderDetailClient() {
-  const router = useRouter()
-  const pathname = usePathname()
   const params = useParams()
   const searchParams = useSearchParams()
   const isSuccess = searchParams.get('success') === 'true'
@@ -53,20 +51,9 @@ export default function OrderDetailClient() {
   const [order, setOrder] = useState<WebsiteOrder | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [authChecked, setAuthChecked] = useState(false)
+  const authChecked = useRequireAuth()
   const [showSuccessBanner, setShowSuccessBanner] = useState(isSuccess)
 
-  // Auth gate
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (!useAuthStore.getState().accessToken) {
-        router.replace(`/login?return=${pathname}`)
-      } else {
-        setAuthChecked(true)
-      }
-    }, 600)
-    return () => clearTimeout(timeout)
-  }, [router, pathname])
 
   useEffect(() => {
     if (!authChecked) return

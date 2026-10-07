@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useVisualizerStore } from '@/lib/stores/visualizerStore'
 import { useCartStore } from '@/lib/stores/cartStore'
-import { useAuthStore } from '@/lib/stores/authStore'
-import { getVisualizerUsage } from '@/lib/auth/api'
+import { getAuthToken, getVisualizerUsage } from '@/lib/auth/api'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import type { VisualizerProduct } from '@/lib/data/visualizer'
 import type { AIGenerateResponse, ShareResult } from '@/lib/ai/types'
@@ -111,13 +110,15 @@ function isChainableDataUrl(url: string): boolean {
 async function generateChain(
   baseImage: string,
   items: VisualizerProduct[],
-  token: string | null,
+  getToken: () => Promise<string | null>,
   onProgress: (progress: { current: number; total: number; productName: string }) => void,
 ): Promise<string> {
   let current = baseImage
   for (let i = 0; i < items.length; i++) {
     const product = items[i]
     onProgress({ current: i + 1, total: items.length, productName: product.name })
+    // Per call: a chain can outlive one ~60s Clerk session token.
+    const token = await getToken()
     const res = await fetch('/api/visualizer/generate', {
       method: 'POST',
       headers: {
@@ -219,8 +220,7 @@ function GenerateBlock() {
     setIsGenerating(true)
     setGenerationError(null)
     try {
-      const token = useAuthStore.getState().accessToken
-      const url = await generateChain(baseImage, items, token, setGenerationProgress)
+      const url = await generateChain(baseImage, items, getAuthToken, setGenerationProgress)
       applyRender(url, resultIds)
     } catch (err) {
       setGenerationError(err instanceof Error ? err.message : 'Generation failed')

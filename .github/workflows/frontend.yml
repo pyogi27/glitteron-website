@@ -34,8 +34,13 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
+          # Publishable key (public by design) is inlined into the client bundle at build
+          # time, so it must be a build arg; App Runner's runtime copy only reaches the server.
+          CLERK_PK=$(aws secretsmanager get-secret-value --secret-id googleSSO/NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY \
+            --query SecretString --output text | jq -er .NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
           docker build \
             --build-arg API_URL=${{ secrets.API_URL }} \
+            --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$CLERK_PK \
             --build-arg NEXT_PUBLIC_RAZORPAY_KEY_ID=${{ secrets.NEXT_PUBLIC_RAZORPAY_KEY_ID }} \
             --build-arg NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }} \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \

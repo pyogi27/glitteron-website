@@ -1,23 +1,23 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import Logo from '@/components/ui/Logo'
 import CartButton from './CartButton'
 import WishlistButton from './WishlistButton'
 import SearchButton, { HeaderSearch } from './SearchButton'
 import { useAuthStore } from '@/lib/stores/authStore'
-import { logoutApi } from '@/lib/auth/api'
+import { useClerk } from '@clerk/nextjs'
 
 // ─── Profile button + dropdown ────────────────────────────────────────────────
 
 function ProfileButton({ isLight }: { isLight: boolean }) {
   const user = useAuthStore(s => s.user)
   const clearAuth = useAuthStore(s => s.clearAuth)
+  const { signOut } = useClerk()
   const [mounted, setMounted] = useState(false)
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-  const router = useRouter()
   const pathname = usePathname()
 
   useEffect(() => { setMounted(true) }, [])
@@ -35,9 +35,8 @@ function ProfileButton({ isLight }: { isLight: boolean }) {
 
   const handleLogout = async () => {
     setOpen(false)
-    try { await logoutApi() } catch { /* ignore */ }
     clearAuth()
-    router.push('/')
+    await signOut({ redirectUrl: '/' })
   }
 
   const initials = mounted && user
@@ -92,7 +91,7 @@ function ProfileButton({ isLight }: { isLight: boolean }) {
                   {user.firstName} {user.lastName}
                 </p>
                 <p className="font-sans text-[11.5px] font-light mt-0.5" style={{ color: '#A09488' }}>
-                  +91 {user.phone}
+                  {user.phone ? `+91 ${user.phone}` : user.email}
                 </p>
               </div>
 

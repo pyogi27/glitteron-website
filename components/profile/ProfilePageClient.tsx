@@ -190,7 +190,7 @@ function OrderRow({ order }: { order: WebsiteOrder }) {
 export default function ProfilePageClient() {
   const user = useAuthStore(s => s.user);
   const hydrated = useAuthStore(s => s.hydrated);
-  const setAuth = useAuthStore(s => s.setAuth);
+  const setUser = useAuthStore(s => s.setUser);
 
   const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
@@ -258,7 +258,7 @@ export default function ProfilePageClient() {
     setSaveError('');
     try {
       const res = await updateMe({ firstName, lastName, address, city, state, zipCode });
-      setAuth(useAuthStore.getState().accessToken!, res.user);
+      setUser(res.user);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3500);
     } catch (err: unknown) {
@@ -267,7 +267,7 @@ export default function ProfilePageClient() {
     } finally {
       setSaving(false);
     }
-  }, [firstName, lastName, address, city, state, zipCode, setAuth]);
+  }, [firstName, lastName, address, city, state, zipCode, setUser]);
 
   // ── Loading skeleton ───────────────────────────────────────────────────────
   if (!mounted || !hydrated) return <Skeleton />;
@@ -389,7 +389,7 @@ export default function ProfilePageClient() {
                 {fullName}
               </h2>
               <p className="mt-1 font-sans text-[12.5px] font-light" style={{ color: '#A09488' }}>
-                +91 {user.phone}
+                {user.phone ? `+91 ${user.phone}` : user.email}
               </p>
               <p className="mt-1.5 font-sans text-[10px] tracking-[0.1em] uppercase" style={{ color: '#A09488' }}>
                 LitMeUp Member
@@ -468,10 +468,12 @@ export default function ProfilePageClient() {
                         <dt className="font-sans text-[10.5px] font-light" style={{ color: '#A09488' }}>Full Name</dt>
                         <dd className="font-sans text-[13.5px] font-medium mt-0.5" style={{ color: '#2C2825' }}>{fullName}</dd>
                       </div>
-                      <div>
-                        <dt className="font-sans text-[10.5px] font-light" style={{ color: '#A09488' }}>Phone</dt>
-                        <dd className="font-sans text-[13.5px] font-medium mt-0.5" style={{ color: '#2C2825' }}>+91 {user.phone}</dd>
-                      </div>
+                      {user.phone && (
+                        <div>
+                          <dt className="font-sans text-[10.5px] font-light" style={{ color: '#A09488' }}>Phone</dt>
+                          <dd className="font-sans text-[13.5px] font-medium mt-0.5" style={{ color: '#2C2825' }}>+91 {user.phone}</dd>
+                        </div>
+                      )}
                       {user.email && (
                         <div>
                           <dt className="font-sans text-[10.5px] font-light" style={{ color: '#A09488' }}>Email</dt>
@@ -664,7 +666,7 @@ export default function ProfilePageClient() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <Field label="First Name" id="firstName" value={firstName} onChange={setFirstName} placeholder="First name" />
                       <Field label="Last Name" id="lastName" value={lastName} onChange={setLastName} placeholder="Last name" />
-                      <Field label="Phone" id="phone" value={user.phone} readOnly />
+                      <Field label="Phone" id="phone" value={user.phone ?? ''} readOnly />
                       <Field label="Email" id="email" value={user.email ?? ''} readOnly />
                     </div>
                   </div>

@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuthStore } from '@/lib/stores/authStore'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { getWebsiteOrders, type WebsiteOrder } from '@/lib/auth/api'
 
 function formatDate(iso: string) {
@@ -44,25 +45,17 @@ function PaymentStatusBadge({ status }: { status: WebsiteOrder['payment']['statu
 
 export default function OrderListClient() {
   const router = useRouter()
-  const pathname = usePathname()
   const hydrated = useAuthStore(s => s.hydrated)
-  const accessToken = useAuthStore(s => s.accessToken)
+  const signedIn = useRequireAuth()
   const [orders, setOrders] = useState<WebsiteOrder[]>([])
   const [totalCount, setTotalCount] = useState(0)
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Auth gate — wait for SessionRestorer to finish hydrating the store,
-  // then either proceed or redirect to login.
-  useEffect(() => {
-    if (!hydrated) return
-    if (!accessToken) router.replace(`/login?return=${pathname}`)
-  }, [hydrated, accessToken, router, pathname])
-
   // Fetch orders once auth is confirmed
   useEffect(() => {
-    if (!hydrated || !accessToken) return
+    if (!signedIn) return
     setLoading(true)
     setError(null)
     getWebsiteOrders(page, 10)
@@ -74,7 +67,7 @@ export default function OrderListClient() {
         setError(err.message ?? 'Failed to load orders')
       })
       .finally(() => setLoading(false))
-  }, [hydrated, accessToken, page])
+  }, [signedIn, page])
 
   if (!hydrated || loading) {
     return (

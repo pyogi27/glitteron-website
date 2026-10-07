@@ -5,7 +5,7 @@ import { absoluteUrl } from '@/lib/site'
  * Only paths that must never be *fetched*.
  *
  * The account and transactional pages (`/cart`, `/login`, `/checkout`,
- * `/profile`, `/orders`, `/signup`, `/reset-password`, `/forgot-password`) used
+ * `/profile`, `/orders`, `/signup`) used
  * to be listed here too, and that was the wrong tool: they each already send
  * `<meta name="robots" content="noindex">`, and a crawler that is disallowed
  * can never read it. The header links to `/login`, `/signup` and `/profile`, so

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { ClerkProvider } from '@clerk/nextjs'
 import { Newsreader, Jost } from 'next/font/google'
 import './globals.css'
 import Header from '@/components/layout/Header'
@@ -60,19 +61,38 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image', title: TITLE, description: DESCRIPTION },
 }
 
+// Brand palette for every Clerk screen (sign-in, sign-up, password reset).
+const CLERK_APPEARANCE = {
+  variables: {
+    colorPrimary: '#C4714A',
+    colorPrimaryForeground: '#EDE8E0',
+    colorBackground: '#F5F1EB',
+    colorForeground: '#1A1210',
+    colorMutedForeground: '#A09488',
+    colorInput: '#FFFFFF',
+    colorInputForeground: '#2C2825',
+    colorDanger: '#C4714A',
+    fontFamily: 'var(--font-jost)',
+    borderRadius: '0.5rem',
+  },
+}
+
 // Next already emits a high-priority preload for the hero <video poster>, so no
 // manual <link rel="preload"> is needed in <head>.
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-IN" className={`${newsreader.variable} ${jost.variable}`}>
       <body className="bg-white text-dark font-sans font-light leading-relaxed overflow-x-hidden" suppressHydrationWarning>
-        <SessionRestorer />
-        <CustomCursor />
-        <GrainOverlay />
-        <NewsletterPopup />
-        <Header />
-        <main>{children}</main>
-        <Footer />
+        {/* Inside <body>, not around <html>, per Clerk's App Router setup. */}
+        <ClerkProvider signInUrl="/login" signUpUrl="/signup" appearance={CLERK_APPEARANCE}>
+          <SessionRestorer />
+          <CustomCursor />
+          <GrainOverlay />
+          <NewsletterPopup />
+          <Header />
+          <main>{children}</main>
+          <Footer />
+        </ClerkProvider>
       </body>
     </html>
   )

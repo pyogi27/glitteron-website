@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuthStore } from '@/lib/stores/authStore'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { useCartStore } from '@/lib/stores/cartStore'
 import {
   createCheckout,
@@ -36,14 +37,13 @@ const EMPTY_ADDRESS: AddressFormData = {
 
 export default function CheckoutClient() {
   const router = useRouter()
-  const pathname = usePathname()
   const { user } = useAuthStore()
   const { items, clearCart } = useCartStore()
 
   const [address, setAddress] = useState<AddressFormData>(EMPTY_ADDRESS)
   const [loading, setLoading] = useState<LoadingState>(null)
   const [error, setError] = useState<string | null>(null)
-  const [authChecked, setAuthChecked] = useState(false)
+  const authChecked = useRequireAuth()
 
   // Server cart totals (live prices + pre-computed GST/shipping)
   const [serverCart, setServerCart] = useState<WebsiteCartSummary | null>(null)
@@ -54,17 +54,6 @@ export default function CheckoutClient() {
   const [shippingAvailable, setShippingAvailable] = useState(true)
   const [shippingLoading, setShippingLoading] = useState(false)
 
-  // Auth gate — wait up to 600ms for SessionRestorer to hydrate the store
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (!useAuthStore.getState().accessToken) {
-        router.replace(`/login?return=${pathname}`)
-      } else {
-        setAuthChecked(true)
-      }
-    }, 600)
-    return () => clearTimeout(timeout)
-  }, [router, pathname])
 
   // Pre-fill address from user profile
   useEffect(() => {
