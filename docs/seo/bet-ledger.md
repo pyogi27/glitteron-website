@@ -8,7 +8,7 @@ One line per bet. Never delete a row; a closed bet stays as evidence.
 
 | Term | Thesis (one line) | Opened | Seed PR | Verdict | Verdict date |
 |------|-------------------|--------|---------|---------|--------------|
-| _(none yet)_ | | | | | |
+| `acrylic chandelier` | Query already gets 15 impressions/90d at position 8.5 with zero dedicated content; an honest acrylic-vs-glass buying guide (we stock no acrylic — CTA routes to hand-blown glass) captures the intent without fabricating inventory. | 2026-09-28 | (opens with this run) | OPEN | |
 
 **Verdict values:** `OPEN` · `SCALE` · `LEAVE` · `EXTENDED` (one borderline extension only —
 a second borderline is a `LEAVE`).

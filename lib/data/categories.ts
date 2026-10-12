@@ -122,7 +122,7 @@ export const categories: LightCategory[] = [
           'Yes — free shipping on every order anywhere in India, with no minimum order value. Delivery is 5 to 7 days from dispatch by registered courier, tracked by email.',
       },
     ],
-    guides: ['what-size-chandelier', 'how-high-to-hang-a-dining-light'],
+    guides: ['what-size-chandelier', 'how-high-to-hang-a-dining-light', 'acrylic-vs-glass-chandeliers'],
     rooms: ['living-room', 'dining-room'],
     priceBands: [
       {
