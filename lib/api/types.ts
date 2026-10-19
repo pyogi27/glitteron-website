@@ -62,6 +62,11 @@ export interface ApiProduct {
   badge?: "new" | "sale" | "best";
   originalPrice?: number | string;
   discount?: number | string;
+  // Website discounts (backend adds these for website requests only). discountedPrice
+  // is what the shopper pays per unit before GST; compareAtPrice is the list price.
+  compareAtPrice?: number | string | null;
+  discountedPrice?: number | string | null;
+  discountLabel?: string | null;
 }
 
 /**
@@ -96,6 +101,9 @@ export interface ApiVariation {
   mainImage?: string | null;
   additionalImages?: string[] | null;
   lightOnImage?: string | null;
+  // Website discounts, as on ApiProduct.
+  compareAtPrice?: number | string | null;
+  discountedPrice?: number | string | null;
 }
 
 export interface ApiReview {

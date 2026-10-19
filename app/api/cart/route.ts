@@ -3,7 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 const BACKEND = process.env.API_URL ?? 'http://localhost:3000';
 
 async function proxyRequest(req: NextRequest): Promise<NextResponse> {
-  const url = `${BACKEND}/api/v1/cart`;
+  // Forward the query string: GET /api/v1/cart?pincode= prices courier for that pincode.
+  const searchParams = req.nextUrl.searchParams.toString();
+  const url = `${BACKEND}/api/v1/cart${searchParams ? `?${searchParams}` : ''}`;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',

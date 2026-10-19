@@ -155,7 +155,18 @@ export function toSyncable(items: CartItem[]): SyncableItem[] {
  * Returns the diff that was applied so callers can tell "nothing needed doing" from
  * "wrote successfully" without another round trip.
  */
-export async function syncCartToServer(items: CartItem[]): Promise<CartDiff> {
+// One sync at a time. Two overlapping syncs both read the server cart before either
+// writes, then both add the same missing lines — and AddToCart INCREMENTS, so the
+// server (which is what checkout charges) ends up with double the quantity.
+let syncQueue: Promise<unknown> = Promise.resolve()
+
+export function syncCartToServer(items: CartItem[]): Promise<CartDiff> {
+  const run = syncQueue.then(() => syncNow(items), () => syncNow(items))
+  syncQueue = run.catch(() => undefined) // a failed sync must not block the next one
+  return run
+}
+
+async function syncNow(items: CartItem[]): Promise<CartDiff> {
   const local = toSyncable(items)
   const { items: server } = await getServerCart()
   const diff = computeCartDiff(local, server)

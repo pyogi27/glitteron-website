@@ -13,6 +13,8 @@ interface RazorpayOptions {
   name: string
   description: string
   order_id: string
+  /** Seconds until Checkout closes itself (Razorpay `timeout` option). */
+  timeout?: number
   prefill?: { name?: string; contact?: string; email?: string }
   theme?: { color?: string }
   handler: (response: RazorpayPaymentResponse) => void

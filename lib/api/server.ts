@@ -1,4 +1,4 @@
-import type { Product } from "@/lib/types";
+import type { Product, ProductVariation } from "@/lib/types";
 import { availableStock, DEFAULT_MAX_QTY, mapVariations } from "@/lib/variations";
 import { sanitizeKeyFeatures } from "@/lib/keyFeatures";
 import { slugify } from "./slug";
@@ -15,7 +15,9 @@ import type {
   ApiCategory,
   ApiProduct,
   ApiProductDetail,
+  ApiVariation,
 } from "./types";
+import { displayPrice } from "@/lib/pricing";
 
 const BACKEND = process.env.API_URL ?? "http://localhost:3000";
 
@@ -172,9 +174,11 @@ export function mapApiProduct(p: ApiProduct, categoryName?: string): Product {
     subtitle: p.description ?? "",
     category: resolvedCategory,
     badge: p.badge,
-    price: toNumber(p.price),
-    originalPrice: p.originalPrice != null ? toNumber(p.originalPrice) : undefined,
-    discount: p.discount != null ? toNumber(p.discount) : undefined,
+    // A website discount from the backend wins over manually authored fields.
+    ...displayPrice(toNumber(p.price), p, {
+      originalPrice: p.originalPrice != null ? toNumber(p.originalPrice) : undefined,
+      discount: p.discount != null ? toNumber(p.discount) : undefined,
+    }),
     rating: toNumber(p.rating),
     reviewCount: toNumber(p.reviewCount),
     sku: p.sku ?? "",
@@ -547,6 +551,18 @@ function mapVariants(p: ApiProductDetail): Product["variants"] {
   return { sizes, finishes, crystalTones };
 }
 
+/**
+ * Apply website discounts to mapped variations. Kept here, not in mapVariation, because
+ * lib/variations.ts is loaded directly by node's test runner and can't import siblings.
+ */
+function withVariationDiscounts(mapped: ProductVariation[], rows: ApiVariation[] | undefined): ProductVariation[] {
+  const byId = new Map((rows ?? []).map((r) => [r.id, r]));
+  return mapped.map((v) => {
+    const row = byId.get(v.id);
+    return row ? { ...v, ...displayPrice(v.price, row) } : v;
+  });
+}
+
 // Fetch single product by ID with variations and specs
 export async function fetchProductById(id: number): Promise<Product | null> {
   // includeVariations is passed explicitly: the backend's default is the boolean `true`
@@ -598,7 +614,7 @@ export async function fetchProductById(id: number): Promise<Product | null> {
       images: mergedImages,
       specs: Object.keys(authoredSpecs).length > 0 ? authoredSpecs : product.specs,
       variants: mappedVariants,
-      variations: mapVariations(productData.variations),
+      variations: withVariationDiscounts(mapVariations(productData.variations), productData.variations),
       reviews,
       whereUsed: productData.whereUsed,
       keyFeatures: sanitizeKeyFeatures(productData.keyFeatures) ?? undefined,

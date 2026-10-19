@@ -143,28 +143,72 @@ export interface WebsiteCartItem {
   productId: number
   productVariationId: number | null
   quantity: number
+  /** List unit price. */
   livePrice: number
+  /** What this line costs after discounts, before GST. */
   lineTotal: number
+  compareAtPrice?: number
+  /** Unit price after discounts, before GST. */
+  discountedPrice?: number
+  /** e.g. "20% off", or null. */
+  discountLabel?: string | null
   product: { id: number; name: string; mainImage: string }
   variation: { id: number; name: string; color: string; size: string } | null
 }
 
+/** A discount that changed the price, as the backend's pricing engine reports it. */
+export interface AppliedDiscount {
+  id: number
+  name: string
+  code: string | null
+  type: 'percentage' | 'free_shipping'
+  value: number | null
+  amount: number
+}
+
+/**
+ * GET /api/v1/cart (and POST /cart/coupon/validate). Every total is what checkout will
+ * charge: `subtotal` is after discounts and before GST.
+ */
 export interface WebsiteCartSummary {
   success: true
   items: WebsiteCartItem[]
+  /** Before any discount. */
+  listSubtotal?: number
+  discountTotal?: number
   subtotal: number
   gstRate: number
   gstAmount: number
+  /** Charged; 0 when waived by a free-shipping discount. */
   courierCharges: number
+  courierWaived?: number
   finalTotal: number
+  appliedDiscounts?: AppliedDiscount[]
+  couponCode?: string | null
 }
 
 export const getServerCart = () =>
   authedFetch<{ success: true; items: ServerCartItem[] }>('/api/cart')
 
-/** Get cart with live prices and pre-computed totals (uses user's saved zipCode for shipping) */
-export const getWebsiteCart = () =>
-  authedFetch<WebsiteCartSummary>('/api/website/cart')
+/**
+ * Cart with live prices, discounts and pre-computed totals. Courier is priced for
+ * `pincode`, else the user's saved zipCode.
+ *
+ * Was '/api/website/cart', a path no backend serves: it always 404'd and every page
+ * silently fell back to totals computed in the browser (no shipping, no discounts).
+ */
+export const getWebsiteCart = (pincode?: string) =>
+  authedFetch<WebsiteCartSummary>(`/api/cart${pincode ? `?pincode=${encodeURIComponent(pincode)}` : ''}`)
+
+/**
+ * Prices the cart with a coupon code (preview only; checkout re-validates). Rejects with
+ * { status: 400, message } when the code can't be applied, 429 when tried too often.
+ */
+export const validateCoupon = (code: string, zipCode?: string) =>
+  authedFetch<WebsiteCartSummary>('/api/cart/coupon/validate', {
+    method: 'POST',
+    body: JSON.stringify({ code, ...(zipCode ? { zipCode } : {}) }),
+  })
 
 /**
  * Add a line to the server cart.
@@ -220,7 +264,7 @@ export interface ShippingRateResponse {
 /** Fetch shipping charges for a given pincode (omit pincode to use user's saved zipCode) */
 export const getShippingRate = (pincode?: string) =>
   authedFetch<ShippingRateResponse>(
-    `/api/website/cart/shipping${pincode ? `?pincode=${pincode}` : ''}`
+    `/api/cart/shipping${pincode ? `?pincode=${encodeURIComponent(pincode)}` : ''}`
   )
 
 // ─── Payments ─────────────────────────────────────────────────────────────────
@@ -232,10 +276,21 @@ export interface ShippingAddress {
   zipCode: string
 }
 
-export const createCheckout = (shippingAddress: ShippingAddress) =>
-  authedFetch<{ success: true; razorpayOrderId: string; amount: number; currency: string }>('/api/payments/checkout', {
+/**
+ * Creates the Razorpay order. Rejects with status 409 when `couponCode` no longer applies
+ * (expired or used up since the preview): re-price without it and ask again.
+ */
+export const createCheckout = (shippingAddress: ShippingAddress, couponCode?: string | null) =>
+  authedFetch<{
+    success: true
+    razorpayOrderId: string
+    amount: number
+    currency: string
+    /** ISO time the server stops holding stock for this order; a later payment is refunded. */
+    reservedUntil?: string
+  }>('/api/payments/checkout', {
     method: 'POST',
-    body: JSON.stringify({ shippingAddress }),
+    body: JSON.stringify({ shippingAddress, ...(couponCode ? { couponCode } : {}) }),
   })
 
 export const verifyPayment = (payload: {
@@ -253,8 +308,11 @@ export const verifyPayment = (payload: {
 export interface WebsiteOrderItem {
   id: number
   quantity: number
+  /** Unit price paid (after discounts). */
   price: string
   total: string
+  /** List unit price; set on orders placed since discounts shipped. */
+  mrp?: string | null
   units?: string
   product: { id: number; name: string; thumbnailImage?: string; mainImage?: string }
   productVariation: { id: number; name: string; color: string; size: string } | null
@@ -270,6 +328,10 @@ export interface WebsiteOrder {
   gstAmount: string
   discount?: string
   discountAmount?: string
+  /** Before discounts, and the discount taken off it (website discounts). */
+  totalMRP?: string | null
+  totalItemDiscount?: string | null
+  couponCode?: string | null
   packagingCharges?: string
   courierCharges?: string
   customerAddress: string

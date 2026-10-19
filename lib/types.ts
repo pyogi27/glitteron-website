@@ -58,6 +58,10 @@ export interface ProductVariation {
   size: string
   color: string
   price: number
+  /** List price, struck through, when a website discount lowers `price`. */
+  originalPrice?: number
+  /** Whole percent saved, when discounted. */
+  discount?: number
   /** Units available to sell: quantity - reservedQuantity, never below 0. */
   stock: number
   /** stock > 0. Derived, so it can never disagree with `stock`. */

@@ -163,7 +163,12 @@ export default function OrderDetailClient() {
                       <p className="text-[12px] text-[#A09488] mt-0.5">Qty: {item.quantity}</p>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="text-[12px] text-[#A09488]">{formatPrice(item.price)} each</p>
+                      <p className="text-[12px] text-[#A09488]">
+                        {item.mrp && parseFloat(item.mrp) > parseFloat(item.price) && (
+                          <span className="mr-1.5 line-through">{formatPrice(item.mrp)}</span>
+                        )}
+                        {formatPrice(item.price)} each
+                      </p>
                       <p className="text-[15px] font-medium text-[#2C2825]">{formatPrice(item.total)}</p>
                     </div>
                   </div>
@@ -175,6 +180,17 @@ export default function OrderDetailClient() {
             <div className="bg-white rounded-[24px] border border-[#D8D0C4] p-5 md:p-8">
               <h2 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#A09488] mb-4">Order Total</h2>
               <div className="space-y-2 text-[13px]">
+                {parseFloat(order.totalItemDiscount ?? '0') > 0 && (
+                  <>
+                    <div className="flex justify-between text-[#A09488]">
+                      <span>Item total</span><span>{formatPrice(order.totalMRP!)}</span>
+                    </div>
+                    <div className="flex justify-between text-green-700">
+                      <span>Discount{order.couponCode ? ` (code ${order.couponCode})` : ''}</span>
+                      <span>−{formatPrice(order.totalItemDiscount!)}</span>
+                    </div>
+                  </>
+                )}
                 <div className="flex justify-between text-[#A09488]">
                   <span>Subtotal</span><span>{formatPrice(order.subtotal)}</span>
                 </div>

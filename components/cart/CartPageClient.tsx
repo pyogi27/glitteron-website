@@ -5,7 +5,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import QuantityControl from '@/components/product/QuantityControl'
-import { useCartStore } from '@/lib/stores/cartStore'
+import { useCartStore, type CartItem } from '@/lib/stores/cartStore'
+import { serverLineFor } from '@/lib/pricing'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { getWebsiteCart, type WebsiteCartSummary } from '@/lib/auth/api'
 import { syncCartToServer, toSyncable } from '@/lib/api/cartSync'
@@ -102,11 +103,27 @@ export default function CartPageClient() {
   const localSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const hasServer = serverCart !== null && serverCart.items.length > 0
 
-  const subtotal = hasServer ? serverCart.subtotal : localSubtotal
+  // Before discounts; the discount row below brings it down to what GST is charged on.
+  const listSubtotal = hasServer ? (serverCart.listSubtotal ?? serverCart.subtotal) : localSubtotal
+  const discountTotal = hasServer ? (serverCart.discountTotal ?? 0) : 0
   const gstRate = hasServer ? serverCart.gstRate : 18
   const gstAmount = hasServer ? serverCart.gstAmount : Math.round(localSubtotal * 0.18)
   const courierCharges = hasServer ? serverCart.courierCharges : 0
   const finalTotal = hasServer ? serverCart.finalTotal : localSubtotal + gstAmount + courierCharges
+
+  /** Unit and line prices for a local line: the server's (after discounts) when it has the line. */
+  const linePrice = (item: CartItem) => {
+    const line = hasServer ? serverLineFor(item, serverCart.items) : undefined
+    if (!line) {
+      return { unit: item.price, listUnit: item.price, total: item.price * item.quantity, label: null }
+    }
+    return {
+      unit: line.discountedPrice ?? line.livePrice,
+      listUnit: line.livePrice,
+      total: line.lineTotal,
+      label: line.discountLabel ?? null,
+    }
+  }
 
   const progress = Math.min(100, (localSubtotal / SHIPPING_THRESHOLD) * 100)
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
@@ -183,7 +200,13 @@ export default function CartPageClient() {
                           </div>
                           <div className="text-right">
                             <div className="text-[10px] uppercase tracking-[0.08em] text-[#A09488]">Unit price</div>
-                            <div className="text-[17px] font-medium text-[#2C2825]">{formatPrice(item.price)}</div>
+                            {linePrice(item).unit < linePrice(item).listUnit && (
+                              <div className="text-[12px] text-[#A09488] line-through">{formatPrice(linePrice(item).listUnit)}</div>
+                            )}
+                            <div className="text-[17px] font-medium text-[#2C2825]">{formatPrice(linePrice(item).unit)}</div>
+                            {linePrice(item).label && (
+                              <div className="text-[11px] font-medium text-green-700">{linePrice(item).label}</div>
+                            )}
                           </div>
                         </div>
 
@@ -197,7 +220,7 @@ export default function CartPageClient() {
                           <div className="flex items-center gap-4">
                             <div className="text-right">
                               <div className="text-[10px] uppercase tracking-[0.08em] text-[#A09488]">Line total</div>
-                              <div className="text-[19px] font-medium text-[#2C2825]">{formatPrice(item.price * item.quantity)}</div>
+                              <div className="text-[19px] font-medium text-[#2C2825]">{formatPrice(linePrice(item).total)}</div>
                             </div>
                             <button
                               type="button"
@@ -249,9 +272,15 @@ export default function CartPageClient() {
                 <span>
                   {summaryLoading
                     ? <span className="text-[#EDE8E0]/40">—</span>
-                    : formatPrice(subtotal)}
+                    : formatPrice(listSubtotal)}
                 </span>
               </div>
+              {!summaryLoading && discountTotal > 0 && (
+                <div className="flex items-center justify-between text-[#C9A84C]">
+                  <span>Discounts</span>
+                  <span>−{formatPrice(discountTotal)}</span>
+                </div>
+              )}
               <div className="flex items-center justify-between text-[#EDE8E0]/80">
                 <span>Shipping</span>
                 <span>

@@ -7,7 +7,9 @@ type RouteContext = { params: Promise<{ proxy: string[] }> };
 async function proxyRequest(req: NextRequest, ctx: RouteContext): Promise<NextResponse> {
   const { proxy } = await ctx.params;
   const path = proxy.join('/');
-  const url = `${BACKEND}/api/v1/cart/${path}`;
+  // Forward the query string (e.g. /shipping?pincode=).
+  const searchParams = req.nextUrl.searchParams.toString();
+  const url = `${BACKEND}/api/v1/cart/${path}${searchParams ? `?${searchParams}` : ''}`;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',

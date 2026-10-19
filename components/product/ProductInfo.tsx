@@ -206,6 +206,9 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
   // server-side, so displaying the parent price here while charging the variation price
   // would just move the surprise to the payment screen.
   const effectivePrice = selectedVariation?.price ?? product.price
+  // The strikethrough follows the same row: a variation's own discount, else the product's.
+  const effectiveOriginal = selectedVariation ? selectedVariation.originalPrice : product.originalPrice
+  const effectiveDiscount = selectedVariation ? selectedVariation.discount : product.discount
 
   const handleAddToCart = () => {
     const added = addItem({
@@ -276,14 +279,14 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
           <span className="font-serif text-[32px] font-light text-[#2C2825]">
             ₹{effectivePrice.toLocaleString('en-IN')}
           </span>
-          {product.originalPrice && (
+          {effectiveOriginal && (
             <span className="text-[15px] text-[#A09488] line-through font-light">
-              ₹{product.originalPrice.toLocaleString('en-IN')}
+              ₹{effectiveOriginal.toLocaleString('en-IN')}
             </span>
           )}
-          {product.discount && (
+          {effectiveDiscount && (
             <span className="text-[11px] text-green-600 bg-green-600/10 px-2 py-0.5 rounded-lg font-medium">
-              Save {product.discount}%
+              Save {effectiveDiscount}%
             </span>
           )}
         </div>

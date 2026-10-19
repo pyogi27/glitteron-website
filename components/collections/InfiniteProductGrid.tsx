@@ -4,6 +4,7 @@ import { Product } from '@/lib/types'
 import { useFilterStore } from '@/lib/stores/filterStore'
 import ProductCard, { EAGER_CARDS } from '@/components/products/ProductCard'
 import { useScrollRestoration } from '@/hooks/useScrollRestoration'
+import { displayPrice } from '@/lib/pricing'
 
 const BATCH_SIZE = 100
 
@@ -80,9 +81,11 @@ function mapRawProduct(p: RawProduct): Product {
     subtitle: typeof p.description === 'string' ? p.description : '',
     category: categoryName,
     badge: (p.badge === 'new' || p.badge === 'sale' || p.badge === 'best') ? p.badge : undefined,
-    price: toNumber(p.price),
-    originalPrice: p.originalPrice != null ? toNumber(p.originalPrice) : undefined,
-    discount: p.discount != null ? toNumber(p.discount) : undefined,
+    // A website discount from the backend wins over manually authored fields.
+    ...displayPrice(toNumber(p.price), p, {
+      originalPrice: p.originalPrice != null ? toNumber(p.originalPrice) : undefined,
+      discount: p.discount != null ? toNumber(p.discount) : undefined,
+    }),
     rating: toNumber(p.rating),
     reviewCount: toNumber(p.reviewCount),
     sku: typeof p.sku === 'string' ? p.sku : '',
