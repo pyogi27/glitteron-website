@@ -14,6 +14,8 @@ export interface Product {
   category: string
   badge?: 'new' | 'sale' | 'best'
   price: number
+  /** Top of the variation price range when variations differ; cards show "From ₹price". */
+  maxPrice?: number
   originalPrice?: number
   discount?: number
   rating: number

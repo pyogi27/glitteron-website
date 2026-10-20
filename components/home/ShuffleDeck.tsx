@@ -3,6 +3,7 @@ import { useRef, useEffect, useCallback, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Product } from '@/lib/types'
+import { formatListingPrice } from '@/lib/pricing'
 
 interface Props { products: Product[] }
 
@@ -278,7 +279,7 @@ export default function ShuffleDeck({ products }: Props) {
             >
               <div className="text-[9px] font-semibold tracking-[0.18em] uppercase text-[#C4714A] mb-1">{product.category}</div>
               <div className="font-serif text-[17px] font-normal text-white leading-[1.2]">{product.name}</div>
-              <div className="text-[13px] text-white/80 mt-1">₹{product.price.toLocaleString('en-IN')}</div>
+              <div className="text-[13px] text-white/80 mt-1">{formatListingPrice(product)}</div>
             </div>
           </Link>
 
@@ -447,7 +448,7 @@ export default function ShuffleDeck({ products }: Props) {
                 >
                   <div className="text-[9px] font-semibold tracking-[0.18em] uppercase text-[#C4714A] mb-1">{product.category}</div>
                   <div className="font-serif text-[18px] font-normal text-white leading-[1.2]">{product.name}</div>
-                  <div className="text-[13px] text-white/80 mt-1">₹{product.price.toLocaleString('en-IN')}</div>
+                  <div className="text-[13px] text-white/80 mt-1">{formatListingPrice(product)}</div>
                 </div>
               </Link>
             )

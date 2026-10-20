@@ -43,6 +43,54 @@ export function displayPrice(listPrice: number, row: SaleFields, fallback: Parti
   return { price: listPrice, ...fallback }
 }
 
+interface Range {
+  min?: number | string | null
+  max?: number | string | null
+}
+
+/** A product row as GET /api/products and /api/products/:id send it. */
+export interface ListingFields extends SaleFields {
+  price?: number | string | null
+  hasVariations?: boolean
+  /** Min/max over the active variations (productController, Product.getPriceRange). */
+  priceRange?: Range | null
+  /** priceRange after website discounts (discounts/listingPrices.js). */
+  discountedPriceRange?: Range | null
+}
+
+export interface ListingPrice extends DisplayPrice {
+  /** Top of the variation price range, set only when variations differ, for "From ₹X". */
+  maxPrice?: number
+}
+
+/**
+ * The price to show for a product on a card or listing.
+ *
+ * A variation product keeps a placeholder parent price (usually 0; 33 of 48 on the
+ * first in-stock page, measured 2026-10-20), so `price` alone rendered "₹0". The real
+ * prices live on the variations and the backend summarises them as `priceRange`.
+ * Mirrors glitteron-prod client/src/utils/priceRange.js.
+ */
+export function listingPrice(row: ListingFields, fallback: Partial<DisplayPrice> = {}): ListingPrice {
+  const min = toNumber(row.priceRange?.min)
+  if (!row.hasVariations || min == null || min <= 0) {
+    return displayPrice(toNumber(row.price) ?? 0, row, fallback)
+  }
+  const saleMin = toNumber(row.discountedPriceRange?.min)
+  const price = saleMin != null && saleMin > 0 && saleMin < min ? saleMin : min
+  const top = toNumber(row.discountedPriceRange?.max) ?? toNumber(row.priceRange?.max)
+  return {
+    price,
+    ...(price < min && { originalPrice: min, discount: Math.max(1, Math.round((1 - price / min) * 100)) }),
+    ...(top != null && top > price && { maxPrice: top }),
+  }
+}
+
+/** "₹41,800", or "From ₹41,800" when the variations span a range. */
+export function formatListingPrice(p: { price: number; maxPrice?: number }): string {
+  return `${p.maxPrice ? 'From ' : ''}₹${p.price.toLocaleString('en-IN')}`
+}
+
 /** The fields a local cart line and a server cart line share. */
 export interface LocalLineKey {
   productId: string

@@ -4,7 +4,7 @@ import { Product } from '@/lib/types'
 import { useFilterStore } from '@/lib/stores/filterStore'
 import ProductCard, { EAGER_CARDS } from '@/components/products/ProductCard'
 import { useScrollRestoration } from '@/hooks/useScrollRestoration'
-import { displayPrice } from '@/lib/pricing'
+import { listingPrice, type ListingFields } from '@/lib/pricing'
 
 const BATCH_SIZE = 100
 
@@ -82,7 +82,7 @@ function mapRawProduct(p: RawProduct): Product {
     category: categoryName,
     badge: (p.badge === 'new' || p.badge === 'sale' || p.badge === 'best') ? p.badge : undefined,
     // A website discount from the backend wins over manually authored fields.
-    ...displayPrice(toNumber(p.price), p, {
+    ...listingPrice(p as ListingFields, {
       originalPrice: p.originalPrice != null ? toNumber(p.originalPrice) : undefined,
       discount: p.discount != null ? toNumber(p.discount) : undefined,
     }),

@@ -1,4 +1,5 @@
 // lib/data/visualizer.ts
+import { listingPrice, type ListingFields } from '@/lib/pricing'
 
 export interface VisualizerProduct {
   id: number
@@ -160,6 +161,8 @@ export async function fetchProductsForRoom(roomType: string): Promise<Visualizer
     id: number
     name: string
     price: string
+    hasVariations?: boolean
+    priceRange?: ListingFields['priceRange']
     category: string
     mainImage: string
     thumbnailImage: string
@@ -185,13 +188,14 @@ export async function fetchProductsForRoom(roomType: string): Promise<Visualizer
         : p.best_seller ? 91
         : p.new_product ? 82
         : 72
+      const { price } = listingPrice(p)
       return {
         id: p.id,
         name: p.name,
         type: [p.materials, p.lightSource].filter(Boolean).join(' · ') || 'Decorative Light',
         category: categoryMap[p.category] ?? p.category ?? 'Pendant Lights',
-        price: `₹ ${Math.round(parseFloat(p.price)).toLocaleString('en-IN')}`,
-        priceValue: parseFloat(p.price),
+        price: `₹ ${Math.round(price).toLocaleString('en-IN')}`,
+        priceValue: price,
         match,
         thumb: p.thumbnailImage || p.mainImage,
         full: p.arImages || p.mainImage,

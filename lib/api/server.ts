@@ -17,7 +17,7 @@ import type {
   ApiProductDetail,
   ApiVariation,
 } from "./types";
-import { displayPrice } from "@/lib/pricing";
+import { displayPrice, listingPrice } from "@/lib/pricing";
 
 const BACKEND = process.env.API_URL ?? "http://localhost:3000";
 
@@ -84,7 +84,7 @@ function copyInput(p: ApiProduct | ApiProductDetail): ProductCopyInput {
     productLength: detail.productLength,
     diameter: detail.diameter,
     weight: detail.weight,
-    price: toNumber(p.price),
+    price: listingPrice(p).price,
     sku: p.sku,
     whereUsed: detail.whereUsed,
     description: p.description,
@@ -175,7 +175,7 @@ export function mapApiProduct(p: ApiProduct, categoryName?: string): Product {
     category: resolvedCategory,
     badge: p.badge,
     // A website discount from the backend wins over manually authored fields.
-    ...displayPrice(toNumber(p.price), p, {
+    ...listingPrice(p, {
       originalPrice: p.originalPrice != null ? toNumber(p.originalPrice) : undefined,
       discount: p.discount != null ? toNumber(p.discount) : undefined,
     }),

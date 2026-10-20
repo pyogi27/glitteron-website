@@ -11,6 +11,7 @@ import ProductReviews from '@/components/product/ProductReviews'
 import RelatedProducts from '@/components/product/RelatedProducts'
 import JsonLd from '@/components/seo/JsonLd'
 import { breadcrumbSchema, productSchema } from '@/lib/seo/schema'
+import { listingPrice } from '@/lib/pricing'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -46,7 +47,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const copy = {
       ...apiProduct,
       categoryName: resolveCategoryName(apiProduct),
-      price: Number(apiProduct.price) || 0,
+      price: listingPrice(apiProduct).price,
     }
     const title = productTitle(copy)
     const description = productMetaDescription(copy)

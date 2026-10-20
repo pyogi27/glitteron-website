@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { Product } from '@/lib/types'
+import { formatListingPrice } from '@/lib/pricing'
 import Badge from '@/components/ui/Badge'
 import StarRating from '@/components/ui/StarRating'
 import { useCartStore } from '@/lib/stores/cartStore'
@@ -123,7 +124,7 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
                 <span className="text-[10px] text-mid-gray ml-1">({product.reviewCount})</span>
               </div>
               <div className="text-[17px] font-medium text-dark flex items-baseline gap-1.5 flex-wrap">
-                ₹{product.price.toLocaleString('en-IN')}
+                {formatListingPrice(product)}
                 {product.originalPrice && (
                   <span className="text-[13px] text-mid-gray line-through font-light ml-1.5">₹{product.originalPrice.toLocaleString('en-IN')}</span>
                 )}
@@ -218,7 +219,7 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
           </div>
           <div className="flex items-center justify-between gap-3">
             <div className={`text-[17px] font-medium flex items-baseline gap-1.5 flex-wrap ${lightOn ? 'text-white' : 'text-[#1A1715]'}`}>
-              ₹{product.price.toLocaleString('en-IN')}
+              {formatListingPrice(product)}
               {product.originalPrice && (
                 <span
                   className="text-[13px] font-light line-through"
@@ -264,7 +265,7 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
               </div>
             )}
             <div className="text-[16px] font-medium text-[#2C2825] mt-1 flex items-baseline gap-1.5 flex-wrap">
-              ₹{product.price.toLocaleString('en-IN')}
+              {formatListingPrice(product)}
               {product.originalPrice && (
                 <span className="text-[13px] text-[#6E655C] line-through font-light">₹{product.originalPrice.toLocaleString('en-IN')}</span>
               )}

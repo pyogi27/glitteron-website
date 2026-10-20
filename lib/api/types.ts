@@ -71,6 +71,10 @@ export interface ApiProduct {
   compareAtPrice?: number | string | null;
   discountedPrice?: number | string | null;
   discountLabel?: string | null;
+  // Min/max over active variations; the parent `price` is a 0 placeholder for most
+  // variation products. See listingPrice() in lib/pricing.ts.
+  priceRange?: { min?: number | string | null; max?: number | string | null } | null;
+  discountedPriceRange?: { min?: number | string | null; max?: number | string | null } | null;
 }
 
 /**
