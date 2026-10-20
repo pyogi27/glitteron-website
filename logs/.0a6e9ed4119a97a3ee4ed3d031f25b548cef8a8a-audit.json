@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 7
+    },
+    "auditLog": "/Users/yogipatel/Documents/GlitterOn Website/glitteron/logs/.0a6e9ed4119a97a3ee4ed3d031f25b548cef8a8a-audit.json",
+    "files": [
+        {
+            "date": 1792509571867,
+            "name": "/Users/yogipatel/Documents/GlitterOn Website/glitteron/logs/app-2026-10-20.log",
+            "hash": "1370142d1de662e2926954bbbe3062ebd1682646ea7d96f0245da7e154a03529"
+        }
+    ],
+    "hashType": "sha256"
+}
