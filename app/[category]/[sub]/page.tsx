@@ -4,6 +4,8 @@ import CollectionView from '@/components/collections/CollectionView'
 import SubPageSeoContent from '@/components/collections/SubPageSeoContent'
 import JsonLd from '@/components/seo/JsonLd'
 import { faqSchema } from '@/lib/seo/schema'
+import { fetchCategories } from '@/lib/api/server'
+import { findCategoryBanner } from '@/lib/api/categoryBanner'
 import {
   bandSlug,
   categories,
@@ -206,6 +208,8 @@ export default async function CategorySubPage({ params, searchParams }: Props) {
   if (!category || !resolved) notFound()
 
   const page = parsePage((await searchParams).page)
+  // A sub page has no backend category of its own, so it shows its parent's banner.
+  const bannerImage = findCategoryBanner(await fetchCategories(), category.name, category.names)
 
   return (
     <>
@@ -213,6 +217,7 @@ export default async function CategorySubPage({ params, searchParams }: Props) {
       <CollectionView
         categoryName={category.name}
         categoryNames={category.names}
+        bannerImage={bannerImage}
         whereUsed={resolved.whereUsed}
         material={resolved.material}
         color={resolved.color}

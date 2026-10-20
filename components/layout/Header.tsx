@@ -8,6 +8,7 @@ import WishlistButton from './WishlistButton'
 import SearchButton, { HeaderSearch } from './SearchButton'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { useClerk } from '@clerk/nextjs'
+import { COMPANY } from '@/lib/company'
 
 // ─── Profile button + dropdown ────────────────────────────────────────────────
 
@@ -250,7 +251,18 @@ export default function Header({ transparent }: HeaderProps) {
           : 'border-b border-warm-gray/40 bg-white/96 backdrop-blur-xl'
       }`}
     >
-      <div className="flex items-center justify-between px-4 md:px-12 h-header">
+      {/* Support strip — inside the fixed header so it shows on every page and
+          the header's total height (--spacing-header) covers both rows. */}
+      <div className="flex items-center justify-between px-4 md:px-12 h-topbar bg-[#1A1210] text-[#EDE8E0] font-sans text-[11px] tracking-[0.08em] uppercase">
+        <Link href="/contact" className="no-underline text-inherit opacity-80 hover:opacity-100 hover:text-gold-light transition-colors">
+          Support Center
+        </Link>
+        <a href={COMPANY.phoneHref} className="no-underline text-inherit opacity-80 hover:opacity-100 hover:text-gold-light transition-colors">
+          <span className="hidden sm:inline">Call us: </span>{COMPANY.phone}
+        </a>
+      </div>
+
+      <div className="flex items-center justify-between px-4 md:px-12 h-header-row">
         <Logo light={isLight} />
 
         <nav className="hidden md:flex items-center gap-9">

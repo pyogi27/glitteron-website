@@ -4,6 +4,8 @@ import CollectionView from '@/components/collections/CollectionView'
 import CategorySeoContent from '@/components/collections/CategorySeoContent'
 import JsonLd from '@/components/seo/JsonLd'
 import { faqSchema } from '@/lib/seo/schema'
+import { fetchCategories } from '@/lib/api/server'
+import { findCategoryBanner } from '@/lib/api/categoryBanner'
 import { categories, getCategoryBySlug } from '@/lib/data/categories'
 import { COLORS, MATERIALS, pickSlugs } from '@/lib/data/filters'
 
@@ -71,6 +73,8 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
   const { page: pageParam, minPrice, maxPrice, material, color } = await searchParams
   const page = parsePage(pageParam)
+  // Same cached fetch CollectionView makes, so no extra request.
+  const bannerImage = findCategoryBanner(await fetchCategories(), cat.name, cat.names)
 
   return (
     <>
@@ -78,6 +82,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       <CollectionView
         categoryName={cat.name}
         categoryNames={cat.names}
+        bannerImage={bannerImage}
         heading={cat.heading}
         subtitle={cat.subtitle}
         page={page}

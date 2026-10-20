@@ -28,6 +28,7 @@ export interface CollectionCategory {
   id?: number
   name: string
   image?: string | null
+  hoverImage?: string | null
 }
 
 interface Props {
@@ -95,6 +96,18 @@ export default function CollectionsSection({ categories = STATIC_CATEGORIES }: P
                 alt={cat.name}
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 [@media(hover:hover)]:group-hover:scale-105"
               />
+              {/* Optional hover image: stacked over the main one and faded in, so no
+                  src swap and no layout shift. Touch devices never match hover:hover,
+                  so they only ever see the main image. alt="" because it is
+                  decorative; the main image carries the name. */}
+              {cat.hoverImage?.trim() && (
+                <img
+                  src={cat.hoverImage.trim()}
+                  alt=""
+                  loading="lazy"
+                  className="absolute inset-0 w-full h-full object-cover opacity-0 transition-[opacity,scale] duration-[400ms,700ms] [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:scale-105"
+                />
+              )}
               {/* Stock photography here ranges from near-black to near-white, so a
                   soft gradient can't guarantee contrast — the label measured
                   1.51:1 over the bright frames. Hold the bottom band opaque

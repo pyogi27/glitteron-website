@@ -43,6 +43,8 @@ interface Props {
   /** Canonical path for the ItemList. */
   listPath: string
   breadcrumb: { name: string; path: string }[]
+  /** Category banner URL; alt text is the category name. Omitted where there is none. */
+  bannerImage?: string
   /** Bottom-of-page copy: category prose, FAQs, internal links. */
   children?: React.ReactNode
 }
@@ -68,6 +70,7 @@ export default async function CollectionView({
   filterPath = '/collections',
   listPath,
   breadcrumb,
+  bannerImage,
   children,
 }: Props) {
   const minPrice = minPriceStr ? Number(minPriceStr) : undefined
@@ -164,6 +167,7 @@ export default async function CollectionView({
       <PageBanner
         title={heading}
         subtitle={subtitle}
+        image={bannerImage ? { src: bannerImage, alt: categoryName ?? heading } : undefined}
         stats={[
           { num: '500+', label: 'Designs' },
           { num: '12K+', label: 'Customers' },

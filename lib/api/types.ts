@@ -4,6 +4,10 @@ export interface ApiCategory {
   description?: string;
   /** Absolute S3 URL, or null when no image has been uploaded. */
   image?: string | null;
+  /** Optional S3 URL the homepage card crossfades to on hover; null when unset. */
+  hoverImage?: string | null;
+  /** Optional wide S3 banner (4:1) shown atop the category's listing page; null when unset. */
+  bannerImage?: string | null;
   productCount?: number;
 }
 

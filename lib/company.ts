@@ -10,9 +10,9 @@ export const COMPANY = {
   name: 'LitMeUp',
   site: 'www.litmeup.in',
   email: 'info@litmeup.in',
-  phone: '+91 99793 40909',
+  phone: '+91 97278 00808',
   /** E.164-ish, for tel: links. */
-  phoneHref: 'tel:+919979340909',
+  phoneHref: 'tel:+919727800808',
   city: 'Surat, Gujarat',
   address:
     '69 Jalaram Industrial Estate, Navjivan Circle, Udhana Magdalla Road, Surat, Gujarat 395007',

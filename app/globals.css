@@ -29,8 +29,10 @@
 
   /* Fixed header height — the stacked logo artwork sets this. Single source of
      truth for every sticky offset and calc(100vh - header) on the site. */
-  --spacing-header: 104px;
-  --spacing-header-ticker: 168px; /* header + TickerStrip */
+  --spacing-topbar: 28px; /* support strip above the nav row */
+  --spacing-header-row: 104px; /* nav row */
+  --spacing-header: 132px; /* topbar + header-row */
+  --spacing-header-ticker: 196px; /* header + TickerStrip */
 
   /* Fonts */
   --font-serif: var(--font-newsreader), "Newsreader", serif;

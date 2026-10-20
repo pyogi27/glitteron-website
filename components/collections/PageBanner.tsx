@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 interface Stat { num: string; label: string }
 interface Props {
   title: string
@@ -5,11 +7,26 @@ interface Props {
   stats: Stat[]
   /** Eyebrow label above the title. Defaults to 'Collections'. */
   eyebrow?: string
+  /** Admin-uploaded category banner, drawn under the fixed header and above the title. */
+  image?: { src: string; alt: string }
 }
 
-export default function PageBanner({ title, subtitle, stats, eyebrow = 'Collections' }: Props) {
+export default function PageBanner({ title, subtitle, stats, eyebrow = 'Collections', image }: Props) {
   return (
     <div className="pt-header bg-[#EDE8E0] text-[#2C2825] pb-12 px-12">
+      {image && (
+        // Phones get 12:5 so exactly the centre 60% the admin guide promises stays in frame.
+        <div className="relative -mx-12 aspect-[12/5] md:aspect-[4/1] overflow-hidden">
+          <Image
+            src={image.src}
+            alt={image.alt}
+            fill
+            preload
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+        </div>
+      )}
       <div className="max-w-[900px] pt-12">
         <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#A85B3B] mb-4">{eyebrow}</div>
         <h1 className="font-serif text-[clamp(36px,5vw,64px)] font-light leading-[1.1] mb-4">{title}</h1>
