@@ -16,6 +16,8 @@ export interface Product {
   price: number
   /** Top of the variation price range when variations differ; cards show "From ₹price". */
   maxPrice?: number
+  /** Buying it means picking a variation, so a card cannot add it straight to the cart. */
+  hasVariations?: boolean
   originalPrice?: number
   discount?: number
   rating: number
