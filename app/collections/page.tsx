@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import CollectionView from '@/components/collections/CollectionView'
+import { fetchCategories } from '@/lib/api/server'
+import { findCategoryBanner } from '@/lib/api/categoryBanner'
 import { categoryPath } from '@/lib/data/categories'
 import { COLORS, MATERIALS, parseSearch, pickSlugs } from '@/lib/data/filters'
 
@@ -85,6 +87,9 @@ export default async function CollectionsPage({ searchParams }: Props) {
   // result sets. Previously this was hardcoded to 1, so every ?page=N returned
   // page 1 — duplicate content behind different URLs.
   const page = parsePage(pageParam)
+  // The toolbar's category tabs land here, so a category view gets its banner too.
+  // Search results keep the plain hero. Same cached fetch CollectionView makes.
+  const bannerImage = category && !search ? findCategoryBanner(await fetchCategories(), category) : undefined
 
   const breadcrumb = category
     ? [
@@ -100,6 +105,7 @@ export default async function CollectionsPage({ searchParams }: Props) {
   return (
     <CollectionView
       categoryName={category}
+      bannerImage={bannerImage}
       search={search}
       heading={search ? `Results for “${search}”` : category ?? 'All Collections'}
       subtitle={
