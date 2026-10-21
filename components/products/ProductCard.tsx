@@ -10,7 +10,7 @@ import { useCartStore } from '@/lib/stores/cartStore'
 import { useWishlistStore } from '@/lib/stores/wishlistStore'
 import { useFilterStore } from '@/lib/stores/filterStore'
 
-/** `deal`: the homepage Deal of the Day card — big discount badge, always-visible labelled button. */
+/** `deal`: the homepage Deal of the Day card — discount as its eyebrow, always-visible labelled button. */
 type CardVariant = 'grid' | 'list' | 'related' | 'deal'
 
 interface ProductCardProps {
@@ -157,7 +157,7 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
   if (variant === 'deal') {
     const href = `/collections/${product.slug}`
     return (
-      <article className="group relative h-full flex flex-col rounded-[20px] overflow-hidden bg-[#FBF8F4] border border-[#C08A3E]/35 shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
+      <article className="group relative h-full flex flex-col rounded-[20px] overflow-hidden bg-[#EDE8E0]">
         <Link href={href} className="flex flex-col flex-1 no-underline cursor-none">
           <div className="relative h-[220px] sm:h-[240px] bg-[#EFE8DE] overflow-hidden">
             <Image
@@ -168,25 +168,22 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
               sizes="240px"
               onError={() => setImgSrc(FALLBACK_IMAGE)}
             />
-            {product.discount ? (
-              <span className="absolute top-3 left-3 z-10 rounded-full bg-[#2E2620] px-3 py-1.5 text-[13px] font-semibold tracking-[0.04em] text-[#F2C46D] shadow-md">
-                –{product.discount}% OFF
-              </span>
-            ) : null}
           </div>
           <div className="flex flex-col flex-1 px-4 pt-3.5 pb-3">
-            {product.category && (
-              <div className="text-[10px] text-[#A8552C] tracking-[0.14em] uppercase font-medium mb-1">{product.category}</div>
+            {/* The discount takes the eyebrow slot: one mention per card, and the price row
+                below fits one line at card width (a wrapped row stretched every card in the
+                rail). #96471F, not clay: 5.35:1 on #EDE8E0 where clay is 4.08:1. */}
+            {(product.discount || product.category) && (
+              <div className="text-[10px] text-[#96471F] tracking-[0.14em] uppercase font-medium mb-1">
+                {product.discount ? `${product.discount}% off` : product.category}
+              </div>
             )}
             <div className="font-serif text-[17px] leading-[1.3] text-[#2C2825] truncate">{product.name}</div>
-            <div className="mt-auto pt-2 text-[16px] font-medium text-[#2C2825] flex items-baseline gap-1.5 flex-wrap">
+            <div className="mt-auto pt-2 text-[18px] font-medium text-[#2C2825] flex items-baseline gap-1.5 flex-wrap">
               {formatListingPrice(product)}
               {product.originalPrice && (
                 <span className="text-[13px] text-[#6E655C] line-through font-light">₹{product.originalPrice.toLocaleString('en-IN')}</span>
               )}
-              {product.discount ? (
-                <span className="text-[10px] text-green-700 bg-green-700/10 px-1.5 py-0.5 rounded-md font-medium">–{product.discount}%</span>
-              ) : null}
             </div>
           </div>
         </Link>
@@ -208,7 +205,7 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
             <Link
               href={href}
               aria-label={`Choose options for ${product.name}`}
-              className="flex h-11 w-full items-center justify-center rounded-full border border-[#2C2825] text-[12px] font-medium uppercase tracking-[0.12em] text-[#2C2825] no-underline cursor-none transition-colors duration-300 hover:bg-[#2C2825] hover:text-[#FBF8F4]"
+              className="flex h-11 w-full items-center justify-center rounded-full border border-[#2C2825] text-[12px] font-medium uppercase tracking-[0.12em] text-[#2C2825] no-underline cursor-none transition-colors duration-300 hover:bg-[#2C2825] hover:text-[#EDE8E0]"
             >
               Choose options
             </Link>
@@ -216,7 +213,7 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
             <button
               onClick={handleAddToCart}
               aria-label={`Add to Cart, ${product.name}`}
-              className="flex h-11 w-full items-center justify-center gap-2 rounded-full border-none bg-[#2C2825] text-[12px] font-medium uppercase tracking-[0.12em] text-[#FBF8F4] cursor-none transition-[background,transform] duration-300 hover:bg-[#A85B3B] active:scale-[0.98]"
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[#2C2825] bg-transparent text-[12px] font-medium uppercase tracking-[0.12em] text-[#2C2825] cursor-none transition-[background,color,transform] duration-300 hover:bg-[#2C2825] hover:text-[#EDE8E0] active:scale-[0.98]"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0" />
