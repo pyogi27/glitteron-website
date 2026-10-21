@@ -7,15 +7,17 @@ import VideoCarousel from '@/components/home/VideoCarousel'
 import StatsDivider from '@/components/home/StatsDivider'
 import RoomGrid from '@/components/home/RoomGrid'
 import PromoBanners from '@/components/home/PromoBanners'
+import DealOfTheDay from '@/components/home/DealOfTheDay'
 import SocialGrid from '@/components/home/SocialGrid'
 import ReviewsSection from '@/components/home/ReviewsSection'
 import NewsletterStrip from '@/components/home/NewsletterStrip'
 import JsonLd from '@/components/seo/JsonLd'
 import { organizationSchema, videoObjectSchema, websiteSchema } from '@/lib/seo/schema'
-import { fetchCategories, fetchFeaturedProducts, fetchProductVideos, fetchProducts } from '@/lib/api/server'
+import { fetchCategories, fetchFeaturedProducts, fetchProductVideos, fetchProducts, mapApiProduct } from '@/lib/api/server'
 import { categoryPath } from '@/lib/data/categories'
 import { listingPrice } from '@/lib/pricing'
 import { promoImageOf, promoValueLine } from '@/lib/promoBanners'
+import { dedupeProducts, selectDealProducts } from '@/lib/dealOfTheDay'
 
 // Moved off the root layout: there it was inherited by every page that did not
 // set its own canonical, so the account and cart pages each named the homepage
@@ -59,13 +61,7 @@ export default async function HomePage() {
   // Dedupe first: /api/products returns the same product more than once in a
   // single page of results (MT3803-2 came back at both index 8 and 16), so
   // slicing alone still repeated cards inside one carousel.
-  const seen = new Set<string>()
-  const catalog = featured.filter(p => {
-    const key = p.slug || String(p.id)
-    if (seen.has(key)) return false
-    seen.add(key)
-    return true
-  })
+  const catalog = dedupeProducts(featured)
 
   // flatMap over the ids, not a sort on the API order: an id the backend drops
   // just yields one fewer card.
@@ -88,6 +84,16 @@ export default async function HomePage() {
     }
   })
 
+  // Deal of the Day draws on what is already fetched: the featured page plus the three
+  // promo categories (~650 products). Only discounted rows are mapped, so the extra
+  // work is proportional to the deals, not the catalogue.
+  // ponytail: categories outside PROMO_BANNERS only contribute via `featured`; fetch
+  // them too if their discounts go missing from the carousel.
+  const deals = selectDealProducts(
+    [...catalog, ...promoProducts.flatMap(r => r.products.filter(p => (listingPrice(p).discount ?? 0) > 0).map(p => mapApiProduct(p)))],
+    catalog,
+  )
+
   // One or two videos read as a broken rail, so a thin (or failed) response
   // drops the section.
   const showVideos = videos.length >= 3
@@ -100,6 +106,7 @@ export default async function HomePage() {
       <HeroSection />
       <CollectionsSection categories={collections.length > 0 ? collections : undefined} />
       <PromoBanners banners={promoBanners} />
+      <DealOfTheDay products={deals} />
       <ProductCarousel titlePrefix="New" titleHighlight="Arrivals" label="Just In" products={newArrivals} />
       {showVideos && videos.map(v => {
         const schema = videoObjectSchema(v)

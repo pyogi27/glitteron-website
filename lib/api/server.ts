@@ -179,6 +179,7 @@ export function mapApiProduct(p: ApiProduct, categoryName?: string): Product {
       originalPrice: p.originalPrice != null ? toNumber(p.originalPrice) : undefined,
       discount: p.discount != null ? toNumber(p.discount) : undefined,
     }),
+    hasVariations: p.hasVariations,
     rating: toNumber(p.rating),
     reviewCount: toNumber(p.reviewCount),
     sku: p.sku ?? "",

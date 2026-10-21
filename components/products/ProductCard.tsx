@@ -10,7 +10,8 @@ import { useCartStore } from '@/lib/stores/cartStore'
 import { useWishlistStore } from '@/lib/stores/wishlistStore'
 import { useFilterStore } from '@/lib/stores/filterStore'
 
-type CardVariant = 'grid' | 'list' | 'related'
+/** `deal`: the homepage Deal of the Day card — discount as its eyebrow, always-visible labelled button. */
+type CardVariant = 'grid' | 'list' | 'related' | 'deal'
 
 interface ProductCardProps {
   product: Product
@@ -145,6 +146,83 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
           </div>
         </div>
       </Link>
+    )
+  }
+
+  // ── Deal variant ──
+  // An <article>, not one big <Link>: the button sits outside the link, so it is a real
+  // button rather than one nested in an <a>, and it is always visible — no hover reveal,
+  // which touch screens cannot trigger.
+  // ponytail: no lights-on layer here; the homepage has no light toggle to drive it.
+  if (variant === 'deal') {
+    const href = `/collections/${product.slug}`
+    return (
+      <article className="group relative h-full flex flex-col rounded-[20px] overflow-hidden bg-[#EDE8E0]">
+        <Link href={href} className="flex flex-col flex-1 no-underline cursor-none">
+          <div className="relative h-[220px] sm:h-[240px] bg-[#EFE8DE] overflow-hidden">
+            <Image
+              src={imgSrc}
+              alt={product.name}
+              fill
+              className="object-cover transition-transform duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.06]"
+              sizes="240px"
+              onError={() => setImgSrc(FALLBACK_IMAGE)}
+            />
+          </div>
+          <div className="flex flex-col flex-1 px-4 pt-3.5 pb-3">
+            {/* The discount takes the eyebrow slot: one mention per card, and the price row
+                below fits one line at card width (a wrapped row stretched every card in the
+                rail). #96471F, not clay: 5.35:1 on #EDE8E0 where clay is 4.08:1. */}
+            {(product.discount || product.category) && (
+              <div className="text-[10px] text-[#96471F] tracking-[0.14em] uppercase font-medium mb-1">
+                {product.discount ? `${product.discount}% off` : product.category}
+              </div>
+            )}
+            <div className="font-serif text-[17px] leading-[1.3] text-[#2C2825] truncate">{product.name}</div>
+            <div className="mt-auto pt-2 text-[18px] font-medium text-[#2C2825] flex items-baseline gap-1.5 flex-wrap">
+              {formatListingPrice(product)}
+              {product.originalPrice && (
+                <span className="text-[13px] text-[#6E655C] line-through font-light">₹{product.originalPrice.toLocaleString('en-IN')}</span>
+              )}
+            </div>
+          </div>
+        </Link>
+
+        <button
+          onClick={handleWishlist}
+          className="absolute top-3 right-3 z-20 border-none w-8 h-8 rounded-full flex items-center justify-center cursor-none shadow-sm bg-[#F5F0EB]/95 transition-[background] duration-300 hover:bg-gold"
+          aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill={isWishlisted ? '#8B5E3C' : 'none'} stroke={isWishlisted ? '#8B5E3C' : '#7A6E62'} strokeWidth="1.8">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+        </button>
+
+        <div className="px-4 pb-4">
+          {/* A variation product has no single price or stock to add: send the shopper
+              to pick one rather than adding a variation they did not choose. */}
+          {product.hasVariations ? (
+            <Link
+              href={href}
+              aria-label={`Choose options for ${product.name}`}
+              className="flex h-11 w-full items-center justify-center rounded-full border border-[#2C2825] text-[12px] font-medium uppercase tracking-[0.12em] text-[#2C2825] no-underline cursor-none transition-colors duration-300 hover:bg-[#2C2825] hover:text-[#EDE8E0]"
+            >
+              Choose options
+            </Link>
+          ) : (
+            <button
+              onClick={handleAddToCart}
+              aria-label={`Add to Cart, ${product.name}`}
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[#2C2825] bg-transparent text-[12px] font-medium uppercase tracking-[0.12em] text-[#2C2825] cursor-none transition-[background,color,transform] duration-300 hover:bg-[#2C2825] hover:text-[#EDE8E0] active:scale-[0.98]"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0" />
+              </svg>
+              Add to Cart
+            </button>
+          )}
+        </div>
+      </article>
     )
   }
 
