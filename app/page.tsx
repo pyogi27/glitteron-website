@@ -6,13 +6,16 @@ import ProductCarousel from '@/components/home/ProductCarousel'
 import VideoCarousel from '@/components/home/VideoCarousel'
 import StatsDivider from '@/components/home/StatsDivider'
 import RoomGrid from '@/components/home/RoomGrid'
-import ShuffleDeck from '@/components/home/ShuffleDeck'
+import PromoBanners from '@/components/home/PromoBanners'
 import SocialGrid from '@/components/home/SocialGrid'
 import ReviewsSection from '@/components/home/ReviewsSection'
 import NewsletterStrip from '@/components/home/NewsletterStrip'
 import JsonLd from '@/components/seo/JsonLd'
 import { organizationSchema, videoObjectSchema, websiteSchema } from '@/lib/seo/schema'
-import { fetchCategories, fetchFeaturedProducts, fetchProductVideos } from '@/lib/api/server'
+import { fetchCategories, fetchFeaturedProducts, fetchProductVideos, fetchProducts } from '@/lib/api/server'
+import { categoryPath } from '@/lib/data/categories'
+import { listingPrice } from '@/lib/pricing'
+import { promoImageOf, promoValueLine } from '@/lib/promoBanners'
 
 // Moved off the root layout: there it was inherited by every page that did not
 // set its own canonical, so the account and cart pages each named the homepage
@@ -23,17 +26,33 @@ export const metadata: Metadata = { alternates: { canonical: '/' } }
 // id: Pendant, Chandelier, Ceiling, Wall, Table, Floor, Bulb.
 const COLLECTION_ORDER = [5, 4, 2, 1, 7, 3, 6]
 
+// Homepage promo banners, by category id: the first is the large one, the next two
+// stack beside it. `name` is only used when /api/categories fails; `valueLine`
+// replaces "Up to N% Off" while no product in the category is discounted.
+const PROMO_BANNERS = [
+  { id: 4, name: 'Chandelier Lights', valueLine: 'Handcrafted statement pieces' },
+  { id: 5, name: 'Pendant Lights', valueLine: 'Warm light over every table' },
+  { id: 1, name: 'Wall Lights', valueLine: 'Soft glow for every wall' },
+]
+
+// One request covers a whole category (273 products at most, measured 2026-10-21),
+// so "Up to N%" is the true maximum rather than the first page's.
+const PROMO_PRODUCT_LIMIT = 500
+
 export default async function HomePage() {
-  const [apiCategories, featured, videos] = await Promise.all([
+  const [apiCategories, featured, videos, promoProducts] = await Promise.all([
     fetchCategories(),
-    // 29 cards are laid out below (8 + 16 + 5) and the API returns duplicates,
+    // 24 cards are laid out below (8 + 16) and the API returns duplicates,
     // so over-fetch to leave room for the dedupe pass.
     fetchFeaturedProducts(45),
     fetchProductVideos(12),
+    // fetchProducts never rejects: a failed request comes back empty, so that
+    // banner shows its value line instead of a discount.
+    Promise.all(PROMO_BANNERS.map(b => fetchProducts({ categoryId: b.id, limit: PROMO_PRODUCT_LIMIT }))),
   ])
 
-  // Three sections used to slice from index 0, so New Arrivals, Bestselling and
-  // the shuffle deck all opened with the same two products. Carve disjoint
+  // Two sections used to slice from index 0, so New Arrivals and Bestselling
+  // both opened with the same products. Carve disjoint
   // windows instead. Slices past the end are empty, which every consumer
   // handles, so a short catalog degrades to fewer cards rather than repeats.
   //
@@ -54,10 +73,23 @@ export default async function HomePage() {
 
   const newArrivals = catalog.slice(0, 8)
   const bestsellers = catalog.slice(8, 24)
-  const curated = catalog.slice(24, 29)
 
-  // Same rule as the shuffle deck: one or two videos read as a broken rail, so a
-  // thin (or failed) response drops the section.
+  const promoBanners = PROMO_BANNERS.map((b, i) => {
+    const category = apiCategories.find(c => Number(c.id) === b.id)
+    const name = category?.name ?? b.name
+    return {
+      id: b.id,
+      name,
+      href: categoryPath(name) ?? `/collections?category=${encodeURIComponent(name)}`,
+      image: promoImageOf(category),
+      // listingPrice is what puts the "-N%" badge on product cards, so the banner
+      // can only quote a discount a shopper will actually find.
+      valueLine: promoValueLine(promoProducts[i].products.map(p => listingPrice(p).discount), b.valueLine),
+    }
+  })
+
+  // One or two videos read as a broken rail, so a thin (or failed) response
+  // drops the section.
   const showVideos = videos.length >= 3
 
   return (
@@ -67,10 +99,7 @@ export default async function HomePage() {
       <TickerStrip />
       <HeroSection />
       <CollectionsSection categories={collections.length > 0 ? collections : undefined} />
-      {/* A deck of one or two cards isn't a deck. Falling back to New Arrivals
-          here would just reintroduce the duplication this split exists to fix,
-          so a thin catalog drops the section instead. */}
-      {curated.length >= 3 && <ShuffleDeck products={curated} />}
+      <PromoBanners banners={promoBanners} />
       <ProductCarousel titlePrefix="New" titleHighlight="Arrivals" label="Just In" products={newArrivals} />
       {showVideos && videos.map(v => {
         const schema = videoObjectSchema(v)

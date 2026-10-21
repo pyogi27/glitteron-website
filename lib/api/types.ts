@@ -8,6 +8,8 @@ export interface ApiCategory {
   hoverImage?: string | null;
   /** Optional wide S3 banner (4:1) shown atop the category's listing page; null when unset. */
   bannerImage?: string | null;
+  /** Optional landscape (~3:2) S3 image for the homepage promo banner; null when unset. */
+  promoImage?: string | null;
   productCount?: number;
 }
 
