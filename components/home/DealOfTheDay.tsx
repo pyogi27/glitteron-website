@@ -4,36 +4,12 @@ import ScrollRail from '@/components/home/ScrollRail'
 import DealCountdown from '@/components/home/DealCountdown'
 import { Product } from '@/lib/types'
 
-// Warm out-of-focus lights behind the section: [left, top, size px, opacity, animation].
-// motion-safe only, so reduced-motion visitors get a still glow.
-const BOKEH = [
-  ['6%', '10%', 220, 0.22, 'motion-safe:animate-flicker1'],
-  ['78%', '4%', 260, 0.18, 'motion-safe:animate-flicker2'],
-  ['42%', '58%', 320, 0.12, 'motion-safe:animate-flicker1'],
-  ['88%', '62%', 140, 0.24, 'motion-safe:animate-flicker2'],
-  ['20%', '70%', 110, 0.2, 'motion-safe:animate-flicker2'],
-  ['62%', '22%', 70, 0.35, 'motion-safe:animate-flicker1'],
-  ['30%', '18%', 46, 0.4, ''],
-  ['70%', '80%', 56, 0.3, ''],
-] as const
-
-/** Homepage Deal of the Day: dark, gold-lit carousel of today's biggest discounts. */
+/** Homepage Deal of the Day: dark carousel of today's biggest discounts. */
 export default function DealOfTheDay({ products }: { products: Product[] }) {
   if (products.length === 0) return null
 
   return (
-    <section aria-labelledby="deal-heading" className="relative isolate overflow-hidden bg-[#14100D] py-[90px] px-4 md:px-12">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(192,138,62,0.3),transparent_62%)]" />
-        {BOKEH.map(([left, top, size, opacity, animation], i) => (
-          <span
-            key={i}
-            className={`absolute rounded-full -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle,#F2C46D_0%,rgba(242,196,109,0.35)_45%,transparent_70%)] ${animation}`}
-            style={{ left, top, width: size, height: size, opacity }}
-          />
-        ))}
-      </div>
-
+    <section aria-labelledby="deal-heading" className="relative overflow-hidden bg-[#14100D] py-[90px] px-4 md:px-12">
       <div className="flex flex-col items-center text-center gap-7 mb-10 md:mb-12">
         <div>
           <div className="flex items-center justify-center gap-3 text-[11px] font-medium tracking-[0.2em] uppercase text-[#D9B27A] mb-4">
