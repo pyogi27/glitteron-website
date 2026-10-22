@@ -24,10 +24,9 @@ const BEIGE = {
 // Text sits on the frosted panel (70% #1A1410 + blur) rather than a scrim. 70% is the floor
 // that keeps every line here AA even when the photo behind the panel is pure white.
 const ON_PHOTO = {
-  // Phones show the photo alone, so all of the copy is md+ only.
+  // Phones keep the photo uncovered and show only the title, in the dark band beneath it.
   eyebrow: 'hidden md:block text-[#F2C4A8]',
-  // sr-only, not hidden: it is the page's only h1, so screen readers and crawlers still get it.
-  title: 'max-md:sr-only',
+  title: 'max-md:text-[28px] max-md:mb-0',
   subtitle: 'hidden md:block text-[#F7F2EC]/85',
   stats: 'hidden md:flex md:gap-4',
   chip: 'bg-[#1A1410]/40 border border-white/15 backdrop-blur-sm px-6 py-4',
@@ -82,8 +81,8 @@ export default function PageBanner({ image, eyebrow = 'Collections', ...copy }: 
           />
         </div>
         {/* No scrim: on md+ the copy sits on its own frosted panel so the photo stays untouched around it.
-            Unpadded on phones, where only the sr-only h1 is left in here. */}
-        <div className="md:p-12">
+            On phones only the title is left in here, below the photo. */}
+        <div className="px-6 py-5 md:p-12">
           <div className="max-w-[900px] md:w-fit md:rounded-3xl md:bg-[#1A1410]/70 md:backdrop-blur-md md:p-10">
             <Copy {...copy} eyebrow={eyebrow} tone={ON_PHOTO} />
           </div>
