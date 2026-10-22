@@ -69,13 +69,14 @@ export default function PageBanner({ image, eyebrow = 'Collections', ...copy }: 
       <div className="relative isolate flex md:min-h-[560px] flex-col md:justify-end overflow-hidden text-[#F7F2EC]">
         {/* aspect-[4/1] reserves the photo's height on phones; md+ turns it into the full-bleed background. */}
         <div className="relative aspect-[4/1] md:absolute md:inset-0 md:-z-10 md:aspect-auto">
-          {/* unoptimized: serve the admin's upload byte-for-byte from S3, never re-encoded or downscaled. */}
+          {/* q=90 (allowed in next.config): the default 75 visibly softened the banner. Optimized rather than
+              unoptimized so phones get a sized WebP from Next's cache instead of the full S3 original. */}
           <Image
             src={image.src}
             alt={image.alt}
             fill
             preload
-            unoptimized
+            quality={90}
             sizes="100vw"
             className="object-contain md:object-cover object-center"
           />

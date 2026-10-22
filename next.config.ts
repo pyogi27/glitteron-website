@@ -35,6 +35,8 @@ const nextConfig: NextConfig = {
     }))
   },
   images: {
+    // 75 is Next 16's default; 90 is for category banners, which visibly lose detail at 75.
+    qualities: [75, 90],
     remotePatterns: [
       {
         protocol: 'https',
