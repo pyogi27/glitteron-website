@@ -27,7 +27,7 @@ export default function ProductCarousel({ titlePrefix, titleHighlight, label, pr
       <ScrollRail>
         {products.map(p => (
           <div key={p.id} className="flex-none w-[300px] [scroll-snap-align:start]">
-            <ProductCard product={p} />
+            <ProductCard product={p} sizes="300px" />
           </div>
         ))}
       </ScrollRail>
