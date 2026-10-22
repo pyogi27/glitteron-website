@@ -22,6 +22,8 @@ interface ProductCardProps {
    * default, which put the whole download behind layout.
    */
   priority?: boolean
+  /** Grid variant only: override the `sizes` hint when the card is not in a column grid (e.g. a fixed-width rail). */
+  sizes?: string
 }
 
 /**
@@ -31,10 +33,20 @@ interface ProductCardProps {
  */
 export const EAGER_CARDS = 4
 
+// `sizes` hints, matched to each variant's rendered width per breakpoint.
+// List: 38% of the card on phones, capped at 220px.
+const LIST_SIZES = '(min-width: 640px) 220px, 38vw'
+// Deal: fixed-width rail item (DealOfTheDay: w-[220px] md:w-[236px]).
+const DEAL_SIZES = '(min-width: 768px) 236px, 220px'
+// Related: 1 column, 2 from sm, 4 from lg inside max-w-6xl.
+const RELATED_SIZES = '(min-width: 1024px) 270px, (min-width: 640px) 50vw, 100vw'
+// Grid: 2 columns, 3+ from lg (collections, wishlist).
+const GRID_SIZES = '(min-width: 1024px) 33vw, 50vw'
+
 const FALLBACK_IMAGE =
   'https://images.pexels.com/photos/1123262/pexels-photo-1123262.jpeg?auto=compress&cs=tinysrgb&w=800&h=900&fit=crop'
 
-export default function ProductCard({ product, variant = 'grid', priority = false }: ProductCardProps) {
+export default function ProductCard({ product, variant = 'grid', priority = false, sizes }: ProductCardProps) {
   const addItem = useCartStore((s) => s.addItem)
   const { toggle, has } = useWishlistStore()
   const [mounted, setMounted] = useState(false)
@@ -83,19 +95,22 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
     return (
       <Link
         href={`/collections/${product.slug}`}
-        className="group relative rounded-[16px] overflow-hidden flex flex-row h-[180px] no-underline text-dark cursor-none border border-warm-gray bg-white
+        className="group relative rounded-[16px] overflow-hidden flex flex-row no-underline text-dark cursor-none border border-warm-gray bg-white
           transition-[transform,box-shadow,border-color] duration-[450ms] [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]
           hover:-translate-y-[4px] hover:border-gold/40 hover:shadow-card-hover"
       >
-        <div className="relative w-[220px] h-full flex-shrink-0 overflow-hidden bg-offwhite">
+        {/* The ratio sets the row's minimum height (220x180 at full size, as before); the
+            column still stretches if the text runs taller, and object-contain shows the
+            whole photo either way. 38% on phones so the text column keeps room. */}
+        <div className="relative w-[38%] max-w-[220px] aspect-[11/9] flex-shrink-0 overflow-hidden bg-offwhite">
           {product.badge && <Badge variant={product.badge} />}
           <Image
             src={imgSrc}
             alt={product.name}
             fill
-            className={`object-cover transition-[transform,opacity] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.07]
+            className={`object-contain transition-[transform,opacity] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.07]
               ${showLit ? 'opacity-0' : 'opacity-100'}`}
-            sizes="220px"
+            sizes={LIST_SIZES}
             priority={priority}
             onError={() => setImgSrc(FALLBACK_IMAGE)}
           />
@@ -105,14 +120,14 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
               alt=""
               aria-hidden="true"
               fill
-              className={`object-cover transition-[opacity,transform] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]
+              className={`object-contain transition-[opacity,transform] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]
                 group-hover:scale-[1.07] ${showLit ? 'opacity-100' : 'opacity-0'}`}
-              sizes="220px"
+              sizes={LIST_SIZES}
               onError={() => setLitFailed(true)}
             />
           )}
         </div>
-        <div className="flex flex-col flex-1 p-[20px_24px] justify-between">
+        <div className="flex flex-col flex-1 min-w-0 p-4 sm:p-[20px_24px] justify-between">
           <div>
             <div className="text-[10px] text-gold tracking-[0.15em] uppercase font-medium mb-1.5">{product.category}</div>
             <div className="font-serif text-[20px] font-normal leading-[1.3] text-dark mb-1.5">{product.name}</div>
@@ -159,13 +174,13 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
     return (
       <article className="group relative h-full flex flex-col rounded-[20px] overflow-hidden bg-[#EDE8E0]">
         <Link href={href} className="flex flex-col flex-1 no-underline cursor-none">
-          <div className="relative h-[220px] sm:h-[240px] bg-[#EFE8DE] overflow-hidden">
+          <div className="relative aspect-square bg-[#EFE8DE] overflow-hidden">
             <Image
               src={imgSrc}
               alt={product.name}
               fill
-              className="object-cover transition-transform duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.06]"
-              sizes="240px"
+              className="object-contain transition-transform duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.06]"
+              sizes={DEAL_SIZES}
               onError={() => setImgSrc(FALLBACK_IMAGE)}
             />
           </div>
@@ -227,23 +242,23 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
   }
 
   // ── Grid / Related variant ──
-  const imgHeight = variant === 'related' ? 'h-[300px]' : 'h-[240px] sm:h-[360px]'
+  const imgSizes = variant === 'related' ? RELATED_SIZES : sizes ?? GRID_SIZES
 
   return (
     <Link
       href={`/collections/${product.slug}`}
       className="product-card relative no-underline cursor-none block"
     >
-      {/* Image block — fixed height, clips to rounded corners */}
-      <div className={`relative rounded-[20px] overflow-hidden w-full ${imgHeight}`}>
+      {/* Image block — square like the catalogue photos, clips to rounded corners */}
+      <div className="relative rounded-[20px] overflow-hidden w-full aspect-square">
 
         <Image
           src={imgSrc}
           alt={product.name}
           fill
-          className={`product-card-img object-cover transition-[transform,opacity] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]
+          className={`product-card-img object-contain transition-[transform,opacity] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]
             ${showLit ? 'opacity-0' : 'opacity-100'}`}
-          sizes={variant === 'related' ? '(max-width: 768px) 50vw, 25vw' : '(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw'}
+          sizes={imgSizes}
           priority={priority}
           onError={() => setImgSrc(FALLBACK_IMAGE)}
         />
@@ -254,8 +269,8 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
             alt=""
             aria-hidden="true"
             fill
-            className={`product-card-img object-cover transition-[opacity,transform] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] ${showLit ? 'opacity-100' : 'opacity-0'}`}
-            sizes={variant === 'related' ? '(max-width: 768px) 50vw, 25vw' : '(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw'}
+            className={`product-card-img object-contain transition-[opacity,transform] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] ${showLit ? 'opacity-100' : 'opacity-0'}`}
+            sizes={imgSizes}
             onError={() => setLitFailed(true)}
           />
         )}
