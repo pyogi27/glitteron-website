@@ -15,7 +15,8 @@ const BEIGE = {
   eyebrow: 'text-[#A85B3B]',
   title: '',
   subtitle: 'text-[#2C2825]/60',
-  stats: 'flex gap-4',
+  // Wraps rather than scrolling the page sideways on phones narrower than the three chips.
+  stats: 'flex flex-wrap gap-3 md:gap-4',
   chip: 'bg-[#E2DAD0] px-6 py-4',
   num: 'text-[#A85B3B]',
   label: 'text-[#8B7D6E]',
@@ -55,7 +56,7 @@ function Copy({ title, subtitle, stats, eyebrow, tone }: Required<Omit<Props, 'i
 export default function PageBanner({ image, eyebrow = 'Collections', ...copy }: Props) {
   if (!image) {
     return (
-      <div className="pt-header bg-[#EDE8E0] text-[#2C2825] pb-12 px-12">
+      <div className="pt-header bg-[#EDE8E0] text-[#2C2825] pb-12 px-6 md:px-12">
         <div className="max-w-[900px] pt-12">
           <Copy {...copy} eyebrow={eyebrow} tone={BEIGE} />
         </div>
