@@ -17,7 +17,7 @@ const BEIGE = {
   subtitle: 'text-[#2C2825]/60',
   // Wraps rather than scrolling the page sideways on phones narrower than the three chips.
   stats: 'flex flex-wrap gap-3 md:gap-4',
-  chip: 'bg-[#E2DAD0] px-6 py-4',
+  chip: 'bg-[#E2DAD0] px-4 md:px-6 py-4',
   num: 'text-[#A85B3B]',
   label: 'text-[#8B7D6E]',
 }
