@@ -12,6 +12,7 @@ import RelatedProducts from '@/components/product/RelatedProducts'
 import JsonLd from '@/components/seo/JsonLd'
 import { breadcrumbSchema, productSchema } from '@/lib/seo/schema'
 import { listingPrice } from '@/lib/pricing'
+import GoogleReviewsBanner from '@/components/reviews/GoogleReviewsBanner'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -161,6 +162,8 @@ export default async function ProductPage({ params }: Props) {
       </div>
 
       <ProductHero product={product} />
+
+      <GoogleReviewsBanner />
 
       {/* Description and specs sit in the buy column (ProductDetails); reviews run
           full width below. */}

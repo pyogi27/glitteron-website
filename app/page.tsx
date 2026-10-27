@@ -9,7 +9,7 @@ import RoomGrid from '@/components/home/RoomGrid'
 import PromoBanners from '@/components/home/PromoBanners'
 import DealOfTheDay from '@/components/home/DealOfTheDay'
 import SocialGrid from '@/components/home/SocialGrid'
-import ReviewsSection from '@/components/home/ReviewsSection'
+import GoogleReviewsBanner from '@/components/reviews/GoogleReviewsBanner'
 import NewsletterStrip from '@/components/home/NewsletterStrip'
 import JsonLd from '@/components/seo/JsonLd'
 import { organizationSchema, videoObjectSchema, websiteSchema } from '@/lib/seo/schema'
@@ -117,7 +117,7 @@ export default async function HomePage() {
       <ProductCarousel titlePrefix="Bestselling" titleHighlight="Lights" label="Most Loved" products={bestsellers} />
       <RoomGrid />
       <SocialGrid />
-      <ReviewsSection />
+      <GoogleReviewsBanner />
       <NewsletterStrip />
     </>
   )
