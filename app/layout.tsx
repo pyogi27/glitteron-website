@@ -62,18 +62,46 @@ export const metadata: Metadata = {
 }
 
 // Brand palette for every Clerk screen (sign-in, sign-up, password reset).
+// The card is transparent so the form sits straight on the page ground, the
+// way premium stores lay out sign-in. Primary is brand clay (#A85B3B) darkened
+// just enough that it, muted and danger all clear 4.5:1 text contrast on #EDE8E0.
 const CLERK_APPEARANCE = {
   variables: {
-    colorPrimary: '#C4714A',
+    colorPrimary: '#9C5335',
     colorPrimaryForeground: '#EDE8E0',
-    colorBackground: '#F5F1EB',
+    colorBackground: '#EDE8E0',
     colorForeground: '#1A1210',
-    colorMutedForeground: '#A09488',
+    colorMutedForeground: '#5A5249',
     colorInput: '#FFFFFF',
     colorInputForeground: '#2C2825',
-    colorDanger: '#C4714A',
+    colorDanger: '#A0362A',
     fontFamily: 'var(--font-jost)',
     borderRadius: '0.5rem',
+  },
+  elements: {
+    rootBox: { width: '100%' },
+    cardBox: { width: '100%', boxShadow: 'none', border: 'none', background: 'transparent' },
+    card: { background: 'transparent', boxShadow: 'none', border: 'none', paddingInline: 0 },
+    footer: { background: 'transparent' },
+    // The site header already carries the logo.
+    logoBox: { display: 'none' },
+    headerTitle: { fontFamily: 'var(--font-serif)', fontSize: '1.875rem', fontWeight: 400, letterSpacing: '-0.01em' },
+    formFieldInput: { height: '3rem' },
+    socialButtonsBlockButton: { height: '3rem', background: '#FFFFFF' },
+    formButtonPrimary: {
+      height: '3rem',
+      borderRadius: '9999px',
+      fontSize: '0.75rem',
+      fontWeight: 500,
+      letterSpacing: '0.08em',
+      textTransform: 'uppercase',
+      // Flat like the site's CTAs. Clerk's solid-variant rules are [data-*]
+      // qualified, so these match that specificity to win on source order.
+      '&[data-variant="solid"][data-color="primary"]': { boxShadow: 'none' },
+      '&[data-variant="solid"]::after': { display: 'none' },
+      '&[data-variant="solid"][data-color="primary"]:hover': { backgroundColor: '#7E4229' },
+      '&:focus-visible': { outline: '2px solid #2C2825', outlineOffset: '2px' },
+    },
   },
 }
 
