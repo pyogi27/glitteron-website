@@ -6,6 +6,7 @@ import ProductCarousel from '@/components/home/ProductCarousel'
 import VideoCarousel from '@/components/home/VideoCarousel'
 import StatsDivider from '@/components/home/StatsDivider'
 import RoomGrid from '@/components/home/RoomGrid'
+import ConsultationSection from '@/components/home/ConsultationSection'
 import PromoBanners from '@/components/home/PromoBanners'
 import DealOfTheDay from '@/components/home/DealOfTheDay'
 import SocialGrid from '@/components/home/SocialGrid'
@@ -116,6 +117,7 @@ export default async function HomePage() {
       <StatsDivider />
       <ProductCarousel titlePrefix="Bestselling" titleHighlight="Lights" label="Most Loved" products={bestsellers} />
       <RoomGrid />
+      <ConsultationSection />
       <SocialGrid />
       <GoogleReviewsBanner />
       <NewsletterStrip />
