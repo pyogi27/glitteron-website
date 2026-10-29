@@ -723,3 +723,23 @@ html[data-chrome-hidden]:not(:has(:is(.site-header, .collection-toolbar) [aria-e
     gap: 1rem 2.5rem;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Floating WhatsApp button (components/layout/WhatsAppButton.tsx).
+   It is a server component, so stacking is handled here in CSS:
+   - hidden while any modal is open (native <dialog open>, or the custom
+     aria-modal overlays: newsletter popup, gallery lightbox, visualizer);
+   - lifted above the product page's mobile buy bar while that bar is showing.
+   ───────────────────────────────────────────────────────────── */
+.wa-fab {
+  translate: 0 0;
+  transition: translate 0.3s cubic-bezier(0.25, 1, 0.5, 1), scale 0.2s, box-shadow 0.2s;
+}
+body:has(dialog[open], [aria-modal="true"]) .wa-fab {
+  visibility: hidden;
+}
+@media (max-width: 1023.98px) {
+  body:has([data-sticky-buy-bar]:not([aria-hidden="true"])) .wa-fab {
+    translate: 0 -4.5rem;
+  }
+}

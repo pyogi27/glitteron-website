@@ -12,3 +12,6 @@ export function waMeUrl(phone: string, text: string): string {
   if (!/^\d{8,15}$/.test(digits)) throw new Error(`waMeUrl: not a phone number: "${phone}"`)
   return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`
 }
+
+/** Prefilled text for the site-wide chat entry points (floating button, footer link). */
+export const WHATSAPP_MESSAGE = "Hi LitMeUp, I'd like help choosing a light."

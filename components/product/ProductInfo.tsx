@@ -401,6 +401,7 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
           showStickyBar ? 'translate-y-0' : 'translate-y-full'
         }`}
         aria-hidden={!showStickyBar}
+        data-sticky-buy-bar
       >
         <div className="min-w-0">
           <div className="font-serif text-[19px] leading-none text-[#2C2825]">

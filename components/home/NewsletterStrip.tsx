@@ -1,38 +1,8 @@
 'use client'
-import { useState } from 'react'
+import { useNewsletterSignup } from '@/hooks/useNewsletterSignup'
 
 export default function NewsletterStrip() {
-  const [email, setEmail] = useState('')
-  const [submitted, setSubmitted] = useState(false)
-  const [error, setError] = useState('')
-  const [pending, setPending] = useState(false)
-
-  // This used to be `if (email) setSubmitted(true)` — no request at all, so every
-  // visitor was told they had subscribed and nothing was ever stored. Post for
-  // real and report failure honestly; a form that lies is worse than one that
-  // admits it is down.
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email.includes('@')) {
-      setError('Please enter a valid email address.')
-      return
-    }
-    setError('')
-    setPending(true)
-    try {
-      const res = await fetch('/api/website/newsletter/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      })
-      if (!res.ok) throw new Error(String(res.status))
-      setSubmitted(true)
-    } catch {
-      setError("We couldn't sign you up just now. Please try again in a moment.")
-    } finally {
-      setPending(false)
-    }
-  }
+  const { email, setEmail, submitted, error, pending, submit: handleSubmit } = useNewsletterSignup()
 
   return (
     <section className="bg-[#EDE8E0] py-[80px] px-4 md:px-12 text-center">
@@ -47,7 +17,7 @@ export default function NewsletterStrip() {
         </p>
         <div aria-live="polite">
           {submitted ? (
-            <div className="text-[#A8552C] font-serif text-[18px] italic">Thank you for subscribing ✦</div>
+            <div ref={el => el?.focus()} tabIndex={-1} className="text-[#A8552C] font-serif text-[18px] italic outline-none">Thank you for subscribing ✦</div>
           ) : (
             <form onSubmit={handleSubmit} className="max-w-[440px] mx-auto" noValidate>
               <div className="flex gap-3">
@@ -61,7 +31,7 @@ export default function NewsletterStrip() {
                   required
                   aria-invalid={Boolean(error)}
                   aria-describedby={error ? 'newsletter-error' : undefined}
-                  className="flex-1 bg-white border border-[#D8D0C4] text-[#2C2825] placeholder:text-[#6E655C] px-5 py-3.5 rounded-3xl text-[14px] font-light transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A8552C] focus:border-[#A8552C]"
+                  className="min-w-0 flex-1 bg-white border border-[#D8D0C4] text-[#2C2825] placeholder:text-[#6E655C] px-5 py-3.5 rounded-3xl text-[14px] font-light transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A8552C] focus:border-[#A8552C]"
                 />
                 <button type="submit" disabled={pending}
                   className="bg-[#A8552C] text-white border-none px-7 py-3.5 rounded-3xl font-sans text-[12px] font-semibold tracking-[0.08em] uppercase whitespace-nowrap transition-all hover:-translate-y-0.5 hover:bg-[#8B4423] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2C2825] disabled:opacity-60 disabled:translate-y-0">

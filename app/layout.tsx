@@ -4,6 +4,9 @@ import { Newsreader, Jost } from 'next/font/google'
 import './globals.css'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import WhatsAppButton from '@/components/layout/WhatsAppButton'
+import TrustFactors from '@/components/layout/TrustFactors'
+import BrandBanner from '@/components/layout/BrandBanner'
 import CustomCursor from '@/components/ui/CustomCursor'
 import GrainOverlay from '@/components/ui/GrainOverlay'
 import NewsletterPopup from '@/components/ui/NewsletterPopup'
@@ -119,7 +122,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <NewsletterPopup />
           <Header />
           <main>{children}</main>
+          <TrustFactors />
+          <BrandBanner />
           <Footer />
+          <WhatsAppButton />
         </ClerkProvider>
       </body>
     </html>
