@@ -28,7 +28,7 @@ export default function DealCountdown() {
       <span id="deal-timer-label" className="sr-only">Today&apos;s deals end at 11:59:59 PM India time. Time left:</span>
       {/* aria-live="off": a screen reader can read the time on demand but is not
           interrupted every second. */}
-      <div role="timer" aria-live="off" aria-labelledby="deal-timer-label" className="flex items-baseline gap-2 text-[20px] font-light tabular-nums text-white">
+      <div role="timer" aria-live="off" aria-labelledby="deal-timer-label" className="flex items-baseline gap-2 text-[20px] font-normal tabular-nums text-white">
         {parts.map((value, i) => (
           <span key={i}>
             {/* 2ch: the "--" placeholder is narrower than two digits, so without it the

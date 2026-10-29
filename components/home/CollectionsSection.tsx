@@ -70,8 +70,8 @@ export default function CollectionsSection({ categories = STATIC_CATEGORIES }: P
           <p className="text-[11px] font-medium tracking-[0.22em] uppercase text-[#C4714A] mb-4">
             Browse by Style
           </p>
-          <h2 className="font-serif text-[clamp(34px,4.5vw,58px)] font-light leading-[1.1] text-[#2C2825]">
-            Shop by <em className="italic text-[#C4714A]">Collection</em>
+          <h2 className="font-serif text-[clamp(34px,4.5vw,58px)] font-normal leading-[1.1] text-[#2C2825]">
+            Shop by <em className="text-[#C4714A]">Collection</em>
           </h2>
         </div>
 
@@ -115,7 +115,7 @@ export default function CollectionsSection({ categories = STATIC_CATEGORIES }: P
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
               {/* Text */}
               <div className="relative mt-auto p-4 text-white">
-                <p className="font-serif text-[16px] font-light leading-tight">{cat.name}</p>
+                <p className="font-serif text-[16px] font-normal leading-tight">{cat.name}</p>
               </div>
               {/* Hover border */}
               <div className="absolute inset-0 rounded-2xl ring-1 ring-white/0 [@media(hover:hover)]:group-hover:ring-white/30 transition-all duration-300" />

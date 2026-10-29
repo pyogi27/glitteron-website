@@ -15,7 +15,7 @@ export default function SocialGrid() {
       <div className="text-center mb-10">
         {/* was #A09488 = 2.43:1 */}
         <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#5A5249] mb-3">Follow Our World</div>
-        <h2 className="font-serif text-[32px] font-light text-[#2C2825]">@litmeup.in</h2>
+        <h2 className="font-serif text-[32px] font-normal text-[#2C2825]">@litmeup.in</h2>
       </div>
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 max-w-5xl mx-auto">
         {SOCIAL_IMAGES.map((src, i) => (

@@ -21,8 +21,8 @@ export default function DealOfTheDay({ products }: { products: Product[] }) {
               <span className="w-8 h-px bg-[#C4714A] inline-block" />
               Limited Time
             </div>
-            <h2 id="deal-heading" className="font-serif text-[clamp(32px,4vw,52px)] font-light leading-[1.15] text-white">
-              Deal of the <em className="italic">Day</em>
+            <h2 id="deal-heading" className="font-serif text-[clamp(32px,4vw,52px)] font-normal leading-[1.15] text-white">
+              Deal of the <em className="">Day</em>
             </h2>
           </div>
           {/* /collections has no sort-by-discount param yet, so this is the plain listing. */}

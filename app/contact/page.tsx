@@ -104,7 +104,7 @@ export default function ContactPage() {
                 <div className="text-[10px] font-medium tracking-[0.16em] uppercase text-[#8B7D6E] mb-2">
                   {channel.label}
                 </div>
-                <div className="font-serif text-[24px] font-light text-[#2C2825] mb-2.5 leading-tight">
+                <div className="font-serif text-[24px] font-normal text-[#2C2825] mb-2.5 leading-tight">
                   {channel.value}
                 </div>
                 <p className="text-[13px] leading-[1.75] text-[#5C5449]">{channel.note}</p>
@@ -138,7 +138,7 @@ export default function ContactPage() {
             <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#A8552C] mb-4">
               Send A Message
             </div>
-            <h2 className="font-serif text-[clamp(28px,3.4vw,44px)] font-light leading-[1.15] text-[#2C2825] mb-8">
+            <h2 className="font-serif text-[clamp(28px,3.4vw,44px)] font-normal leading-[1.15] text-[#2C2825] mb-8">
               Tell us about the room.
             </h2>
             <ContactForm />
@@ -146,7 +146,7 @@ export default function ContactPage() {
 
           <RevealOnScroll delay={0.15} className="lg:sticky lg:top-24">
             <div className="rounded-2xl bg-[#2C2825] p-8 md:p-9">
-              <h3 className="font-serif text-[26px] font-light text-[#EDE8E0] mb-4">
+              <h3 className="font-serif text-[26px] font-normal text-[#EDE8E0] mb-4">
                 Before you write
               </h3>
               <p className="text-[13.5px] leading-[1.8] text-white/55 mb-7">
@@ -206,7 +206,7 @@ export default function ContactPage() {
             <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#A8552C] mb-4">
               Quick Answers
             </div>
-            <h2 className="font-serif text-[clamp(28px,3.6vw,46px)] font-light leading-[1.15] text-[#2C2825]">
+            <h2 className="font-serif text-[clamp(28px,3.6vw,46px)] font-normal leading-[1.15] text-[#2C2825]">
               Most people ask these first.
             </h2>
           </RevealOnScroll>

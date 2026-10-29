@@ -39,12 +39,12 @@ function Copy({ title, subtitle, stats, eyebrow, tone }: Required<Omit<Props, 'i
   return (
     <>
       <div className={`text-[11px] font-medium tracking-[0.2em] uppercase ${tone.eyebrow} mb-4`}>{eyebrow}</div>
-      <h1 className={`font-serif text-[clamp(36px,5vw,64px)] font-light leading-[1.1] mb-4 ${tone.title}`}>{title}</h1>
-      <p className={`text-[14px] font-light ${tone.subtitle} max-w-[480px] leading-[1.8] mb-10`}>{subtitle}</p>
+      <h1 className={`font-serif text-[clamp(36px,5vw,64px)] font-normal leading-[1.1] mb-4 ${tone.title}`}>{title}</h1>
+      <p className={`text-[14px] font-normal ${tone.subtitle} max-w-[480px] leading-[1.8] mb-10`}>{subtitle}</p>
       <div className={tone.stats}>
         {stats.map(s => (
           <div key={s.label} className={`${tone.chip} rounded-2xl`}>
-            <div className={`font-serif text-[28px] font-light ${tone.num}`}>{s.num}</div>
+            <div className={`font-serif text-[28px] font-normal ${tone.num}`}>{s.num}</div>
             <div className={`text-[10px] font-medium tracking-[0.14em] uppercase ${tone.label} mt-1`}>{s.label}</div>
           </div>
         ))}

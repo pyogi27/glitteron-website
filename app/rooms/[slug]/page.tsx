@@ -115,8 +115,8 @@ export default async function RoomPage({ params }: Props) {
               {room.name}
               <span className="w-8 h-px bg-[#C4714A] inline-block" />
             </div>
-            <h2 className="font-serif text-[clamp(26px,3vw,40px)] font-light leading-[1.2] text-[#2C2825] mb-4 max-w-[520px]">
-              We&rsquo;re still curating pieces for this <em className="italic">space</em>
+            <h2 className="font-serif text-[clamp(26px,3vw,40px)] font-normal leading-[1.2] text-[#2C2825] mb-4 max-w-[520px]">
+              We&rsquo;re still curating pieces for this <em className="">space</em>
             </h2>
             <p className="text-[13px] text-[#A09488] leading-[1.8] max-w-[400px] mb-10">
               New designs are tagged to rooms as they arrive. Meanwhile, explore the

@@ -45,10 +45,10 @@ export default function GuidesPage() {
           <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#D08355] mb-4">
             Guides
           </div>
-          <h1 className="font-serif text-[clamp(38px,5vw,64px)] font-light leading-[1.08] mb-5">
+          <h1 className="font-serif text-[clamp(38px,5vw,64px)] font-normal leading-[1.08] mb-5">
             Lighting, answered with numbers
           </h1>
-          <p className="text-[16px] font-light text-white/60 max-w-[54ch] leading-[1.75]">
+          <p className="text-[16px] font-normal text-white/60 max-w-[54ch] leading-[1.75]">
             What size, how high, how many, which Kelvin. The measurements we give customers on
             the phone, written down so you can measure once and buy once.
           </p>
@@ -69,7 +69,7 @@ export default function GuidesPage() {
                   <div className="text-[10px] font-medium tracking-[0.16em] uppercase text-[#8B7D6E] mb-2.5">
                     {guide.category}
                   </div>
-                  <h2 className="font-serif text-[clamp(22px,2.4vw,30px)] font-light leading-[1.25] text-[#2C2825] mb-3 transition-colors group-hover:text-[#A8552C]">
+                  <h2 className="font-serif text-[clamp(22px,2.4vw,30px)] font-normal leading-[1.25] text-[#2C2825] mb-3 transition-colors group-hover:text-[#A8552C]">
                     {guide.title}
                   </h2>
                   <p className="text-[15px] leading-[1.75] text-[#5C5449] max-w-[62ch]">

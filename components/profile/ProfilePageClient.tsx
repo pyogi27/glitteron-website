@@ -111,7 +111,7 @@ function Field({
         readOnly={readOnly}
         onChange={e => onChange?.(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-lg px-4 py-3 font-sans text-[13px] font-light outline-none transition-all duration-200"
+        className="w-full rounded-lg px-4 py-3 font-sans text-[13px] font-normal outline-none transition-all duration-200"
         style={{
           background: readOnly ? 'rgba(44,40,37,0.04)' : 'rgba(44,40,37,0.06)',
           border: '1px solid rgba(44,40,37,0.15)',
@@ -295,10 +295,10 @@ export default function ProfilePageClient() {
                 <circle cx="12" cy="7" r="4"/>
               </svg>
             </div>
-            <h1 className="font-serif font-light mb-3" style={{ fontSize: '38px', color: '#1A1210', lineHeight: 1.1 }}>
+            <h1 className="font-serif font-normal mb-3" style={{ fontSize: '38px', color: '#1A1210', lineHeight: 1.1 }}>
               Sign in to continue
             </h1>
-            <p className="font-sans text-[13px] font-light leading-[1.7] mb-8" style={{ color: '#A09488' }}>
+            <p className="font-sans text-[13px] font-normal leading-[1.7] mb-8" style={{ color: '#A09488' }}>
               Access your order history, wishlist, and account details.
             </p>
             <Link
@@ -308,7 +308,7 @@ export default function ProfilePageClient() {
             >
               Sign In
             </Link>
-            <p className="mt-5 font-sans text-[12.5px] font-light" style={{ color: '#A09488' }}>
+            <p className="mt-5 font-sans text-[12.5px] font-normal" style={{ color: '#A09488' }}>
               New here?{' '}
               <Link href="/signup" className="font-medium" style={{ color: '#C4714A' }}>Create an account</Link>
             </p>
@@ -380,15 +380,15 @@ export default function ProfilePageClient() {
             {/* Avatar */}
             <div className="flex flex-col items-center text-center mb-6 pb-6 border-b border-[#D8D0C4]">
               <div
-                className="w-16 h-16 rounded-full flex items-center justify-center mb-4 font-serif text-xl font-light"
+                className="w-16 h-16 rounded-full flex items-center justify-center mb-4 font-serif text-xl font-normal"
                 style={{ background: '#C4714A', color: '#EDE8E0' }}
               >
                 {initials}
               </div>
-              <h2 className="font-serif font-light" style={{ fontSize: '24px', color: '#1A1210', lineHeight: 1.1 }}>
+              <h2 className="font-serif font-normal" style={{ fontSize: '24px', color: '#1A1210', lineHeight: 1.1 }}>
                 {fullName}
               </h2>
-              <p className="mt-1 font-sans text-[12.5px] font-light" style={{ color: '#A09488' }}>
+              <p className="mt-1 font-sans text-[12.5px] font-normal" style={{ color: '#A09488' }}>
                 {user.phone ? `+91 ${user.phone}` : user.email}
               </p>
               <p className="mt-1.5 font-sans text-[10px] tracking-[0.1em] uppercase" style={{ color: '#A09488' }}>
@@ -438,10 +438,10 @@ export default function ProfilePageClient() {
                   <p className="font-sans text-[9px] tracking-[0.22em] uppercase mb-2" style={{ color: '#A09488' }}>
                     Your Account
                   </p>
-                  <h1 className="font-serif font-light" style={{ fontSize: 'clamp(32px,3.5vw,48px)', color: '#1A1210', lineHeight: 1.05 }}>
+                  <h1 className="font-serif font-normal" style={{ fontSize: 'clamp(32px,3.5vw,48px)', color: '#1A1210', lineHeight: 1.05 }}>
                     Welcome, {user.firstName}
                   </h1>
-                  <p className="mt-2 font-sans text-[13px] font-light leading-[1.7]" style={{ color: '#A09488' }}>
+                  <p className="mt-2 font-sans text-[13px] font-normal leading-[1.7]" style={{ color: '#A09488' }}>
                     Manage your details, track your orders, and update your preferences below.
                   </p>
                 </div>
@@ -465,18 +465,18 @@ export default function ProfilePageClient() {
                     </div>
                     <dl className="space-y-3">
                       <div>
-                        <dt className="font-sans text-[10.5px] font-light" style={{ color: '#A09488' }}>Full Name</dt>
+                        <dt className="font-sans text-[10.5px] font-normal" style={{ color: '#A09488' }}>Full Name</dt>
                         <dd className="font-sans text-[13.5px] font-medium mt-0.5" style={{ color: '#2C2825' }}>{fullName}</dd>
                       </div>
                       {user.phone && (
                         <div>
-                          <dt className="font-sans text-[10.5px] font-light" style={{ color: '#A09488' }}>Phone</dt>
+                          <dt className="font-sans text-[10.5px] font-normal" style={{ color: '#A09488' }}>Phone</dt>
                           <dd className="font-sans text-[13.5px] font-medium mt-0.5" style={{ color: '#2C2825' }}>+91 {user.phone}</dd>
                         </div>
                       )}
                       {user.email && (
                         <div>
-                          <dt className="font-sans text-[10.5px] font-light" style={{ color: '#A09488' }}>Email</dt>
+                          <dt className="font-sans text-[10.5px] font-normal" style={{ color: '#A09488' }}>Email</dt>
                           <dd className="font-sans text-[13.5px] font-medium mt-0.5" style={{ color: '#2C2825' }}>{user.email}</dd>
                         </div>
                       )}
@@ -499,7 +499,7 @@ export default function ProfilePageClient() {
                       </button>
                     </div>
                     {hasAddress ? (
-                      <address className="not-italic font-sans text-[13.5px] font-light leading-[1.75]" style={{ color: '#2C2825' }}>
+                      <address className="not-italic font-sans text-[13.5px] font-normal leading-[1.75]" style={{ color: '#2C2825' }}>
                         {user.address && <span className="block">{user.address}</span>}
                         {(user.city || user.state) && (
                           <span className="block">
@@ -510,7 +510,7 @@ export default function ProfilePageClient() {
                       </address>
                     ) : (
                       <div className="flex flex-col items-start gap-3">
-                        <p className="font-sans text-[13px] font-light" style={{ color: '#A09488' }}>
+                        <p className="font-sans text-[13px] font-normal" style={{ color: '#A09488' }}>
                           No address saved yet.
                         </p>
                         <button
@@ -529,7 +529,7 @@ export default function ProfilePageClient() {
                 {/* Recent orders preview */}
                 <div className="bg-white rounded-[24px] border border-[#D8D0C4] p-6 md:p-8">
                   <div className="flex items-center justify-between mb-5">
-                    <h3 className="font-serif font-light" style={{ fontSize: '26px', color: '#1A1210', lineHeight: 1.1 }}>
+                    <h3 className="font-serif font-normal" style={{ fontSize: '26px', color: '#1A1210', lineHeight: 1.1 }}>
                       Recent Orders
                     </h3>
                     <button
@@ -560,7 +560,7 @@ export default function ProfilePageClient() {
                       <p className="font-serif text-[22px] leading-[1.1] mb-2" style={{ color: '#2C2825' }}>
                         No orders yet
                       </p>
-                      <p className="font-sans text-[13px] font-light mb-5" style={{ color: '#A09488' }}>
+                      <p className="font-sans text-[13px] font-normal mb-5" style={{ color: '#A09488' }}>
                         Your orders will appear here once you make a purchase.
                       </p>
                       <Link
@@ -589,7 +589,7 @@ export default function ProfilePageClient() {
                   <p className="font-sans text-[9px] tracking-[0.22em] uppercase mb-2" style={{ color: '#A09488' }}>
                     Purchase History
                   </p>
-                  <h1 className="font-serif font-light" style={{ fontSize: 'clamp(30px,3.2vw,44px)', color: '#1A1210', lineHeight: 1.05 }}>
+                  <h1 className="font-serif font-normal" style={{ fontSize: 'clamp(30px,3.2vw,44px)', color: '#1A1210', lineHeight: 1.05 }}>
                     My Orders
                   </h1>
                 </div>
@@ -618,7 +618,7 @@ export default function ProfilePageClient() {
                     <p className="font-serif text-[28px] leading-[1.1] mb-3" style={{ color: '#2C2825' }}>
                       No orders yet
                     </p>
-                    <p className="font-sans text-[13px] font-light mb-6" style={{ color: '#A09488' }}>
+                    <p className="font-sans text-[13px] font-normal mb-6" style={{ color: '#A09488' }}>
                       Browse our handcrafted lighting and place your first order.
                     </p>
                     <Link
@@ -633,7 +633,7 @@ export default function ProfilePageClient() {
 
                 {!ordersLoading && orders.length > 0 && (
                   <>
-                    <p className="font-sans text-[12.5px] font-light mb-5" style={{ color: '#A09488' }}>
+                    <p className="font-sans text-[12.5px] font-normal mb-5" style={{ color: '#A09488' }}>
                       {orders.length} order{orders.length !== 1 ? 's' : ''} total
                     </p>
                     <div className="space-y-3">
@@ -651,7 +651,7 @@ export default function ProfilePageClient() {
                   <p className="font-sans text-[9px] tracking-[0.22em] uppercase mb-2" style={{ color: '#A09488' }}>
                     Account Settings
                   </p>
-                  <h1 className="font-serif font-light" style={{ fontSize: 'clamp(30px,3.2vw,44px)', color: '#1A1210', lineHeight: 1.05 }}>
+                  <h1 className="font-serif font-normal" style={{ fontSize: 'clamp(30px,3.2vw,44px)', color: '#1A1210', lineHeight: 1.05 }}>
                     Edit Profile
                   </h1>
                 </div>
@@ -690,7 +690,7 @@ export default function ProfilePageClient() {
                   {/* Feedback messages */}
                   {saveSuccess && (
                     <div
-                      className="mb-5 rounded-xl px-4 py-3 font-sans text-[12.5px] font-light"
+                      className="mb-5 rounded-xl px-4 py-3 font-sans text-[12.5px] font-normal"
                       style={{ background: 'rgba(34,197,94,0.1)', color: '#15803D' }}
                     >
                       Profile updated successfully.
@@ -698,7 +698,7 @@ export default function ProfilePageClient() {
                   )}
                   {saveError && (
                     <div
-                      className="mb-5 rounded-xl px-4 py-3 font-sans text-[12.5px] font-light"
+                      className="mb-5 rounded-xl px-4 py-3 font-sans text-[12.5px] font-normal"
                       style={{ background: 'rgba(196,113,74,0.08)', color: '#C4714A' }}
                     >
                       {saveError}

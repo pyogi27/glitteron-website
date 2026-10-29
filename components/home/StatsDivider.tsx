@@ -16,7 +16,7 @@ export default function StatsDivider() {
             2.89:1, below the 4.5:1 AA floor. */}
         {stats.map((s, i) => (
           <RevealOnScroll key={s.num} delay={i * 0.1} className="bg-[#E6DFD5] border border-[#CFC5B6] rounded-2xl p-8 text-center">
-            <div className="font-serif text-[clamp(36px,4vw,52px)] font-light text-[#2C2825] leading-none mb-2">{s.num}</div>
+            <div className="font-serif text-[clamp(36px,4vw,52px)] font-normal text-[#2C2825] leading-none mb-2">{s.num}</div>
             <div className="text-[12px] font-medium tracking-[0.16em] uppercase text-[#5A5249]">{s.label}</div>
           </RevealOnScroll>
         ))}

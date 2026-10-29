@@ -66,14 +66,14 @@ export default async function CityPage({ params }: Props) {
       <section className="bg-[#EDE8E0] text-[#2C2825] px-6 md:px-12 pb-20 pt-10">
         <div className="max-w-[760px]">
           {city.intro.map(para => (
-            <p key={para.slice(0, 40)} className="text-[15px] font-light leading-[1.9] text-[#2C2825]/75 mb-5">
+            <p key={para.slice(0, 40)} className="text-[15px] font-normal leading-[1.9] text-[#2C2825]/75 mb-5">
               {para}
             </p>
           ))}
 
           {/* Said plainly, on every city page. The whole point of this URL family
               is that it ranks locally without pretending to a local address. */}
-          <p className="text-[14px] font-light leading-[1.85] text-[#2C2825]/60 border-l-2 border-[#C4714A] pl-5 my-10">
+          <p className="text-[14px] font-normal leading-[1.85] text-[#2C2825]/60 border-l-2 border-[#C4714A] pl-5 my-10">
             LitMeUp has no showroom in {city.name}. Everything is made at, and ships from, our
             workshop in Surat, Gujarat — which is why there is no dealer margin in the price.{' '}
             <Link href="/surat-store" className="text-[#A8552C] no-underline hover:underline">
@@ -82,7 +82,7 @@ export default async function CityPage({ params }: Props) {
             Monday to Saturday, 10am to 7pm.
           </p>
 
-          <h2 className="font-serif text-[clamp(24px,3vw,32px)] font-light leading-[1.2] mt-14 mb-6">
+          <h2 className="font-serif text-[clamp(24px,3vw,32px)] font-normal leading-[1.2] mt-14 mb-6">
             Buying from {city.name} — common questions
           </h2>
           <div className="border-t border-[#D8D0C4]">
@@ -97,7 +97,7 @@ export default async function CityPage({ params }: Props) {
                     +
                   </span>
                 </summary>
-                <p className="text-[14px] font-light leading-[1.85] text-[#2C2825]/70 mt-3 pr-8">
+                <p className="text-[14px] font-normal leading-[1.85] text-[#2C2825]/70 mt-3 pr-8">
                   {faq.answer}
                 </p>
               </details>
@@ -114,7 +114,7 @@ export default async function CityPage({ params }: Props) {
                   <li key={category.slug}>
                     <Link
                       href={`/${category.slug}`}
-                      className="text-[14px] font-light text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
+                      className="text-[14px] font-normal text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
                     >
                       {category.heading}
                     </Link>
@@ -132,7 +132,7 @@ export default async function CityPage({ params }: Props) {
                   <li key={guide.slug}>
                     <Link
                       href={`/guides/${guide.slug}`}
-                      className="text-[14px] font-light text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
+                      className="text-[14px] font-normal text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
                     >
                       {guide.title}
                     </Link>
@@ -141,7 +141,7 @@ export default async function CityPage({ params }: Props) {
                 <li>
                   <Link
                     href="/shipping"
-                    className="text-[14px] font-light text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
+                    className="text-[14px] font-normal text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
                   >
                     Shipping &amp; delivery policy
                   </Link>
@@ -158,7 +158,7 @@ export default async function CityPage({ params }: Props) {
               <li key={other.slug}>
                 <Link
                   href={`/lighting/${other.slug}`}
-                  className="text-[14px] font-light text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
+                  className="text-[14px] font-normal text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
                 >
                   {other.name}
                 </Link>

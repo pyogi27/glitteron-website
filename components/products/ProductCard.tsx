@@ -142,7 +142,7 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
               <div className="text-[17px] font-medium text-dark flex items-baseline gap-1.5 flex-wrap">
                 {formatListingPrice(product)}
                 {product.originalPrice && (
-                  <span className="text-[13px] text-mid-gray line-through font-light ml-1.5">₹{product.originalPrice.toLocaleString('en-IN')}</span>
+                  <span className="text-[13px] text-mid-gray line-through font-normal ml-1.5">₹{product.originalPrice.toLocaleString('en-IN')}</span>
                 )}
                 {product.discount && (
                   <span className="text-[10px] text-green-600 bg-green-600/10 px-1.5 py-0.5 rounded-lg font-medium">–{product.discount}%</span>
@@ -197,7 +197,7 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
             <div className="mt-auto pt-2 text-[18px] font-medium text-[#2C2825] flex items-baseline gap-1.5 flex-wrap">
               {formatListingPrice(product)}
               {product.originalPrice && (
-                <span className="text-[13px] text-[#6E655C] line-through font-light">₹{product.originalPrice.toLocaleString('en-IN')}</span>
+                <span className="text-[13px] text-[#6E655C] line-through font-normal">₹{product.originalPrice.toLocaleString('en-IN')}</span>
               )}
             </div>
           </div>
@@ -315,7 +315,7 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
               {formatListingPrice(product)}
               {product.originalPrice && (
                 <span
-                  className="text-[13px] font-light line-through"
+                  className="text-[13px] font-normal line-through"
                   style={{ color: lightOn ? 'rgba(255,255,255,0.8)' : 'rgba(26,23,21,0.68)' }}
                 >
                   ₹{product.originalPrice.toLocaleString('en-IN')}
@@ -360,7 +360,7 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
             <div className="text-[16px] font-medium text-[#2C2825] mt-1 flex items-baseline gap-1.5 flex-wrap">
               {formatListingPrice(product)}
               {product.originalPrice && (
-                <span className="text-[13px] text-[#6E655C] line-through font-light">₹{product.originalPrice.toLocaleString('en-IN')}</span>
+                <span className="text-[13px] text-[#6E655C] line-through font-normal">₹{product.originalPrice.toLocaleString('en-IN')}</span>
               )}
               {product.discount && (
                 <span className="text-[10px] text-green-700 bg-green-700/10 px-1.5 py-0.5 rounded-md font-medium">–{product.discount}%</span>

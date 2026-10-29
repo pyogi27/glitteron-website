@@ -8,7 +8,7 @@ export default function FooterNewsletter() {
     <div className="max-w-[340px]" aria-live="polite">
       <h3 className="text-[11px] font-semibold tracking-[0.15em] uppercase text-[#2C2825] mb-2.5">Stay Illuminated</h3>
       {submitted ? (
-        <p ref={el => el?.focus()} tabIndex={-1} className="font-serif italic text-[16px] text-[#A8552C] outline-none">Thank you for subscribing ✦</p>
+        <p ref={el => el?.focus()} tabIndex={-1} className="font-serif text-[16px] text-[#A8552C] outline-none">Thank you for subscribing ✦</p>
       ) : (
         <form onSubmit={submit} noValidate>
           <p className="text-[12.5px] text-[#5C5449] leading-[1.6] mb-3">
@@ -25,7 +25,7 @@ export default function FooterNewsletter() {
               required
               aria-invalid={Boolean(error)}
               aria-describedby={error ? 'footer-newsletter-error' : undefined}
-              className="min-w-0 flex-1 bg-white border border-[#D8D0C4] text-[#2C2825] placeholder:text-[#6E655C] px-4 py-2.5 rounded-full text-[13px] font-light transition-colors focus:border-[#A8552C] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A8552C]"
+              className="min-w-0 flex-1 bg-white border border-[#D8D0C4] text-[#2C2825] placeholder:text-[#6E655C] px-4 py-2.5 rounded-full text-[13px] font-normal transition-colors focus:border-[#A8552C] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A8552C]"
             />
             <button
               type="submit"

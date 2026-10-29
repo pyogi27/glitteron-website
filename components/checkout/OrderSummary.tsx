@@ -161,7 +161,7 @@ export default function OrderSummary({
           <span>Shipping</span>
           <span>
             {cartLoading ? (
-              <span className="text-[#EDE8E0]/40 italic text-[11px]">Calculating…</span>
+              <span className="text-[#EDE8E0]/40 text-[11px]">Calculating…</span>
             ) : !shippingAvailable ? (
               <span className="text-[#EDE8E0]/60 text-[11px]">Calculated at delivery</span>
             ) : shipping === 0 ? (

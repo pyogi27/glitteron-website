@@ -88,7 +88,7 @@ export default function GoogleReviewsTicker({ reviews }: { reviews: GoogleReview
               }`}
             >
               <StarRating rating={r.rating} size={14} />
-              <p className="font-serif text-[18px] italic leading-[1.6] text-[#2C2825] mt-4 line-clamp-4">
+              <p className="font-serif text-[18px] leading-[1.6] text-[#2C2825] mt-4 line-clamp-4">
                 &ldquo;{r.text}&rdquo;
               </p>
               <div className="mt-auto pt-5 flex items-center gap-3">

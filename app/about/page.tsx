@@ -100,7 +100,7 @@ export default function AboutPage() {
             <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#A8552C] mb-5">
               Our Story
             </div>
-            <h2 className="font-serif text-[clamp(30px,4vw,52px)] font-light leading-[1.15] text-[#2C2825] mb-6">
+            <h2 className="font-serif text-[clamp(30px,4vw,52px)] font-normal leading-[1.15] text-[#2C2825] mb-6">
               We started because the light was always the last thing anyone thought about.
             </h2>
             <div className="space-y-5 text-[14.5px] leading-[1.85] text-[#5C5449] max-w-[52ch]">
@@ -141,7 +141,7 @@ export default function AboutPage() {
                 />
               </div>
               <div className="absolute -bottom-6 -left-4 md:-left-8 bg-[#2C2825] rounded-2xl px-7 py-6 max-w-[230px]">
-                <div className="font-serif text-[38px] font-light text-[#C4714A] leading-none">10</div>
+                <div className="font-serif text-[38px] font-normal text-[#C4714A] leading-none">10</div>
                 <div className="text-[11px] tracking-[0.14em] uppercase text-white/50 mt-2">
                   Years at the bench
                 </div>
@@ -158,7 +158,7 @@ export default function AboutPage() {
             <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#A8552C] mb-4">
               What We Stand For
             </div>
-            <h2 className="font-serif text-[clamp(28px,3.6vw,46px)] font-light leading-[1.15] text-[#2C2825]">
+            <h2 className="font-serif text-[clamp(28px,3.6vw,46px)] font-normal leading-[1.15] text-[#2C2825]">
               Four rules we have not broken yet.
             </h2>
           </RevealOnScroll>
@@ -185,7 +185,7 @@ export default function AboutPage() {
                     {value.icon}
                   </svg>
                 </span>
-                <h3 className="font-serif text-[24px] font-light text-[#2C2825] mb-3">{value.title}</h3>
+                <h3 className="font-serif text-[24px] font-normal text-[#2C2825] mb-3">{value.title}</h3>
                 <p className="text-[14px] leading-[1.8] text-[#5C5449] max-w-[46ch]">{value.body}</p>
               </RevealOnScroll>
             ))}
@@ -200,7 +200,7 @@ export default function AboutPage() {
             <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#A8552C] mb-4">
               The Long Version
             </div>
-            <h2 className="font-serif text-[clamp(28px,3.6vw,46px)] font-light leading-[1.15] text-[#2C2825]">
+            <h2 className="font-serif text-[clamp(28px,3.6vw,46px)] font-normal leading-[1.15] text-[#2C2825]">
               How we got here.
             </h2>
           </RevealOnScroll>
@@ -213,7 +213,7 @@ export default function AboutPage() {
                   style={{ background: i === 0 ? '#C4714A' : '#D8D0C4' }}
                 />
                 <span className="absolute -top-[3px] left-0 w-[7px] h-[7px] rounded-full bg-[#C4714A]" />
-                <div className="font-serif text-[30px] font-light text-[#C4714A] leading-none mb-3">
+                <div className="font-serif text-[30px] font-normal text-[#C4714A] leading-none mb-3">
                   {item.year}
                 </div>
                 <h3 className="text-[15px] font-medium text-[#2C2825] mb-2.5">{item.title}</h3>
@@ -231,7 +231,7 @@ export default function AboutPage() {
             <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#A8552C] mb-4">
               From Bench To Ceiling
             </div>
-            <h2 className="font-serif text-[clamp(28px,3.6vw,46px)] font-light leading-[1.15] text-[#2C2825]">
+            <h2 className="font-serif text-[clamp(28px,3.6vw,46px)] font-normal leading-[1.15] text-[#2C2825]">
               Four steps, none of them skipped.
             </h2>
           </RevealOnScroll>
@@ -239,7 +239,7 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
             {CRAFT_STEPS.map((s, i) => (
               <RevealOnScroll key={s.step} delay={i * 0.08} className="bg-[#E2DAD0] rounded-2xl p-8 md:p-9">
-                <div className="font-serif text-[46px] font-light text-[#2C2825]/12 leading-none mb-4">{s.step}</div>
+                <div className="font-serif text-[46px] font-normal text-[#2C2825]/12 leading-none mb-4">{s.step}</div>
                 <h3 className="text-[15px] font-medium text-[#2C2825] mb-2.5">{s.title}</h3>
                 <p className="text-[13.5px] leading-[1.75] text-[#5C5449]">{s.body}</p>
               </RevealOnScroll>
@@ -251,7 +251,7 @@ export default function AboutPage() {
       {/* CTA */}
       <section className="bg-[#E2DAD0] py-16 md:py-24 px-4 md:px-12">
         <RevealOnScroll className="max-w-[680px] mx-auto text-center">
-          <h2 className="font-serif text-[clamp(30px,4vw,52px)] font-light leading-[1.15] text-[#2C2825] mb-5">
+          <h2 className="font-serif text-[clamp(30px,4vw,52px)] font-normal leading-[1.15] text-[#2C2825] mb-5">
             Come see what we have been building.
           </h2>
           <p className="text-[14.5px] leading-[1.85] text-[#5C5449] mb-9 max-w-[46ch] mx-auto">

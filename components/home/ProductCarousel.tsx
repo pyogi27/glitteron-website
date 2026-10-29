@@ -14,8 +14,8 @@ export default function ProductCarousel({ titlePrefix, titleHighlight, label, pr
             <span className="w-8 h-px bg-[#C4714A] inline-block" />
             {label}
           </div>
-          <h2 className="font-serif text-[clamp(32px,4vw,52px)] font-light leading-[1.15]">
-            {titlePrefix} <em className="italic">{titleHighlight}</em>
+          <h2 className="font-serif text-[clamp(32px,4vw,52px)] font-normal leading-[1.15]">
+            {titlePrefix} <em className="">{titleHighlight}</em>
           </h2>
         </div>
         {/* opacity-50 on #2C2825 put this link at 2.51:1. A link is the last thing

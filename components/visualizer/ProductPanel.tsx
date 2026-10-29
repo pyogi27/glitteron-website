@@ -54,7 +54,7 @@ export default function ProductPanel() {
       <div className="overflow-y-auto flex-1 px-3 pb-3">
         {products.length === 0 ? (
           <div className="py-6 px-2 text-center">
-            <p className="font-serif text-sm italic text-mid-gray mb-1">
+            <p className="font-serif text-sm text-mid-gray mb-1">
               Upload a room to see matches
             </p>
             <p className="text-[11px] text-warm-gray">AI ranks by style compatibility</p>

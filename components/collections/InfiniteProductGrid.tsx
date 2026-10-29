@@ -230,7 +230,7 @@ function InfiniteProductGridInner({
     <div className="flex-1 p-4 sm:p-8 overflow-visible">
       {sorted.length === 0 && !loading ? (
         <div className="flex flex-col items-center justify-center h-64 text-center">
-          <div className="font-serif text-[24px] font-light text-[#2C2825] mb-3">No products found</div>
+          <div className="font-serif text-[24px] font-normal text-[#2C2825] mb-3">No products found</div>
           <div className="text-[13px] text-[#A09488]">Try adjusting your filters</div>
         </div>
       ) : (

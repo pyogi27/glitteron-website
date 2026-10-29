@@ -65,8 +65,8 @@ export default function PromoBanners({ banners }: Props) {
                   the right half, where the shade fades out. */}
               <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-r from-black/80 via-black/65 via-60% to-black/10" />
               <div className="flex max-w-[58%] flex-col items-start text-white">
-                <h3 className={`font-serif font-light italic leading-[1.05] ${slot.title}`}>{banner.name}</h3>
-                <p className={`mt-2 font-sans font-light tracking-[0.02em] ${slot.line}`}>{banner.valueLine}</p>
+                <h3 className={`font-serif font-normal leading-[1.05] ${slot.title}`}>{banner.name}</h3>
+                <p className={`mt-2 font-sans font-normal tracking-[0.02em] ${slot.line}`}>{banner.valueLine}</p>
                 {/* Styled, not a button: the whole banner is the one link. */}
                 <span className="mt-5 inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-black px-5 py-2.5 font-sans text-[12px] font-medium uppercase tracking-[0.12em] text-white transition-colors duration-300 group-hover:bg-gold-dark">
                   Shop Now <span aria-hidden="true">→</span>

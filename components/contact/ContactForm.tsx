@@ -40,7 +40,7 @@ export function validate(values: FormValues): FieldErrors {
 }
 
 const INPUT_CLASS =
-  'auth-input w-full rounded-lg px-4 py-3 text-[13.5px] font-light bg-[#2C2825]/[0.05] text-[#2C2825]'
+  'auth-input w-full rounded-lg px-4 py-3 text-[13.5px] font-normal bg-[#2C2825]/[0.05] text-[#2C2825]'
 
 function borderFor(hasError: boolean) {
   return { border: `1px solid ${hasError ? 'rgba(196,113,74,0.7)' : 'rgba(44,40,37,0.15)'}` }
@@ -90,7 +90,7 @@ export default function ContactForm() {
             <path d="m20 6-11 11-5-5" />
           </svg>
         </span>
-        <h3 className="font-serif text-[28px] font-light text-[#2C2825] mb-3">Message received.</h3>
+        <h3 className="font-serif text-[28px] font-normal text-[#2C2825] mb-3">Message received.</h3>
         <p className="text-[14px] leading-[1.8] text-[#5C5449] max-w-[38ch] mx-auto mb-7">
           A real person reads every one of these. Expect a reply within one working day.
         </p>

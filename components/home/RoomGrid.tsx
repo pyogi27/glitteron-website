@@ -12,8 +12,8 @@ export default function RoomGrid() {
             <span className="w-8 h-px bg-[#C4714A] inline-block" />
             Shop by Space
           </div>
-          <h2 className="font-serif text-[clamp(32px,4vw,52px)] font-light leading-[1.15]">
-            Light for Every <em className="italic">Room</em>
+          <h2 className="font-serif text-[clamp(32px,4vw,52px)] font-normal leading-[1.15]">
+            Light for Every <em className="">Room</em>
           </h2>
         </div>
         <Link
@@ -80,7 +80,7 @@ export default function RoomGrid() {
                 {room.tag}
               </div>
               <div
-                className="font-serif font-light leading-[1.15] mb-2.5 text-[#EDE8E0]"
+                className="font-serif font-normal leading-[1.15] mb-2.5 text-[#EDE8E0]"
                 style={{ fontSize: i === 0 ? 'clamp(24px, 2.4vw, 36px)' : 'clamp(18px, 1.8vw, 26px)' }}
                 dangerouslySetInnerHTML={{ __html: i === 0 ? room.name.replace(' ', '<br>') : room.name }}
               />
@@ -120,7 +120,7 @@ export default function RoomGrid() {
             <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(26,18,16,0.78) 0%, transparent 60%)' }} />
             <div className="absolute bottom-3 left-4">
               <div className="text-[9px] font-medium tracking-[0.16em] uppercase text-[#E8A87C] mb-0.5">{room.tag}</div>
-              <div className="font-serif text-[16px] font-light text-[#EDE8E0]">{room.name}</div>
+              <div className="font-serif text-[16px] font-normal text-[#EDE8E0]">{room.name}</div>
             </div>
           </Link>
         ))}

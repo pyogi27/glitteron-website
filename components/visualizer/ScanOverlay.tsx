@@ -5,7 +5,7 @@ export default function ScanOverlay() {
   return (
     <div className="absolute inset-0 bg-[rgba(244,241,237,0.74)] backdrop-blur-sm flex flex-col items-center justify-center gap-3 z-40">
       <div className="viz-scan-line" />
-      <p className="font-serif text-lg italic z-10">Reading your space…</p>
+      <p className="font-serif text-lg z-10">Reading your space…</p>
       <p className="text-[10.5px] tracking-[1.5px] uppercase text-mid-gray z-10">
         Detecting ceiling · style · lighting zones
       </p>

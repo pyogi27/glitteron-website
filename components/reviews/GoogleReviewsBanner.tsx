@@ -25,8 +25,8 @@ export default async function GoogleReviewsBanner() {
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-10 md:gap-16 items-center">
         <div>
           <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#C4714A] mb-4">Google Reviews</div>
-          <h2 id="google-reviews-heading" className="font-serif text-[clamp(32px,4vw,48px)] font-light leading-[1.15]">
-            Trusted by <em className="italic">{trustedCountLabel(data.count)}</em> customers
+          <h2 id="google-reviews-heading" className="font-serif text-[clamp(32px,4vw,48px)] font-normal leading-[1.15]">
+            Trusted by <em className="">{trustedCountLabel(data.count)}</em> customers
           </h2>
 
           {/* Places policy: the Google Maps logo, 16–19px tall, with clear space around it. */}

@@ -35,12 +35,12 @@ export default function ProductReviews({ product }: { product: Product }) {
                 {r.title && (
                   <p className="text-[13.5px] font-medium text-[#2C2825] mt-2">{r.title}</p>
                 )}
-                <p className="font-serif text-[16px] italic mt-2 text-[#4A4540] leading-[1.8]">{r.text}</p>
+                <p className="font-serif text-[16px] mt-2 text-[#4A4540] leading-[1.8]">{r.text}</p>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-[13.5px] leading-[1.9] text-[#A09488] italic max-w-prose">
+          <p className="text-[13.5px] leading-[1.9] text-[#A09488] max-w-prose">
             No reviews yet for this piece. If you own it, we&apos;d genuinely like to
             hear how it lives in your room.
           </p>

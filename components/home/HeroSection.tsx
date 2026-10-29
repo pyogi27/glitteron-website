@@ -41,10 +41,10 @@ export default function HeroSection() {
       {/* Content */}
       <div className="relative z-[3] text-center text-white max-w-[760px] px-6">
         <h1
-          className="hero-reveal font-serif text-[clamp(52px,7vw,92px)] font-light leading-[1.05] tracking-[-0.01em] text-balance mb-10"
+          className="hero-reveal font-serif text-[clamp(52px,7vw,92px)] font-normal leading-[1.05] tracking-[-0.01em] text-balance mb-10"
           style={{ '--hero-opacity': 0.78, '--hero-delay': '0.15s' } as React.CSSProperties}
         >
-          Where Light Becomes <em className="italic text-[#F5F0EB]">an Art</em>
+          Where Light Becomes <em className="text-[#F5F0EB]">an Art</em>
           {/* The visible h1 is deliberately atmospheric; this carries the terms
               the page actually ranks for, for crawlers and screen readers. */}
           <span className="sr-only">

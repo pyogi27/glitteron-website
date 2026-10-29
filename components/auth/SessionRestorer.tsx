@@ -46,7 +46,7 @@ export default function SessionRestorer() {
 
   if (!profileError) return null;
   return (
-    <div role="alert" className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[1000] w-[calc(100%-32px)] max-w-[440px] rounded-xl px-5 py-4 shadow-lg font-sans text-[13px] font-light"
+    <div role="alert" className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[1000] w-[calc(100%-32px)] max-w-[440px] rounded-xl px-5 py-4 shadow-lg font-sans text-[13px] font-normal"
       style={{ background: '#1A1210', color: '#EDE8E0' }}>
       <p>{profileError}</p>
       <button

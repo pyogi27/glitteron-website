@@ -40,7 +40,7 @@ export default function ProductDetails({ product }: { product: Product }) {
             ))}
           </dl>
         ) : (
-          <p className="text-[13.5px] leading-[1.9] text-[#A09488] italic">
+          <p className="text-[13.5px] leading-[1.9] text-[#A09488] ">
             Full specifications for this piece aren&apos;t published yet. The size and
             finish options above are accurate, and the SKU will get you an exact answer
             on dimensions and wattage from our team.

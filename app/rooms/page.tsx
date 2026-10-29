@@ -80,7 +80,7 @@ export default async function RoomsPage() {
                   {room.tag}
                 </div>
                 <div
-                  className="font-serif font-light leading-[1.15] mb-2.5 text-[#EDE8E0]"
+                  className="font-serif font-normal leading-[1.15] mb-2.5 text-[#EDE8E0]"
                   style={{ fontSize: i === 0 ? 'clamp(24px, 2.4vw, 36px)' : 'clamp(18px, 1.8vw, 26px)' }}
                 >
                   {room.name}

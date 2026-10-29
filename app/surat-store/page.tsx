@@ -75,7 +75,7 @@ export default function SuratStorePage() {
               <h2 className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#A85B3B] mb-4">
                 Address
               </h2>
-              <address className="not-italic text-[15px] font-light leading-[1.9] text-[#2C2825]/75">
+              <address className="not-italic text-[15px] font-normal leading-[1.9] text-[#2C2825]/75">
                 69 Jalaram Industrial Estate<br />
                 Navjivan Circle, Udhana Magdalla Road<br />
                 Surat, Gujarat 395007<br />
@@ -85,7 +85,7 @@ export default function SuratStorePage() {
                 href={MAP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block mt-4 text-[14px] font-light text-[#A8552C] no-underline hover:underline"
+                className="inline-block mt-4 text-[14px] font-normal text-[#A8552C] no-underline hover:underline"
               >
                 Open in Google Maps
               </a>
@@ -95,11 +95,11 @@ export default function SuratStorePage() {
               <h2 className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#A85B3B] mb-4">
                 Hours &amp; contact
               </h2>
-              <p className="text-[15px] font-light leading-[1.9] text-[#2C2825]/75">
+              <p className="text-[15px] font-normal leading-[1.9] text-[#2C2825]/75">
                 Monday to Saturday, 10am – 7pm<br />
                 Closed Sunday
               </p>
-              <p className="text-[15px] font-light leading-[1.9] text-[#2C2825]/75 mt-3">
+              <p className="text-[15px] font-normal leading-[1.9] text-[#2C2825]/75 mt-3">
                 <a href={COMPANY.phoneHref} className="text-[#A8552C] no-underline hover:underline">
                   {COMPANY.phone}
                 </a>
@@ -111,28 +111,28 @@ export default function SuratStorePage() {
             </div>
           </div>
 
-          <h2 className="font-serif text-[clamp(26px,3.2vw,38px)] font-light leading-[1.2] mb-6">
+          <h2 className="font-serif text-[clamp(26px,3.2vw,38px)] font-normal leading-[1.2] mb-6">
             What you will find here
           </h2>
-          <p className="text-[15px] font-light leading-[1.9] text-[#2C2825]/75 mb-5">
+          <p className="text-[15px] font-normal leading-[1.9] text-[#2C2825]/75 mb-5">
             This is a working workshop rather than a showroom floor, and that is the point.
             Brass is turned and plated here, glass is blown and fitted here, and every fixture
             is assembled and inspected here before it ships. What is on display is what is being
             made.
           </p>
-          <p className="text-[15px] font-light leading-[1.9] text-[#2C2825]/75 mb-5">
+          <p className="text-[15px] font-normal leading-[1.9] text-[#2C2825]/75 mb-5">
             Come for the two decisions photographs are worst at. Finish is one — twelve of them,
             and the difference between antique brass and aged brass is obvious in the hand and
             invisible on a screen. Colour temperature is the other; standing under a 2700K and a
             3500K fixture side by side settles in a minute what a spec sheet never does.
           </p>
-          <p className="text-[15px] font-light leading-[1.9] text-[#2C2825]/75 mb-5">
+          <p className="text-[15px] font-normal leading-[1.9] text-[#2C2825]/75 mb-5">
             Surat is about 265 km from Ahmedabad and 280 km from Mumbai, both an easy drive.
             If you cannot make it, everything here ships free anywhere in India with a 7-day
             return window, so buying unseen is not the risk it sounds like.
           </p>
 
-          <h2 className="font-serif text-[clamp(24px,3vw,32px)] font-light leading-[1.2] mt-14 mb-6">
+          <h2 className="font-serif text-[clamp(24px,3vw,32px)] font-normal leading-[1.2] mt-14 mb-6">
             Visiting — common questions
           </h2>
           <div className="border-t border-[#D8D0C4]">
@@ -147,7 +147,7 @@ export default function SuratStorePage() {
                     +
                   </span>
                 </summary>
-                <p className="text-[14px] font-light leading-[1.85] text-[#2C2825]/70 mt-3 pr-8">
+                <p className="text-[14px] font-normal leading-[1.85] text-[#2C2825]/70 mt-3 pr-8">
                   {faq.answer}
                 </p>
               </details>
@@ -164,7 +164,7 @@ export default function SuratStorePage() {
                   <li key={category.slug}>
                     <Link
                       href={`/${category.slug}`}
-                      className="text-[14px] font-light text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
+                      className="text-[14px] font-normal text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
                     >
                       {category.heading}
                     </Link>
@@ -182,7 +182,7 @@ export default function SuratStorePage() {
                   <li key={city.slug}>
                     <Link
                       href={`/lighting/${city.slug}`}
-                      className="text-[14px] font-light text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
+                      className="text-[14px] font-normal text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
                     >
                       Lighting delivered to {city.name}
                     </Link>

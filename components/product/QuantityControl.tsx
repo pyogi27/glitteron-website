@@ -23,7 +23,7 @@ export default function QuantityControl({ value, max = 99, onChange }: Props) {
         onClick={() => update(value - 1)}
         disabled={value <= 1}
         aria-label="Decrease quantity"
-        className="w-9 h-9 flex items-center justify-center text-[#A09488] hover:text-[#2C2825] hover:bg-[#D8D0C4] transition-all text-[18px] font-light disabled:opacity-30 disabled:cursor-not-allowed"
+        className="w-9 h-9 flex items-center justify-center text-[#A09488] hover:text-[#2C2825] hover:bg-[#D8D0C4] transition-all text-[18px] font-normal disabled:opacity-30 disabled:cursor-not-allowed"
       >
         −
       </button>
@@ -34,7 +34,7 @@ export default function QuantityControl({ value, max = 99, onChange }: Props) {
         disabled={atCeiling}
         aria-label="Increase quantity"
         title={atCeiling ? `Only ${ceiling} available` : undefined}
-        className="w-9 h-9 flex items-center justify-center text-[#A09488] hover:text-[#2C2825] hover:bg-[#D8D0C4] transition-all text-[18px] font-light disabled:opacity-30 disabled:cursor-not-allowed"
+        className="w-9 h-9 flex items-center justify-center text-[#A09488] hover:text-[#2C2825] hover:bg-[#D8D0C4] transition-all text-[18px] font-normal disabled:opacity-30 disabled:cursor-not-allowed"
       >
         +
       </button>

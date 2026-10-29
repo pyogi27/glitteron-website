@@ -247,7 +247,7 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
       {/* Title */}
       {/* The headline describes the piece; `name` is the model code and stays
           visible on the SKU line below. */}
-      <h1 className="font-serif text-[clamp(28px,3vw,40px)] font-light leading-[1.2] text-[#2C2825] mb-2">
+      <h1 className="font-serif text-[clamp(28px,3vw,40px)] font-normal leading-[1.2] text-[#2C2825] mb-2">
         {product.headline || product.name}
       </h1>
 
@@ -276,11 +276,11 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
       {/* Price */}
       <div className="mb-6">
         <div className="flex items-baseline gap-3 mb-1">
-          <span className="font-serif text-[32px] font-light text-[#2C2825]">
+          <span className="font-serif text-[32px] font-normal text-[#2C2825]">
             ₹{effectivePrice.toLocaleString('en-IN')}
           </span>
           {effectiveOriginal && (
-            <span className="text-[15px] text-[#A09488] line-through font-light">
+            <span className="text-[15px] text-[#A09488] line-through font-normal">
               ₹{effectiveOriginal.toLocaleString('en-IN')}
             </span>
           )}

@@ -14,7 +14,7 @@ export function Section({ id, title, children }: { id?: string; title?: string; 
   return (
     <section id={id} className="mb-14 scroll-mt-header-ticker">
       {title && (
-        <h2 className="font-serif text-[clamp(24px,2.6vw,32px)] font-light text-[#2C2825] mb-5 leading-[1.25]">
+        <h2 className="font-serif text-[clamp(24px,2.6vw,32px)] font-normal text-[#2C2825] mb-5 leading-[1.25]">
           {title}
         </h2>
       )}
@@ -45,7 +45,7 @@ export function KeyFacts({ facts }: { facts: { value: string; label: string }[] 
           <dt className="text-[10px] font-medium tracking-[0.14em] uppercase text-[#8B7D6E] mb-1.5">
             {f.label}
           </dt>
-          <dd className="font-serif text-[22px] font-light text-[#A8552C] leading-none">{f.value}</dd>
+          <dd className="font-serif text-[22px] font-normal text-[#A8552C] leading-none">{f.value}</dd>
         </div>
       ))}
     </dl>
@@ -116,10 +116,10 @@ export default function LegalPage({ title, intro, sections, eyebrow = 'Legal', c
           <div className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#D08355] mb-4">
             {eyebrow}
           </div>
-          <h1 className="font-serif text-[clamp(38px,5vw,64px)] font-light leading-[1.08] mb-5">
+          <h1 className="font-serif text-[clamp(38px,5vw,64px)] font-normal leading-[1.08] mb-5">
             {title}
           </h1>
-          <p className="text-[16px] font-light text-white/60 max-w-[54ch] leading-[1.75]">{intro}</p>
+          <p className="text-[16px] font-normal text-white/60 max-w-[54ch] leading-[1.75]">{intro}</p>
         </div>
       </header>
 

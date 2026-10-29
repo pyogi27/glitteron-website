@@ -91,7 +91,7 @@ function ProfileButton({ isLight }: { isLight: boolean }) {
                 <p className="font-sans text-[13px] font-medium truncate" style={{ color: '#1A1210' }}>
                   {user.firstName} {user.lastName}
                 </p>
-                <p className="font-sans text-[11.5px] font-light mt-0.5" style={{ color: '#A09488' }}>
+                <p className="font-sans text-[11.5px] font-normal mt-0.5" style={{ color: '#A09488' }}>
                   {user.phone ? `+91 ${user.phone}` : user.email}
                 </p>
               </div>

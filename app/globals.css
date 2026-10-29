@@ -35,8 +35,8 @@
   --spacing-header-ticker: 196px; /* header + TickerStrip */
 
   /* Fonts */
-  --font-serif: var(--font-newsreader), "Newsreader", serif;
-  --font-sans: var(--font-jost), "Jost", sans-serif;
+  --font-serif: var(--font-baskervville), "Baskervville", serif;
+  --font-sans: var(--font-nunito), "Nunito Sans", sans-serif;
 
   /* Box Shadows */
   --shadow-gold-glow: 0 24px 64px rgba(168,91,59,0.22), 0 8px 24px rgba(26,18,16,0.14);
@@ -105,6 +105,8 @@
 }
 
 @layer base {
+  /* Type is upright everywhere; <em> keeps its accent colour, not the slant. */
+  em { font-style: normal; }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body { overflow-x: hidden; }

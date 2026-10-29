@@ -33,18 +33,18 @@ export default function SubPageSeoContent({
   return (
     <section className="bg-[#EDE8E0] text-[#2C2825] px-6 md:px-12 pb-20 pt-4">
       <div className="max-w-[760px]">
-        <h2 className="font-serif text-[clamp(26px,3.2vw,38px)] font-light leading-[1.2] mb-6">
+        <h2 className="font-serif text-[clamp(26px,3.2vw,38px)] font-normal leading-[1.2] mb-6">
           Choosing {heading.toLowerCase()}
         </h2>
         {intro.map(para => (
-          <p key={para.slice(0, 40)} className="text-[15px] font-light leading-[1.9] text-[#2C2825]/75 mb-5">
+          <p key={para.slice(0, 40)} className="text-[15px] font-normal leading-[1.9] text-[#2C2825]/75 mb-5">
             {para}
           </p>
         ))}
 
         {faqs.length > 0 && (
           <>
-            <h2 className="font-serif text-[clamp(24px,3vw,32px)] font-light leading-[1.2] mt-14 mb-6">
+            <h2 className="font-serif text-[clamp(24px,3vw,32px)] font-normal leading-[1.2] mt-14 mb-6">
               {heading} — common questions
             </h2>
             <div className="border-t border-[#D8D0C4]">
@@ -59,7 +59,7 @@ export default function SubPageSeoContent({
                       +
                     </span>
                   </summary>
-                  <p className="text-[14px] font-light leading-[1.85] text-[#2C2825]/70 mt-3 pr-8">{faq.answer}</p>
+                  <p className="text-[14px] font-normal leading-[1.85] text-[#2C2825]/70 mt-3 pr-8">{faq.answer}</p>
                 </details>
               ))}
             </div>
@@ -77,7 +77,7 @@ export default function SubPageSeoContent({
                   <li key={sibling.href}>
                     <Link
                       href={sibling.href}
-                      className="text-[14px] font-light text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
+                      className="text-[14px] font-normal text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
                     >
                       {sibling.label}
                     </Link>
@@ -96,7 +96,7 @@ export default function SubPageSeoContent({
                 <li key={guide.slug}>
                   <Link
                     href={`/guides/${guide.slug}`}
-                    className="text-[14px] font-light text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
+                    className="text-[14px] font-normal text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
                   >
                     {guide.title}
                   </Link>
@@ -105,7 +105,7 @@ export default function SubPageSeoContent({
               <li>
                 <Link
                   href={`/${category.slug}`}
-                  className="text-[14px] font-light text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
+                  className="text-[14px] font-normal text-[#2C2825]/75 no-underline hover:text-[#A8552C] transition-colors"
                 >
                   All {category.heading.toLowerCase()}
                 </Link>

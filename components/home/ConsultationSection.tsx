@@ -109,10 +109,10 @@ export default function ConsultationSection() {
             <span className="w-8 h-px bg-[#C4714A] inline-block" />
             Free Expert Help
           </div>
-          <h2 id="consultation-heading" className="font-serif text-[clamp(32px,4vw,52px)] font-light leading-[1.15] text-white">
-            Light your room right, <em className="italic text-gold-light">with an expert</em>
+          <h2 id="consultation-heading" className="font-serif text-[clamp(32px,4vw,52px)] font-normal leading-[1.15] text-white">
+            Light your room right, <em className="text-gold-light">with an expert</em>
           </h2>
-          <p className="mt-4 max-w-[46ch] text-[15px] font-light leading-relaxed text-white/75">
+          <p className="mt-4 max-w-[46ch] text-[15px] font-normal leading-relaxed text-white/75">
             Not sure which light suits your room? Our team helps you pick the fixture, size and warmth, free.
           </p>
 
@@ -128,8 +128,8 @@ export default function ConsultationSection() {
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <span>
-                    <span className="block font-serif text-[22px] font-light leading-tight group-hover:text-gold-light">{o.title}</span>
-                    <span className="mt-1 block text-[13px] font-light leading-snug text-white/65">{o.benefit}</span>
+                    <span className="block font-serif text-[22px] font-normal leading-tight group-hover:text-gold-light">{o.title}</span>
+                    <span className="mt-1 block text-[13px] font-normal leading-snug text-white/65">{o.benefit}</span>
                   </span>
                   <span className="flex items-center gap-2 self-center text-[11px] font-medium uppercase tracking-[0.12em] text-white/70 group-hover:text-white">
                     <span className="hidden sm:inline whitespace-nowrap">{o.action}</span>

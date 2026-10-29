@@ -6,17 +6,17 @@ export default function BrandBanner() {
       <div className="max-w-2xl mx-auto text-center">
         <h2
           id="brand-banner-heading"
-          className="font-serif text-[clamp(28px,3.4vw,40px)] font-light italic text-dark leading-[1.2] mb-6"
+          className="font-serif text-[clamp(28px,3.4vw,40px)] font-normal text-dark leading-[1.2] mb-6"
         >
           Illuminate every corner of your story.
         </h2>
         <p className="text-[15px] text-dark/80 leading-[1.75] mb-4">
-          LitMeUp is a Surat workshop making chandeliers, pendants and wall lights by hand, in brass, hand-blown glass
-          and solid steel. Every fixture is assembled and inspected here before it ships.
+          LitMeUp is a Surat-based lighting store, selling chandeliers, pendants, wall lights and lamps in brass,
+          glass and steel finishes. We pick each piece for how it looks and performs in a real home.
         </p>
         <p className="text-[15px] text-dark/80 leading-[1.75]">
           We sell direct, with no showroom markup and no seasonal fake discounts, so the price you see is the price we
-          stand behind. Every piece is dimmable as standard and covered by a five-year warranty.
+          stand behind. Every order ships free across India.
         </p>
       </div>
     </section>

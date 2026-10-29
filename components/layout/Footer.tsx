@@ -14,7 +14,7 @@ export default function Footer() {
         <div className="col-span-2 lg:col-span-1 flex flex-col gap-5">
           <div>
             <Logo />
-            <p className="font-serif text-[17px] text-[#2C2825]/70 italic mt-2.5 leading-[1.55]">
+            <p className="font-serif text-[17px] text-[#2C2825]/70 mt-2.5 leading-[1.55]">
               Illuminate every corner<br />of your story.
             </p>
           </div>

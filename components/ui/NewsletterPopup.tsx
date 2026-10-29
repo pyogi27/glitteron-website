@@ -153,10 +153,10 @@ export default function NewsletterPopup() {
                 ✓
               </div>
               <div>
-                <div className="font-serif text-[22px] font-light text-[#EDE8E0] leading-snug mb-2">
-                  You&apos;re <em className="italic text-[#E8A87C]">in!</em>
+                <div className="font-serif text-[22px] font-normal text-[#EDE8E0] leading-snug mb-2">
+                  You&apos;re <em className="text-[#E8A87C]">in!</em>
                 </div>
-                <div className="text-[12px] font-light leading-relaxed" style={{ color: 'rgba(237,232,224,0.5)' }}>
+                <div className="text-[12px] font-normal leading-relaxed" style={{ color: 'rgba(237,232,224,0.5)' }}>
                   Check your inbox for your<br />10% discount code.
                 </div>
               </div>
@@ -188,15 +188,15 @@ export default function NewsletterPopup() {
               </div>
 
               {/* Heading */}
-              <h2 className="font-serif text-[24px] font-light leading-[1.15] text-[#EDE8E0]">
+              <h2 className="font-serif text-[24px] font-normal leading-[1.15] text-[#EDE8E0]">
                 Light Your Home,{' '}
-                <em className="italic" style={{ color: '#E8A87C' }}>
+                <em className="" style={{ color: '#E8A87C' }}>
                   Save on Your First
                 </em>
               </h2>
 
               {/* Body */}
-              <p className="text-[11px] font-light leading-relaxed" style={{ color: 'rgba(237,232,224,0.45)' }}>
+              <p className="text-[11px] font-normal leading-relaxed" style={{ color: 'rgba(237,232,224,0.45)' }}>
                 Subscribe for your discount code plus early access to new collections.
               </p>
 
@@ -208,7 +208,7 @@ export default function NewsletterPopup() {
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); setError('') }}
                   placeholder="Your email address"
-                  className="w-full rounded-lg px-3.5 py-[10px] text-[12px] font-light outline-none transition-all"
+                  className="w-full rounded-lg px-3.5 py-[10px] text-[12px] font-normal outline-none transition-all"
                   style={{
                     background: 'rgba(237,232,224,0.07)',
                     border: error ? '1px solid rgba(196,113,74,0.6)' : '1px solid rgba(237,232,224,0.13)',
@@ -218,7 +218,7 @@ export default function NewsletterPopup() {
                   aria-label="Email address"
                 />
                 {error && (
-                  <p className="text-[10px] font-light" style={{ color: '#E8A87C' }}>
+                  <p className="text-[10px] font-normal" style={{ color: '#E8A87C' }}>
                     {error}
                   </p>
                 )}
@@ -238,7 +238,7 @@ export default function NewsletterPopup() {
               {/* Skip */}
               <button
                 onClick={handleClose}
-                className="text-[10px] font-light text-center transition-opacity hover:opacity-60 mt-1"
+                className="text-[10px] font-normal text-center transition-opacity hover:opacity-60 mt-1"
                 style={{ color: 'rgba(237,232,224,0.2)', fontFamily: 'inherit' }}
               >
                 No thanks, I&apos;ll pay full price

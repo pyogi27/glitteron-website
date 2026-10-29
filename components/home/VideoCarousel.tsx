@@ -132,8 +132,8 @@ export default function VideoCarousel({ items }: Props) {
             <span className="w-8 h-px bg-[#C4714A] inline-block" />
             Watch &amp; Shop
           </div>
-          <h2 id="watch-shop-heading" className="font-serif text-[clamp(32px,4vw,52px)] font-light leading-[1.15]">
-            See it <em className="italic">Lit</em>
+          <h2 id="watch-shop-heading" className="font-serif text-[clamp(32px,4vw,52px)] font-normal leading-[1.15]">
+            See it <em className="">Lit</em>
           </h2>
         </div>
         <button
