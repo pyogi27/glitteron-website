@@ -115,7 +115,7 @@ export default async function HomePage() {
       })}
       {showVideos && <VideoCarousel items={videos} />}
       <StatsDivider />
-      <ProductCarousel titlePrefix="Bestselling" titleHighlight="Lights" label="Most Loved" products={bestsellers} />
+      <ProductCarousel titlePrefix="Trending" titleHighlight="Now" label="Most Loved" products={bestsellers} />
       <RoomGrid />
       <ConsultationSection />
       <SocialGrid />

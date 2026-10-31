@@ -82,45 +82,51 @@ export default function CollectionsSection({ categories = STATIC_CATEGORIES }: P
           // last row instead of leaving an orphan hanging off the left edge.
           className="flex flex-wrap justify-center gap-4"
         >
-          {categories.map((cat, i) => (
-            <Link
-              key={cat.id ?? cat.name}
-              // Flat landing page where we have one; the filter view is the fallback
-              // for any category the backend adds before we write copy for it.
-              href={categoryPath(cat.name) ?? `/collections?category=${encodeURIComponent(cat.name)}`}
-              className="group relative flex flex-col overflow-hidden rounded-2xl aspect-[3/4] cursor-pointer w-[calc((100%-16px)/2)] md:w-[calc((100%-48px)/4)] lg:w-[calc((100%-96px)/7)]"
-            >
-              {/* Image */}
-              <img
-                src={cat.image?.trim() || FALLBACK_IMAGES[i % FALLBACK_IMAGES.length]}
-                alt={cat.name}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 [@media(hover:hover)]:group-hover:scale-105"
-              />
-              {/* Optional hover image: stacked over the main one and faded in, so no
-                  src swap and no layout shift. Touch devices never match hover:hover,
-                  so they only ever see the main image. alt="" because it is
-                  decorative; the main image carries the name. */}
-              {cat.hoverImage?.trim() && (
-                <img
-                  src={cat.hoverImage.trim()}
-                  alt=""
-                  loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover opacity-0 transition-[opacity,scale] duration-[400ms,700ms] [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:scale-105"
-                />
-              )}
-              {/* Stock photography here ranges from near-black to near-white, so a
-                  soft gradient can't guarantee contrast — the label measured
-                  1.51:1 over the bright frames. Hold the bottom band opaque
-                  enough to carry white text on any image. */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
-              {/* Text */}
-              <div className="relative mt-auto p-4 text-white">
-                <p className="font-serif text-[16px] font-normal leading-tight">{cat.name}</p>
-              </div>
-              {/* Hover border */}
-              <div className="absolute inset-0 rounded-2xl ring-1 ring-white/0 [@media(hover:hover)]:group-hover:ring-white/30 transition-all duration-300" />
-            </Link>
-          ))}
+          {categories.map((cat, i) => {
+            const image = cat.image?.trim()
+            return (
+              <Link
+                key={cat.id ?? cat.name}
+                // Flat landing page where we have one; the filter view is the fallback
+                // for any category the backend adds before we write copy for it.
+                href={categoryPath(cat.name) ?? `/collections?category=${encodeURIComponent(cat.name)}`}
+                // Staggered only on the single desktop row; wrapped rows would look ragged.
+                className="group flex flex-col cursor-pointer w-[calc((100%-16px)/2)] md:w-[calc((100%-48px)/4)] lg:w-[calc((100%-96px)/7)] lg:even:mt-7 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-dark"
+              >
+                {/* Arch frame, echoing the logo. Category art is a cutout on a neutral
+                    ground, so it sits on a sand surface instead of under a dark
+                    gradient. Multiply drops any off-white matte into the sand. */}
+                <div className="relative aspect-[3/4] overflow-hidden rounded-t-[999px] rounded-b-2xl border border-warm-gray bg-[radial-gradient(120%_70%_at_50%_35%,#F3EEE6_0%,var(--color-offwhite)_100%)] transition-colors duration-500 [@media(hover:hover)]:group-hover:border-brand-clay">
+                  {/* Hover glow: its own layer because gradients cannot be transitioned. */}
+                  <div className="absolute inset-0 opacity-0 bg-[radial-gradient(120%_70%_at_50%_30%,#F6DDB0_0%,#E8C890_55%,transparent_100%)] transition-opacity duration-500 [@media(hover:hover)]:group-hover:opacity-100" />
+                  <img
+                    src={image || FALLBACK_IMAGES[i % FALLBACK_IMAGES.length]}
+                    // Decorative: the label below already names the link.
+                    alt=""
+                    className={
+                      image
+                        ? 'absolute inset-x-[6%] top-[8%] h-[88%] w-[88%] object-contain mix-blend-multiply transition-transform duration-700 ease-out [@media(hover:hover)]:group-hover:-translate-y-2 [@media(hover:hover)]:group-hover:scale-105'
+                        : 'absolute inset-0 h-full w-full object-cover transition-transform duration-700 [@media(hover:hover)]:group-hover:scale-105'
+                    }
+                  />
+                  {/* Optional hover image, stacked over the main one and faded in: no src
+                      swap, no layout shift. It is a lifestyle photo, not a cutout, so it
+                      fills the arch with no blend. Touch devices never match hover:hover. */}
+                  {cat.hoverImage?.trim() && (
+                    <img
+                      src={cat.hoverImage.trim()}
+                      alt=""
+                      loading="lazy"
+                      className="absolute inset-0 h-full w-full object-cover opacity-0 transition-[opacity,scale] duration-[400ms,700ms] [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:scale-105"
+                    />
+                  )}
+                </div>
+                <p className="mt-4 px-1 text-center font-serif text-[17px] font-normal leading-tight text-dark transition-colors duration-300 [@media(hover:hover)]:group-hover:text-brand-clay">
+                  {cat.name}
+                </p>
+              </Link>
+            )
+          })}
         </div>
       </div>
     </section>

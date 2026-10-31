@@ -270,6 +270,7 @@ export const getShippingRate = (pincode?: string) =>
 // ─── Payments ─────────────────────────────────────────────────────────────────
 
 export interface ShippingAddress {
+  phone: string
   addressLine1: string
   city: string
   state: string

@@ -239,7 +239,7 @@ function InfiniteProductGridInner({
           : 'flex flex-col gap-4'
         }>
           {sorted.map((p, i) => (
-            <ProductCard key={p.id} product={p} variant={viewMode} priority={i < EAGER_CARDS} />
+            <ProductCard key={p.id} product={p} variant={viewMode} priority={i < EAGER_CARDS} lightToggle />
           ))}
         </div>
       )}

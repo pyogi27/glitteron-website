@@ -30,7 +30,8 @@ export const useFilterStore = create<FilterStore>()((set) => ({
   priceRange: [PRICE_FLOOR, PRICE_CEILING],
   sortBy: 'featured',
   viewMode: 'grid',
-  lightOn: false,
+  // On by default: the collections grid opens on the lit shots, hover shows the unlit one.
+  lightOn: true,
   setLightOn: (on) => set({ lightOn: on }),
   setActiveTab: (tab) => set({ activeTab: tab }),
   setPriceRange: (range) => set({ priceRange: range }),

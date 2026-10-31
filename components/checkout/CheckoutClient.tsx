@@ -224,6 +224,7 @@ export default function CheckoutClient() {
       // Step 2: Create Razorpay order
       setLoading('creating_order')
       const checkout = await createCheckout({
+        phone: address.phone.trim(),
         addressLine1: address.addressLine1,
         city: address.city,
         state: address.state,

@@ -10,7 +10,7 @@ import { useCartStore } from '@/lib/stores/cartStore'
 import { useWishlistStore } from '@/lib/stores/wishlistStore'
 import { useFilterStore } from '@/lib/stores/filterStore'
 
-/** `deal`: the homepage Deal of the Day card — discount as its eyebrow, always-visible labelled button. */
+/** `deal`: the homepage Deal of the Day card — the shared card on a light panel, discount as its badge. */
 type CardVariant = 'grid' | 'list' | 'related' | 'deal'
 
 interface ProductCardProps {
@@ -24,6 +24,11 @@ interface ProductCardProps {
   priority?: boolean
   /** Grid variant only: override the `sizes` hint when the card is not in a column grid (e.g. a fixed-width rail). */
   sizes?: string
+  /**
+   * Follow the collections page Light toggle (on by default): show the lit shot,
+   * and the unlit one on hover. Off elsewhere, where there is no toggle to turn it off.
+   */
+  lightToggle?: boolean
 }
 
 /**
@@ -46,7 +51,7 @@ const GRID_SIZES = '(min-width: 1024px) 33vw, 50vw'
 const FALLBACK_IMAGE =
   'https://images.pexels.com/photos/1123262/pexels-photo-1123262.jpeg?auto=compress&cs=tinysrgb&w=800&h=900&fit=crop'
 
-export default function ProductCard({ product, variant = 'grid', priority = false, sizes }: ProductCardProps) {
+export default function ProductCard({ product, variant = 'grid', priority = false, sizes, lightToggle = false }: ProductCardProps) {
   const addItem = useCartStore((s) => s.addItem)
   const { toggle, has } = useWishlistStore()
   const [mounted, setMounted] = useState(false)
@@ -61,12 +66,16 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
   // the lit one: one lamp rendered as two. Products without a lightOnImage
   // simply keep showing the off state.
   const litSrc = !litFailed ? product.lightOnImage : undefined
-  const showLit = lightOn && Boolean(litSrc)
-  // The lit layer is invisible until the lights-on toggle is used, but it was
-  // still downloading on load — a second image per card, 100 cards per listing
-  // page. Mount it on first use and keep it mounted so toggling back off still
-  // crossfades rather than popping.
-  const [litMounted, setLitMounted] = useState(false)
+  const showLit = lightToggle && lightOn && Boolean(litSrc)
+  // Mount the lit layer only once it is shown, so cards that never light up don't
+  // download a second image, and keep it mounted so toggling back off still
+  // crossfades rather than popping. Starts mounted when lit on first render, so
+  // the grid opens on the lit shot instead of flashing the unlit one.
+  const [litMounted, setLitMounted] = useState(showLit)
+  // While lit, hovering the card fades back to the unlit shot (group-hover only
+  // fires on hover-capable devices, so touch keeps the lit one).
+  const baseFade = showLit ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
+  const litFade = showLit ? 'opacity-100 group-hover:opacity-0' : 'opacity-0'
   useEffect(() => {
     if (showLit) setLitMounted(true)
   }, [showLit])
@@ -109,9 +118,9 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
             alt={product.name}
             fill
             className={`object-contain transition-[transform,opacity] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.07]
-              ${showLit ? 'opacity-0' : 'opacity-100'}`}
+              ${baseFade}`}
             sizes={LIST_SIZES}
-            priority={priority}
+            priority={priority && !showLit}
             onError={() => setImgSrc(FALLBACK_IMAGE)}
           />
           {litMounted && litSrc && (
@@ -121,8 +130,9 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
               aria-hidden="true"
               fill
               className={`object-contain transition-[opacity,transform] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]
-                group-hover:scale-[1.07] ${showLit ? 'opacity-100' : 'opacity-0'}`}
+                group-hover:scale-[1.07] ${litFade}`}
               sizes={LIST_SIZES}
+              priority={priority && showLit}
               onError={() => setLitFailed(true)}
             />
           )}
@@ -164,44 +174,50 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
     )
   }
 
-  // ── Deal variant ──
-  // An <article>, not one big <Link>: the button sits outside the link, so it is a real
-  // button rather than one nested in an <a>, and it is always visible — no hover reveal,
-  // which touch screens cannot trigger.
-  // ponytail: no lights-on layer here; the homepage has no light toggle to drive it.
-  if (variant === 'deal') {
-    const href = `/collections/${product.slug}`
-    return (
-      <article className="group relative h-full flex flex-col rounded-[20px] overflow-hidden bg-[#EDE8E0]">
-        <Link href={href} className="flex flex-col flex-1 no-underline cursor-none">
-          <div className="relative aspect-square bg-[#EFE8DE] overflow-hidden">
+  // ── Grid / Related / Deal ──
+  // One card everywhere, modelled on the Fig Living grid: image tile with a tinted
+  // badge, then name and price always visible underneath. No hover reveal, which
+  // touch screens cannot trigger. An <article> with two links to the product, not
+  // one big <Link>, so the wishlist and add buttons are real buttons rather than
+  // ones nested in an <a>. The image link is a duplicate, so it is hidden from
+  // keyboard and screen readers; the name link is the one they use.
+  // `deal` sits on the dark Deal of the Day ground, so it gets a light panel and
+  // the discount as its badge.
+  const href = `/collections/${product.slug}`
+  const isDeal = variant === 'deal'
+  const imgSizes = isDeal ? DEAL_SIZES : variant === 'related' ? RELATED_SIZES : sizes ?? GRID_SIZES
+  const imgClass = 'product-card-img object-contain transition-[transform,opacity] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]'
+
+  return (
+    <article className={`product-card group relative h-full flex flex-col ${isDeal ? 'bg-white p-2.5 pb-3.5' : ''}`}>
+      {/* #FFF: the catalogue shots are on white, so the tile reads as one photo edge to edge. */}
+      <div className="relative aspect-square overflow-hidden bg-[#FFFFFF]">
+        <Link href={href} tabIndex={-1} aria-hidden="true" className="absolute inset-0 cursor-none">
+          <Image
+            src={imgSrc}
+            alt={product.name}
+            fill
+            className={`${imgClass} ${baseFade}`}
+            sizes={imgSizes}
+            priority={priority && !showLit}
+            onError={() => setImgSrc(FALLBACK_IMAGE)}
+          />
+          {litMounted && litSrc && (
             <Image
-              src={imgSrc}
-              alt={product.name}
+              src={litSrc}
+              alt=""
               fill
-              className="object-contain transition-transform duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.06]"
-              sizes={DEAL_SIZES}
-              onError={() => setImgSrc(FALLBACK_IMAGE)}
+              className={`${imgClass} ${litFade}`}
+              sizes={imgSizes}
+              priority={priority && showLit}
+              onError={() => setLitFailed(true)}
             />
-          </div>
-          <div className="flex flex-col flex-1 px-4 pt-3.5 pb-3">
-            {/* The discount takes the eyebrow slot: one mention per card, and the price row
-                below fits one line at card width (a wrapped row stretched every card in the
-                rail). #96471F, not clay: 5.35:1 on #EDE8E0 where clay is 4.08:1. */}
-            {(product.discount || product.category) && (
-              <div className="text-[10px] text-[#96471F] tracking-[0.14em] uppercase font-medium mb-1">
-                {product.discount ? `${product.discount}% off` : product.category}
-              </div>
-            )}
-            <div className="font-serif text-[17px] leading-[1.3] text-[#2C2825] truncate">{product.name}</div>
-            <div className="mt-auto pt-2 text-[18px] font-medium text-[#2C2825] flex items-baseline gap-1.5 flex-wrap">
-              {formatListingPrice(product)}
-              {product.originalPrice && (
-                <span className="text-[13px] text-[#6E655C] line-through font-normal">₹{product.originalPrice.toLocaleString('en-IN')}</span>
-              )}
-            </div>
-          </div>
+          )}
         </Link>
+
+        {isDeal && product.discount
+          ? <Badge variant="sale" label={`${product.discount}% Off`} />
+          : product.badge && <Badge variant={product.badge} />}
 
         <button
           onClick={handleWishlist}
@@ -213,171 +229,45 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
           </svg>
         </button>
 
-        <div className="px-4 pb-4">
-          {/* A variation product has no single price or stock to add: send the shopper
-              to pick one rather than adding a variation they did not choose. */}
-          {product.hasVariations ? (
-            <Link
-              href={href}
-              aria-label={`Choose options for ${product.name}`}
-              className="flex h-11 w-full items-center justify-center rounded-full border border-[#2C2825] text-[12px] font-medium uppercase tracking-[0.12em] text-[#2C2825] no-underline cursor-none transition-colors duration-300 hover:bg-[#2C2825] hover:text-[#EDE8E0]"
-            >
-              Choose options
-            </Link>
-          ) : (
-            <button
-              onClick={handleAddToCart}
-              aria-label={`Add to Cart, ${product.name}`}
-              className="flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[#2C2825] bg-transparent text-[12px] font-medium uppercase tracking-[0.12em] text-[#2C2825] cursor-none transition-[background,color,transform] duration-300 hover:bg-[#2C2825] hover:text-[#EDE8E0] active:scale-[0.98]"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0" />
-              </svg>
-              Add to Cart
-            </button>
-          )}
-        </div>
-      </article>
-    )
-  }
-
-  // ── Grid / Related variant ──
-  const imgSizes = variant === 'related' ? RELATED_SIZES : sizes ?? GRID_SIZES
-
-  return (
-    <Link
-      href={`/collections/${product.slug}`}
-      className="product-card relative no-underline cursor-none block"
-    >
-      {/* Image block — square like the catalogue photos, clips to rounded corners */}
-      <div className="relative rounded-[20px] overflow-hidden w-full aspect-square">
-
-        <Image
-          src={imgSrc}
-          alt={product.name}
-          fill
-          className={`product-card-img object-contain transition-[transform,opacity] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]
-            ${showLit ? 'opacity-0' : 'opacity-100'}`}
-          sizes={imgSizes}
-          priority={priority}
-          onError={() => setImgSrc(FALLBACK_IMAGE)}
-        />
-
-        {litMounted && litSrc && (
-          <Image
-            src={litSrc}
-            alt=""
-            aria-hidden="true"
-            fill
-            className={`product-card-img object-contain transition-[opacity,transform] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] ${showLit ? 'opacity-100' : 'opacity-0'}`}
-            sizes={imgSizes}
-            onError={() => setLitFailed(true)}
-          />
-        )}
-
-        {product.badge && <Badge variant={product.badge} />}
-
-        {/* Wishlist */}
-        <button
-          onClick={handleWishlist}
-          className="absolute top-3 right-3 z-20 border-none w-8 h-8 rounded-full flex items-center justify-center cursor-none shadow-sm transition-[background] duration-300 hover:bg-gold"
-          style={{ background: 'rgba(245,240,235,0.95)' }}
-          aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24"
-            fill={isWishlisted ? '#8B5E3C' : 'none'}
-            stroke={isWishlisted ? '#8B5E3C' : '#A09488'}
-            strokeWidth="1.8"
+        {/* A variation product has no single price or stock to add: send the shopper
+            to pick one rather than adding a variation they did not choose. */}
+        {product.hasVariations ? (
+          <Link
+            href={href}
+            aria-label={`Choose options for ${product.name}`}
+            className="absolute bottom-3 right-3 z-20 w-9 h-9 rounded-full flex items-center justify-center bg-[#2C2825] text-[#EDE8E0] no-underline cursor-none shadow-sm transition-[background,transform] duration-300 hover:bg-gold active:scale-95"
           >
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-          </svg>
-        </button>
-
-        {/* Hover reveal. No panel behind it — the text sits straight on the
-            artwork and a text-shadow halo carries the contrast, so nothing
-            covers the product. The halo direction flips with the light toggle:
-            product shots are pale, so dark-text-on-light-halo by default;
-            lit shots go dark, so white-text-on-dark-halo.
-
-            On pointer devices this is the only copy of name and price, so
-            unlike a decorative overlay it stays in the accessibility tree and
-            its button stays focusable — and globals.css reveals it on
-            :focus-within so a keyboard user can see what they have focused. */}
-        <div
-          className={`product-card-reveal absolute bottom-0 left-0 right-0 z-10 px-5 pt-4 pb-5
-            ${lightOn ? 'product-card-overlay-text' : 'product-card-overlay-text-dark'}`}
-        >
-          <div className={`font-serif text-[19px] font-normal leading-[1.25] mb-2.5 truncate ${lightOn ? 'text-white' : 'text-[#1A1715]'}`}>
-            {product.name}
-          </div>
-          <div className="flex items-center justify-between gap-3">
-            <div className={`text-[17px] font-medium flex items-baseline gap-1.5 flex-wrap ${lightOn ? 'text-white' : 'text-[#1A1715]'}`}>
-              {formatListingPrice(product)}
-              {product.originalPrice && (
-                <span
-                  className="text-[13px] font-normal line-through"
-                  style={{ color: lightOn ? 'rgba(255,255,255,0.8)' : 'rgba(26,23,21,0.68)' }}
-                >
-                  ₹{product.originalPrice.toLocaleString('en-IN')}
-                </span>
-              )}
-            </div>
-            <button
-              onClick={handleAddToCart}
-              className="bg-gold text-white border-none w-[34px] h-[34px] rounded-full flex items-center justify-center transition-[background,transform] duration-300 hover:bg-gold-dark hover:scale-110 flex-shrink-0"
-              style={{ boxShadow: '0 4px 14px rgba(168,91,59,0.45)' }}
-              aria-label={`Add ${product.name} to cart`}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Touch fallback only — hidden wherever hover works, so pointer devices
-          get the clean image-only card. It has to exist for phones and tablets:
-          with no hover there is otherwise no name, no price and no way to add
-          to cart anywhere on the card. */}
-      <div className="product-card-info p-3">
-        {/* API products can have an empty category — don't render a blank eyebrow. */}
-        {product.category && (
-          <div className="text-[10px] text-[#A8552C] tracking-[0.14em] uppercase font-medium mb-1">{product.category}</div>
-        )}
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 min-w-0">
-            <div className="font-serif text-[16px] font-normal leading-[1.3] text-[#2C2825] truncate">{product.name}</div>
-            {/* API products come back with reviewCount 0, which rendered an empty
-                five-star row and a bare "(0)" on every card — worse than showing
-                no rating at all. */}
-            {product.reviewCount > 0 && (
-              <div className="flex items-center gap-1 mt-1">
-                <StarRating rating={product.rating} size={10} />
-                <span className="text-[10px] text-[#6E655C]">({product.reviewCount})</span>
-              </div>
-            )}
-            <div className="text-[16px] font-medium text-[#2C2825] mt-1 flex items-baseline gap-1.5 flex-wrap">
-              {formatListingPrice(product)}
-              {product.originalPrice && (
-                <span className="text-[13px] text-[#6E655C] line-through font-normal">₹{product.originalPrice.toLocaleString('en-IN')}</span>
-              )}
-              {product.discount && (
-                <span className="text-[10px] text-green-700 bg-green-700/10 px-1.5 py-0.5 rounded-md font-medium">–{product.discount}%</span>
-              )}
-            </div>
-          </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <path d="M4 6h16M4 12h16M4 18h10" />
+            </svg>
+          </Link>
+        ) : (
           <button
             onClick={handleAddToCart}
-            className="flex-shrink-0 mt-0.5 bg-[#2C2825] text-white border-none w-[30px] h-[30px] rounded-full flex items-center justify-center cursor-none transition-[background,transform] duration-300 active:scale-95"
             aria-label={`Add ${product.name} to cart`}
+            className="absolute bottom-3 right-3 z-20 border-none w-9 h-9 rounded-full flex items-center justify-center bg-[#2C2825] text-[#EDE8E0] cursor-none shadow-sm transition-[background,transform] duration-300 hover:bg-gold active:scale-95"
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
               <path d="M12 5v14M5 12h14" />
             </svg>
           </button>
-        </div>
+        )}
       </div>
-    </Link>
+
+      <Link href={href} className="block pt-3 no-underline cursor-none">
+        <div className="font-sans text-[13px] font-bold uppercase tracking-[0.04em] leading-[1.35] text-[#2C2825] truncate">
+          {product.name}
+        </div>
+        <div className="mt-1.5 text-[13px] font-bold text-[#2C2825] flex items-baseline gap-x-2 flex-wrap">
+          {formatListingPrice(product)}
+          {product.originalPrice && (
+            <s className="font-medium text-[#6E655C]">₹{product.originalPrice.toLocaleString('en-IN')}</s>
+          )}
+          {product.discount && !isDeal && (
+            <span className="text-[11px] text-[#2E6B2A]">{product.discount}% off</span>
+          )}
+        </div>
+      </Link>
+    </article>
   )
 }
