@@ -1,6 +1,7 @@
 // components/product/ProductInfo.tsx
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useSyncExternalStore } from 'react'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import type { Product, ProductVariation } from '@/lib/types'
@@ -20,6 +21,16 @@ import {
 import { parseWhereUsed } from '@/lib/data/visualizer'
 import RoomVisualizerModal from './RoomVisualizerModal'
 import ProductDetails from './ProductDetails'
+import type { FallbackReason } from './ar/ArViewer'
+import { track } from '@/lib/analytics'
+
+// Its own chunk, fetched only when the shopper opens it: zero JS on the PDP until then.
+const ArViewer = dynamic(() => import('./ar/ArViewer'), { ssr: false })
+
+const noSubscribe = () => () => {}
+/** Browsers expose the camera only to secure contexts (HTTPS or localhost). */
+const useSecureContext = () =>
+  useSyncExternalStore(noSubscribe, () => window.isSecureContext, () => true)
 
 /** At or below this many units the buy box says "Only N left". */
 const LOW_STOCK = 5
@@ -101,6 +112,8 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
   }, [])
 
   const [vizOpen, setVizOpen] = useState(false)
+  const [arOpen, setArOpen] = useState(false)
+  const secure = useSecureContext()
   const parsedRoomTypes = parseWhereUsed(product.whereUsed)
   // Fall back to Living Room so the button always shows
   const roomTypes: import('@/lib/data/visualizer').RoomType[] = parsedRoomTypes.length > 0 ? parsedRoomTypes : ['Living Room']
@@ -236,6 +249,24 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
 
   const emi = Math.round(effectivePrice / 12)
 
+  // The cutout follows the cart line's picture: the picked variation's, else the product's.
+  const arImage = (hasPicked && selectedVariation?.arImage) || product.arImage
+
+  // Camera on phones and tablets; the room visualizer on desktop or without a camera API.
+  const openAr = () => {
+    const camera =
+      window.matchMedia('(pointer: coarse)').matches && !!navigator.mediaDevices?.getUserMedia
+    track('ar_open', { product_id: product.id, mode: camera ? 'camera' : 'visualizer' })
+    if (camera) setArOpen(true)
+    else setVizOpen(true)
+  }
+
+  const arFallback = (reason: FallbackReason) => {
+    track('ar_fallback_visualizer', { product_id: product.id, reason })
+    setArOpen(false)
+    setVizOpen(true)
+  }
+
   return (
     // ponytail: no overflow/height here — the buy box flows in the page scroll.
     // A second scroll container next to the page scroll traps the wheel and hides
@@ -356,18 +387,23 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
         Buy Now
       </button>
 
-      {/* View in Room */}
-      <button
+      {/* View in your room. Hidden without a cutout (a product photo is not one) and on
+          plain-HTTP origins, where the camera API does not exist. */}
+      {arImage && secure ? (
+        <button
           type="button"
-          onClick={() => setVizOpen(true)}
-          className="w-full flex items-center justify-center gap-2 border border-[#D8D0C4] text-[#2C2825] py-3 rounded-3xl font-sans text-[13px] font-medium tracking-[0.06em] mt-3 mb-7 transition-all hover:border-[#C4714A] hover:text-[#C4714A] hover:bg-[#FDF9F6]"
+          onClick={openAr}
+          className="w-full flex items-center justify-center gap-2 border border-[#D8D0C4] text-[#2C2825] min-h-11 py-3 rounded-3xl font-sans text-[13px] font-medium tracking-[0.06em] mt-3 mb-7 transition-all hover:border-[#C4714A] hover:text-[#C4714A] hover:bg-[#FDF9F6]"
         >
-          <svg viewBox="0 0 24 24" className="w-4 h-4 stroke-current fill-none" strokeWidth={1.6}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="w-4 h-4 stroke-current fill-none" strokeWidth={1.6}>
             <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
             <polyline points="9 22 9 12 15 12 15 22" />
           </svg>
-          View in Room
+          View in your room
         </button>
+      ) : (
+        <div className="mb-7" />
+      )}
 
       <ProductDetails product={product} />
 
@@ -420,8 +456,21 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
         </button>
       </div>
 
+      {arOpen && arImage && (
+        <ArViewer
+          src={arImage}
+          productId={product.id}
+          name={product.headline || product.name}
+          slug={product.slug}
+          category={product.category}
+          heightMm={product.heightMm}
+          onClose={() => setArOpen(false)}
+          onFallback={arFallback}
+        />
+      )}
+
       {/* Room visualizer modal */}
-      {vizOpen && roomTypes.length > 0 && (
+      {vizOpen && arImage && roomTypes.length > 0 && (
         <RoomVisualizerModal
           product={{
             id: Number(product.id) || 0,
@@ -432,7 +481,7 @@ export default function ProductInfo({ product, onVariationChange }: Props) {
             priceValue: product.price,
             match: 100,
             thumb: product.images[0] ?? '',
-            full: product.arImage || (product.images[0] ?? ''),
+            full: arImage,
             iw: 90,
             ih: 110,
           }}

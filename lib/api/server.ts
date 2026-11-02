@@ -18,6 +18,7 @@ import type {
   ApiVariation,
 } from "./types";
 import { displayPrice, listingPrice } from "@/lib/pricing";
+import { parseHeightMm } from "@/lib/ar/helpers";
 
 const BACKEND = process.env.API_URL ?? "http://localhost:3000";
 
@@ -191,6 +192,7 @@ export function mapApiProduct(p: ApiProduct, categoryName?: string): Product {
     reviews: [],
     whereUsed: (p as ApiProductDetail).whereUsed,
     arImage: p.arImages,
+    heightMm: parseHeightMm((p as ApiProductDetail).productHeight),
     lightOnImage: p.lightOnImage || undefined,
   };
 }

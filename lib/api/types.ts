@@ -85,7 +85,7 @@ export interface ApiProduct {
  *
  * This is a WIDE row (~20 columns), not an attribute tuple. Only the fields the
  * storefront actually reads are declared here; the rest (material, wattage, weight,
- * dimensions, arImages, sku, sortOrder, createdAt, updatedAt, reservedQuantity) are
+ * dimensions, sku, sortOrder, createdAt, updatedAt, reservedQuantity) are
  * returned but unused. See TODOS.md for trimming the
  * payload server-side.
  *
@@ -111,6 +111,7 @@ export interface ApiVariation {
   mainImage?: string | null;
   additionalImages?: string[] | null;
   lightOnImage?: string | null;
+  arImages?: string | null;
   // Website discounts, as on ApiProduct.
   compareAtPrice?: number | string | null;
   discountedPrice?: number | string | null;

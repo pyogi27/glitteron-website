@@ -49,6 +49,8 @@ export interface Product {
   reviews: Review[]
   whereUsed?: string   // e.g. "Living Room, Dining Room"
   arImage?: string     // AR/room visualizer image URL
+  /** From the free-text productHeight; only when it plainly states a height. */
+  heightMm?: number
   lightOnImage?: string // same product photographed with the light switched on
 }
 
@@ -73,6 +75,8 @@ export interface ProductVariation {
   /** mainImage first, then additionalImages. Empty when the row has no photography. */
   images?: string[]
   lightOnImage?: string
+  /** Transparent cutout for the camera view; a variation lacks one exactly when its parent does. */
+  arImage?: string
 }
 
 export interface Review {

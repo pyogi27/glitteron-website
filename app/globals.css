@@ -218,11 +218,45 @@
     outline-offset: 2px;
   }
 
-  /* Product card: a flat tile like the Fig Living grid. Name and price always
-     sit under the image, so hover only adds a slow zoom on the photo. */
+  /* Product card: one rounded white surface, hairline edge, soft warm shadow.
+     Name and price always sit under the image, so hover only lifts the card
+     and slowly zooms the photo. */
+  .product-card {
+    border-radius: 20px;
+    background: #fff;
+    border: 1px solid rgba(44, 40, 37, 0.07);
+    box-shadow: 0 1px 2px rgba(44, 40, 37, 0.04), 0 10px 28px -18px rgba(44, 40, 37, 0.22);
+    transition:
+      transform 0.45s cubic-bezier(0.25, 1, 0.5, 1),
+      box-shadow 0.45s cubic-bezier(0.25, 1, 0.5, 1),
+      border-color 0.45s ease;
+  }
+
+  .product-card:focus-within {
+    border-color: rgba(168, 91, 59, 0.45);
+  }
+
   @media (hover: hover) {
+    .product-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(168, 91, 59, 0.22);
+      box-shadow: 0 2px 6px rgba(44, 40, 37, 0.05), 0 24px 48px -20px rgba(168, 91, 59, 0.35);
+    }
+
     .product-card:hover .product-card-img {
       transform: scale(1.05);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .product-card,
+    .product-card-img {
+      transition: none;
+    }
+
+    .product-card:hover,
+    .product-card:hover .product-card-img {
+      transform: none;
     }
   }
 

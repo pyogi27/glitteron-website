@@ -1,7 +1,6 @@
-import type { ReactNode } from 'react'
+import Image from 'next/image'
 import { COMPANY } from '@/lib/company'
 import { waMeUrl } from '@/lib/whatsapp'
-import { PhoneCallArt, VideoCallArt, WhatsAppArt } from './ConsultationArt'
 
 /**
  * Homepage "free expert consultation" card: a dark card (after the Jainsons
@@ -28,7 +27,8 @@ interface ConsultOption {
   action: string
   href: string
   opensWhatsApp: boolean
-  art: ReactNode
+  /** Illustration in public/consultation, drawn on a flat #F7F7F7 background. */
+  image: string
 }
 
 // Evaluated at build time, so a malformed COMPANY.phone fails the build rather than shipping dead links.
@@ -39,7 +39,7 @@ const OPTIONS: ConsultOption[] = [
     action: 'Book on WhatsApp',
     href: waMeUrl(COMPANY.phone, `${greeting} I'd like a free video consultation to see fixtures for my room.`),
     opensWhatsApp: true,
-    art: <VideoCallArt />,
+    image: '/consultation/video-call.jpg',
   },
   {
     title: 'Phone call',
@@ -47,7 +47,7 @@ const OPTIONS: ConsultOption[] = [
     action: COMPANY.phone,
     href: COMPANY.phoneHref,
     opensWhatsApp: false,
-    art: <PhoneCallArt />,
+    image: '/consultation/phone-call.jpg',
   },
   {
     title: 'WhatsApp chat',
@@ -55,7 +55,7 @@ const OPTIONS: ConsultOption[] = [
     action: 'Send photos',
     href: waMeUrl(COMPANY.phone, `${greeting} I'd like product picks for my room. I'll send photos here.`),
     opensWhatsApp: true,
-    art: <WhatsAppArt />,
+    image: '/consultation/whatsapp.jpg',
   },
 ]
 
@@ -85,8 +85,15 @@ export default function ConsultationSection() {
                 {...(o.opensWhatsApp ? NEW_TAB : {})}
                 className={`group flex h-full flex-col overflow-hidden rounded-xl bg-brand-umber text-white no-underline ${FOCUS}`}
               >
-                <div className="overflow-hidden border-b border-white/10">
-                  <div className="transition-transform duration-500 motion-safe:group-hover:scale-[1.03]">{o.art}</div>
+                {/* ponytail: contain, not cover, so the square phone shots and the wide laptop shot stay whole at one height */}
+                <div className="relative aspect-[4/3] overflow-hidden bg-[#F7F7F7]">
+                  <Image
+                    src={o.image}
+                    alt=""
+                    fill
+                    sizes="(min-width: 768px) 33vw, 100vw"
+                    className="object-contain p-3 transition-transform duration-500 motion-safe:group-hover:scale-[1.03]"
+                  />
                 </div>
                 <div className="flex flex-1 flex-col px-6 pt-6 pb-7">
                   <span className="font-serif text-[26px] font-normal leading-tight group-hover:text-gold-light">{o.title}</span>

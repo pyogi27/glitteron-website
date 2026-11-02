@@ -171,6 +171,7 @@ export function mapVariation(v: ApiVariation): ProductVariation {
     images: [v.mainImage, ...(Array.isArray(v.additionalImages) ? v.additionalImages : [])]
       .filter((src): src is string => typeof src === 'string' && src.trim() !== ''),
     lightOnImage: v.lightOnImage || undefined,
+    arImage: v.arImages || undefined,
   }
 }
 

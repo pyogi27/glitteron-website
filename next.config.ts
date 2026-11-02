@@ -24,6 +24,8 @@ const REDIRECTED_HOSTS = [
   'eqmpgafg6h.us-east-1.awsapprunner.com',
 ]
 
+// The product page's "View in your room" uses the camera. Any Permissions-Policy header
+// added here must allow it for this origin: camera=(self), never camera=().
 const nextConfig: NextConfig = {
   output: 'standalone',
   async redirects() {

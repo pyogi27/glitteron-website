@@ -48,6 +48,12 @@ const RELATED_SIZES = '(min-width: 1024px) 270px, (min-width: 640px) 50vw, 100vw
 // Grid: 2 columns, 3+ from lg (collections, wishlist).
 const GRID_SIZES = '(min-width: 1024px) 33vw, 50vw'
 
+// Ground behind the lit shot. The glow pixels sit at L* 90–98 (median 93), so on
+// white they read darker than the tile and the lamp looks off. At L* ~85 about 94%
+// of them read brighter; darker adds little glow and only weighs the card down.
+// Warm grey rather than neutral to sit with the cream palette.
+const LIT_GROUND = 'bg-[#D7D3CD]'
+
 const FALLBACK_IMAGE =
   'https://images.pexels.com/photos/1123262/pexels-photo-1123262.jpeg?auto=compress&cs=tinysrgb&w=800&h=900&fit=crop'
 
@@ -76,6 +82,11 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
   // fires on hover-capable devices, so touch keeps the lit one).
   const baseFade = showLit ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
   const litFade = showLit ? 'opacity-100 group-hover:opacity-0' : 'opacity-0'
+  // Grey ground under the photo, only while the lit shot shows: it rides the lit
+  // layer's fade, so light off (or hover back to the unlit shot) is transparent.
+  const litGround = (
+    <div aria-hidden="true" className={`absolute inset-0 ${LIT_GROUND} transition-opacity duration-500 ${litFade}`} />
+  )
   useEffect(() => {
     if (showLit) setLitMounted(true)
   }, [showLit])
@@ -104,20 +115,21 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
     return (
       <Link
         href={`/collections/${product.slug}`}
-        className="group relative rounded-[16px] overflow-hidden flex flex-row no-underline text-dark cursor-pointer border border-warm-gray bg-white
+        className="group relative rounded-[20px] overflow-hidden flex flex-row no-underline text-dark cursor-pointer border border-[#2C2825]/[0.07] bg-[#FFFFFF]
           transition-[transform,box-shadow,border-color] duration-[450ms] [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]
           hover:-translate-y-[4px] hover:border-gold/40 hover:shadow-card-hover"
       >
         {/* The ratio sets the row's minimum height (220x180 at full size, as before); the
             column still stretches if the text runs taller, and object-contain shows the
             whole photo either way. 38% on phones so the text column keeps room. */}
-        <div className="relative w-[38%] max-w-[220px] aspect-[11/9] flex-shrink-0 overflow-hidden bg-offwhite">
+        <div className="relative w-[38%] max-w-[220px] aspect-[11/9] flex-shrink-0 overflow-hidden">
+          {litGround}
           {product.badge && <Badge variant={product.badge} />}
           <Image
             src={imgSrc}
             alt={product.name}
             fill
-            className={`object-contain transition-[transform,opacity] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.07]
+            className={`object-contain p-[8%] transition-[transform,opacity] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.07]
               ${baseFade}`}
             sizes={LIST_SIZES}
             priority={priority && !showLit}
@@ -129,7 +141,7 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
               alt=""
               aria-hidden="true"
               fill
-              className={`object-contain transition-[opacity,transform] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]
+              className={`object-contain p-[8%] transition-[opacity,transform] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]
                 group-hover:scale-[1.07] ${litFade}`}
               sizes={LIST_SIZES}
               priority={priority && showLit}
@@ -186,12 +198,17 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
   const href = `/collections/${product.slug}`
   const isDeal = variant === 'deal'
   const imgSizes = isDeal ? DEAL_SIZES : variant === 'related' ? RELATED_SIZES : sizes ?? GRID_SIZES
-  const imgClass = 'product-card-img object-contain transition-[transform,opacity] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]'
+  // Padding on the <img> itself: object-contain fits the photo inside the content
+  // box, so any aspect ratio (tall lamp, wide chandelier) shows whole and clear of
+  // the rounded corners and the overlaid buttons.
+  const imgClass = 'product-card-img object-contain p-[9%] transition-[transform,opacity] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]'
 
   return (
-    <article className={`product-card group relative h-full flex flex-col ${isDeal ? 'bg-white p-2.5 pb-3.5' : ''}`}>
-      {/* #FFF: the catalogue shots are on white, so the tile reads as one photo edge to edge. */}
-      <div className="relative aspect-square overflow-hidden bg-[#FFFFFF]">
+    <article className="product-card group relative h-full flex flex-col overflow-hidden">
+      {/* Transparent over the white card, so the catalogue shots (on white) read edge
+          to edge; grey only under a lit shot. */}
+      <div className="relative aspect-square overflow-hidden">
+        {litGround}
         <Link href={href} tabIndex={-1} aria-hidden="true" className="absolute inset-0 cursor-pointer">
           <Image
             src={imgSrc}
@@ -254,7 +271,7 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
         )}
       </div>
 
-      <Link href={href} className="block pt-3 no-underline cursor-pointer">
+      <Link href={href} className="block mt-auto px-3.5 pt-2.5 pb-4 sm:px-4 no-underline cursor-pointer border-t border-[#2C2825]/[0.05]">
         <div className="font-sans text-[13px] font-bold uppercase tracking-[0.04em] leading-[1.35] text-[#2C2825] truncate">
           {product.name}
         </div>
