@@ -127,13 +127,15 @@ export default function ProductGallery({ images, name, lightOnImage }: Props) {
             priority={active === 0}
           />
 
+          {/* pointer-events-none: this layer covers the mobile carousel even while
+              transparent, and would otherwise swallow every swipe meant for the track. */}
           {litSrc && (
             <Image
               src={litSrc}
               alt=""
               aria-hidden="true"
               fill
-              className={`object-cover transition-opacity duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] ${showLit ? 'opacity-100' : 'opacity-0'}`}
+              className={`pointer-events-none object-cover transition-opacity duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] ${showLit ? 'opacity-100' : 'opacity-0'}`}
               sizes="50vw"
               onError={() => setLitFailed(true)}
             />
@@ -146,9 +148,11 @@ export default function ProductGallery({ images, name, lightOnImage }: Props) {
             </div>
           )}
 
-          {/* Mobile dots — the only affordance telling a phone shopper more photos exist */}
+          {/* Mobile dots — the only affordance telling a phone shopper more photos exist.
+              Raised above the light toggle when it shows: on a phone the two overlapped
+              and the dots ate taps meant for the toggle. */}
           {images.length > 1 && (
-            <div className="lg:hidden absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-1.5 bg-white/80 rounded-full px-2.5 py-2">
+            <div className={`lg:hidden absolute ${litSrc ? 'bottom-16' : 'bottom-4'} left-1/2 -translate-x-1/2 z-10 flex gap-1.5 bg-white/80 rounded-full px-2.5 py-2`}>
               {images.map((_, i) => (
                 <button
                   key={i}
