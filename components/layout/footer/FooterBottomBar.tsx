@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 const LEGAL_LINK =
-  'text-[#6E655C] no-underline cursor-none transition-colors duration-200 hover:text-[#A8552C] focus-visible:text-[#A8552C] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#A8552C] rounded-sm'
+  'text-[#6E655C] no-underline cursor-pointer transition-colors duration-200 hover:text-[#A8552C] focus-visible:text-[#A8552C] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#A8552C] rounded-sm'
 
 export default function FooterBottomBar() {
   return (

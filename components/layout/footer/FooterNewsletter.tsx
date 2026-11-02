@@ -30,7 +30,7 @@ export default function FooterNewsletter() {
             <button
               type="submit"
               disabled={pending}
-              className="bg-[#2C2825] text-[#EDE8E0] px-5 py-2.5 rounded-full text-[11px] font-semibold tracking-[0.1em] uppercase whitespace-nowrap cursor-none transition-all duration-200 hover:bg-[#A8552C] hover:-translate-y-0.5 focus-visible:bg-[#A8552C] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2C2825] disabled:opacity-60 disabled:translate-y-0"
+              className="bg-[#2C2825] text-[#EDE8E0] px-5 py-2.5 rounded-full text-[11px] font-semibold tracking-[0.1em] uppercase whitespace-nowrap cursor-pointer transition-all duration-200 hover:bg-[#A8552C] hover:-translate-y-0.5 focus-visible:bg-[#A8552C] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2C2825] disabled:opacity-60 disabled:translate-y-0"
             >
               {pending ? 'Signing up…' : 'Subscribe'}
             </button>

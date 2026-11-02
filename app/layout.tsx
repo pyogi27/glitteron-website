@@ -1,34 +1,23 @@
 import type { Metadata } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
-import { Baskervville, Nunito_Sans } from 'next/font/google'
+import { Montserrat } from 'next/font/google'
 import './globals.css'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import WhatsAppButton from '@/components/layout/WhatsAppButton'
 import TrustFactors from '@/components/layout/TrustFactors'
 import BrandBanner from '@/components/layout/BrandBanner'
-import CustomCursor from '@/components/ui/CustomCursor'
 import GrainOverlay from '@/components/ui/GrainOverlay'
 import NewsletterPopup from '@/components/ui/NewsletterPopup'
 import SessionRestorer from '@/components/auth/SessionRestorer'
 import { SITE_NAME, SITE_URL } from '@/lib/site'
 
-// Self-hosted, preloaded, swap-on-fallback. Both are variable fonts, so one
-// file per style covers every weight the site uses.
-// Baskervville (transitional serif, the free cousin of the Baskerville cuts
-// HAY and Schoolhouse use) is headings only: it has no ₹ glyph, so every price
-// must be set in the sans.
-const baskervville = Baskervville({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-baskervville',
-})
-
-// Nunito Sans is the free Avenir-alike (Flos, Brilliant Earth) and carries ₹.
-const nunito = Nunito_Sans({
+// Self-hosted, preloaded, swap-on-fallback. Montserrat is a variable font, so
+// one file per style covers every weight the site uses, and it carries ₹.
+const montserrat = Montserrat({
   subsets: ['latin', 'latin-ext'],
   display: 'swap',
-  variable: '--font-nunito',
+  variable: '--font-montserrat',
 })
 
 // "Buy … Online in India" is the head-term shape every competitor ranking for
@@ -110,12 +99,11 @@ const CLERK_APPEARANCE = {
 // manual <link rel="preload"> is needed in <head>.
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-IN" className={`${baskervville.variable} ${nunito.variable}`}>
+    <html lang="en-IN" className={montserrat.variable}>
       <body className="bg-white text-dark font-sans font-normal leading-relaxed overflow-x-hidden" suppressHydrationWarning>
         {/* Inside <body>, not around <html>, per Clerk's App Router setup. */}
         <ClerkProvider signInUrl="/login" signUpUrl="/signup" appearance={CLERK_APPEARANCE}>
           <SessionRestorer />
-          <CustomCursor />
           <GrainOverlay />
           <NewsletterPopup />
           <Header />

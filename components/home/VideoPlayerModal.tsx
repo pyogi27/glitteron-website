@@ -178,11 +178,7 @@ export default function VideoPlayerModal({ items, startIndex, onClose }: Props) 
       data-video-player
       aria-label="Watch & Shop videos"
       onClose={onClose}
-      // The site hides the native cursor on every element with an unlayered
-      // !important rule and draws its own under z-9999, which the top layer
-      // covers. Layered !important beats unlayered, so these bring it back.
-      className="fixed inset-0 m-0 p-0 border-0 w-full h-dvh max-w-none max-h-none overflow-hidden bg-black text-white backdrop:bg-black
-        cursor-auto! [&_*]:[cursor:inherit]! [&_button]:cursor-pointer! [&_a]:cursor-pointer! [&_button:disabled]:cursor-default!"
+      className="fixed inset-0 m-0 p-0 border-0 w-full h-dvh max-w-none max-h-none overflow-hidden bg-black text-white backdrop:bg-black"
     >
       <div
         ref={scroller}

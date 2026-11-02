@@ -60,7 +60,7 @@ export default function SearchButton({ isLight }: { isLight: boolean }) {
         onClick={() => setOpen(v => !v)}
         aria-label="Search"
         aria-expanded={open}
-        className={`cursor-none border-none bg-transparent w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 ${
+        className={`cursor-pointer border-none bg-transparent w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 ${
           isLight
             ? 'text-white/80 hover:text-gold'
             : 'text-dark opacity-70 hover:opacity-100 hover:text-gold-dark'

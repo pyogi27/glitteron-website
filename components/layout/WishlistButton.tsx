@@ -20,7 +20,7 @@ export default function WishlistButton({ isLight }: WishlistButtonProps) {
     <Link
       href="/wishlist"
       aria-label={mounted && count > 0 ? `Saved items (${count})` : 'Saved items'}
-      className={`relative cursor-none no-underline w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 ${
+      className={`relative cursor-pointer no-underline w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 ${
         isLight
           ? 'text-white/80 hover:text-gold'
           : 'text-dark opacity-70 hover:opacity-100 hover:text-gold-dark'

@@ -105,7 +105,7 @@ export default function SearchInput({ hrefFor, defaultValue = '', autoFocus, onN
             search('')
             inputRef.current?.focus()
           }}
-          className="absolute right-2 w-7 h-7 flex items-center justify-center rounded-full text-[#8B7D6E] transition-colors hover:bg-[#EDE8E0] hover:text-[#2C2825] cursor-none"
+          className="absolute right-2 w-7 h-7 flex items-center justify-center rounded-full text-[#8B7D6E] transition-colors hover:bg-[#EDE8E0] hover:text-[#2C2825] cursor-pointer"
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
             <path d="M18 6L6 18M6 6l12 12" />

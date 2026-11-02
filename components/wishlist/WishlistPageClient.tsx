@@ -105,7 +105,7 @@ export default function WishlistPageClient() {
               <button
                 type="button"
                 onClick={() => load(useWishlistStore.getState().ids)}
-                className="inline-flex items-center justify-center bg-[#2C2825] text-white px-6 py-3 rounded-3xl text-[12px] font-medium uppercase tracking-[0.08em] transition-all duration-300 hover:bg-[#8B5E3C] hover:-translate-y-0.5 cursor-none"
+                className="inline-flex items-center justify-center bg-[#2C2825] text-white px-6 py-3 rounded-3xl text-[12px] font-medium uppercase tracking-[0.08em] transition-all duration-300 hover:bg-[#8B5E3C] hover:-translate-y-0.5 cursor-pointer"
               >
                 Try again
               </button>
@@ -147,7 +147,7 @@ export default function WishlistPageClient() {
                   <button
                     type="button"
                     onClick={() => toggle(id)}
-                    className="text-[11px] uppercase tracking-[0.09em] text-[#8B5E3C] hover:text-[#2C2825] transition-colors cursor-none"
+                    className="text-[11px] uppercase tracking-[0.09em] text-[#8B5E3C] hover:text-[#2C2825] transition-colors cursor-pointer"
                   >
                     Remove
                   </button>

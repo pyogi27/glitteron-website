@@ -104,7 +104,7 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
     return (
       <Link
         href={`/collections/${product.slug}`}
-        className="group relative rounded-[16px] overflow-hidden flex flex-row no-underline text-dark cursor-none border border-warm-gray bg-white
+        className="group relative rounded-[16px] overflow-hidden flex flex-row no-underline text-dark cursor-pointer border border-warm-gray bg-white
           transition-[transform,box-shadow,border-color] duration-[450ms] [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]
           hover:-translate-y-[4px] hover:border-gold/40 hover:shadow-card-hover"
       >
@@ -161,7 +161,7 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
             </div>
             <button
               onClick={handleAddToCart}
-              className="bg-dark text-white border-none w-[34px] h-[34px] rounded-full flex items-center justify-center transition-all duration-300 hover:bg-gold hover:scale-110 flex-shrink-0 cursor-none"
+              className="bg-dark text-white border-none w-[34px] h-[34px] rounded-full flex items-center justify-center transition-all duration-300 hover:bg-gold hover:scale-110 flex-shrink-0 cursor-pointer"
               aria-label={`Add ${product.name} to cart`}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -192,7 +192,7 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
     <article className={`product-card group relative h-full flex flex-col ${isDeal ? 'bg-white p-2.5 pb-3.5' : ''}`}>
       {/* #FFF: the catalogue shots are on white, so the tile reads as one photo edge to edge. */}
       <div className="relative aspect-square overflow-hidden bg-[#FFFFFF]">
-        <Link href={href} tabIndex={-1} aria-hidden="true" className="absolute inset-0 cursor-none">
+        <Link href={href} tabIndex={-1} aria-hidden="true" className="absolute inset-0 cursor-pointer">
           <Image
             src={imgSrc}
             alt={product.name}
@@ -221,7 +221,7 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
 
         <button
           onClick={handleWishlist}
-          className="absolute top-3 right-3 z-20 border-none w-8 h-8 rounded-full flex items-center justify-center cursor-none shadow-sm bg-[#F5F0EB]/95 transition-[background] duration-300 hover:bg-gold"
+          className="absolute top-3 right-3 z-20 border-none w-8 h-8 rounded-full flex items-center justify-center cursor-pointer shadow-sm bg-[#F5F0EB]/95 transition-[background] duration-300 hover:bg-gold"
           aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill={isWishlisted ? '#8B5E3C' : 'none'} stroke={isWishlisted ? '#8B5E3C' : '#7A6E62'} strokeWidth="1.8">
@@ -235,7 +235,7 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
           <Link
             href={href}
             aria-label={`Choose options for ${product.name}`}
-            className="absolute bottom-3 right-3 z-20 w-9 h-9 rounded-full flex items-center justify-center bg-[#2C2825] text-[#EDE8E0] no-underline cursor-none shadow-sm transition-[background,transform] duration-300 hover:bg-gold active:scale-95"
+            className="absolute bottom-3 right-3 z-20 w-9 h-9 rounded-full flex items-center justify-center bg-[#2C2825] text-[#EDE8E0] no-underline cursor-pointer shadow-sm transition-[background,transform] duration-300 hover:bg-gold active:scale-95"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               <path d="M4 6h16M4 12h16M4 18h10" />
@@ -245,7 +245,7 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
           <button
             onClick={handleAddToCart}
             aria-label={`Add ${product.name} to cart`}
-            className="absolute bottom-3 right-3 z-20 border-none w-9 h-9 rounded-full flex items-center justify-center bg-[#2C2825] text-[#EDE8E0] cursor-none shadow-sm transition-[background,transform] duration-300 hover:bg-gold active:scale-95"
+            className="absolute bottom-3 right-3 z-20 border-none w-9 h-9 rounded-full flex items-center justify-center bg-[#2C2825] text-[#EDE8E0] cursor-pointer shadow-sm transition-[background,transform] duration-300 hover:bg-gold active:scale-95"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
               <path d="M12 5v14M5 12h14" />
@@ -254,7 +254,7 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
         )}
       </div>
 
-      <Link href={href} className="block pt-3 no-underline cursor-none">
+      <Link href={href} className="block pt-3 no-underline cursor-pointer">
         <div className="font-sans text-[13px] font-bold uppercase tracking-[0.04em] leading-[1.35] text-[#2C2825] truncate">
           {product.name}
         </div>

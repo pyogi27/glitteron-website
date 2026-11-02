@@ -20,7 +20,7 @@ export default function FooterSocial() {
             target="_blank"
             rel="noopener noreferrer me"
             aria-label={`LitMeUp on ${platform}`}
-            className="w-9 h-9 rounded-full border border-[#D8D0C4] flex items-center justify-center text-[#5C5449] no-underline cursor-none transition-all duration-200 hover:border-[#A8552C] hover:bg-[#A8552C] hover:text-[#EDE8E0] hover:-translate-y-0.5 focus-visible:border-[#A8552C] focus-visible:bg-[#A8552C] focus-visible:text-[#EDE8E0] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2C2825]"
+            className="w-9 h-9 rounded-full border border-[#D8D0C4] flex items-center justify-center text-[#5C5449] no-underline cursor-pointer transition-all duration-200 hover:border-[#A8552C] hover:bg-[#A8552C] hover:text-[#EDE8E0] hover:-translate-y-0.5 focus-visible:border-[#A8552C] focus-visible:bg-[#A8552C] focus-visible:text-[#EDE8E0] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2C2825]"
           >
             <InstagramGlyph />
           </a>

@@ -46,7 +46,7 @@ export const FOOTER_COLUMNS = [
 // Focus-visible gets the same cue plus a ring so keyboard users are not left
 // with the browser default.
 export const FOOTER_LINK_CLASS =
-  'relative inline-block text-[13px] text-[#5C5449] no-underline cursor-none transition-colors duration-200 ' +
+  'relative inline-block text-[13px] text-[#5C5449] no-underline cursor-pointer transition-colors duration-200 ' +
   'after:absolute after:left-0 after:-bottom-0.5 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-[#A8552C] after:transition-transform after:duration-300 ' +
   'hover:text-[#A8552C] hover:after:scale-x-100 ' +
   'focus-visible:text-[#A8552C] focus-visible:after:scale-x-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#A8552C] rounded-sm'

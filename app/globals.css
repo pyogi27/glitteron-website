@@ -35,8 +35,10 @@
   --spacing-header-ticker: 196px; /* header + TickerStrip */
 
   /* Fonts */
-  --font-serif: var(--font-baskervville), "Baskervville", serif;
-  --font-sans: var(--font-nunito), "Nunito Sans", sans-serif;
+  /* ponytail: one family site-wide; font-serif kept as an alias so the
+     existing heading classes need no edits. */
+  --font-sans: var(--font-montserrat), "Montserrat", sans-serif;
+  --font-serif: var(--font-sans);
 
   /* Box Shadows */
   --shadow-gold-glow: 0 24px 64px rgba(168,91,59,0.22), 0 8px 24px rgba(26,18,16,0.14);
@@ -110,19 +112,8 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body { overflow-x: hidden; }
-}
-
-/*
-  Cursor override — only on pointer/mouse devices, not touch screens.
-  Intentionally outside @layer so it beats any layered utility or UA rule.
-*/
-@media (hover: hover) and (pointer: fine) {
-  html,
-  html *,
-  html *::before,
-  html *::after {
-    cursor: none !important;
-  }
+  /* Tailwind v4 dropped the hand cursor on buttons; restore it, per its upgrade guide. */
+  button:not(:disabled), [role="button"]:not(:disabled) { cursor: pointer; }
 }
 
 @layer utilities {
@@ -245,7 +236,6 @@
     position: relative;
     border-radius: 20px;
     overflow: hidden;
-    cursor: none;
     transition:
       filter   0.45s ease,
       box-shadow 0.35s ease;

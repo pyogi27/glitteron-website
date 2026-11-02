@@ -11,7 +11,9 @@ const DEAL_END_MS_INTO_DAY = DAY_MS - 1000
 
 /** Most deals the carousel shows, and the fewest before featured products fill in. */
 export const DEAL_MAX = 12
-export const DEAL_MIN = 5
+// ponytail: equal to DEAL_MAX for now, so the rail is always full of catalogue products
+// while few are discounted. Drop back to 5 once real deals fill the rail on their own.
+export const DEAL_MIN = DEAL_MAX
 
 /**
  * Milliseconds until today's deal ends at 23:59:59 IST. Exactly 0 at the deadline;
