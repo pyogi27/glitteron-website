@@ -50,6 +50,7 @@
   --animate-flicker1: flicker1 4s ease-in-out infinite;
   --animate-flicker2: flicker2 3s ease-in-out infinite;
   --animate-sway: sway 6s ease-in-out infinite;
+  --animate-crossfade: crossfade 7s ease-in-out infinite both;
 
   @keyframes ticker {
     from { transform: translateX(0); }
@@ -77,6 +78,15 @@
   @keyframes sway {
     0%, 100% { transform: translateX(-50%) rotate(-1deg); }
     50%       { transform: translateX(-50%) rotate(1deg); }
+  }
+
+  /* Touch stand-in for a hover image swap: hold the base image, fade the second
+     one in, hold, fade out. Starts and ends hidden, so reduced motion (which
+     collapses this to one frame) just shows the base image. */
+  @keyframes crossfade {
+    0%, 40%  { opacity: 0; }
+    50%, 90% { opacity: 1; }
+    100%     { opacity: 0; }
   }
 
   @keyframes popupIn {

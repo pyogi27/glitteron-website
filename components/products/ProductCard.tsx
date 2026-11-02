@@ -9,6 +9,7 @@ import StarRating from '@/components/ui/StarRating'
 import { useCartStore } from '@/lib/stores/cartStore'
 import { useWishlistStore } from '@/lib/stores/wishlistStore'
 import { useFilterStore } from '@/lib/stores/filterStore'
+import { imageHasBackdrop } from '@/lib/cardImage'
 
 /** `deal`: the homepage Deal of the Day card — the shared card on a light panel, discount as its badge. */
 type CardVariant = 'grid' | 'list' | 'related' | 'deal'
@@ -64,6 +65,10 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
   const [imgSrc, setImgSrc] = useState(product.images[0] || FALLBACK_IMAGE)
   const lightOn = useFilterStore((s) => s.lightOn)
   const [litFailed, setLitFailed] = useState(false)
+  // Shots on a room backdrop fill the tile; ones on white stay padded (see lib/cardImage).
+  const [baseBleed, setBaseBleed] = useState(false)
+  const [litBleed, setLitBleed] = useState(false)
+  const fit = (bleed: boolean, pad: string) => (bleed ? 'object-cover' : `object-contain ${pad}`)
   useEffect(() => { setMounted(true) }, [])
   const isWishlisted = mounted && has(product.id)
   // Lit layer sits above the base image and crossfades in — and the base fades
@@ -129,10 +134,11 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
             src={imgSrc}
             alt={product.name}
             fill
-            className={`object-contain p-[8%] transition-[transform,opacity] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.07]
+            className={`${fit(baseBleed, 'p-[8%]')} transition-[transform,opacity] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.07]
               ${baseFade}`}
             sizes={LIST_SIZES}
             priority={priority && !showLit}
+            onLoad={(e) => setBaseBleed(imageHasBackdrop(e.currentTarget))}
             onError={() => setImgSrc(FALLBACK_IMAGE)}
           />
           {litMounted && litSrc && (
@@ -141,10 +147,11 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
               alt=""
               aria-hidden="true"
               fill
-              className={`object-contain p-[8%] transition-[opacity,transform] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]
+              className={`${fit(litBleed, 'p-[8%]')} transition-[opacity,transform] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]
                 group-hover:scale-[1.07] ${litFade}`}
               sizes={LIST_SIZES}
               priority={priority && showLit}
+              onLoad={(e) => setLitBleed(imageHasBackdrop(e.currentTarget))}
               onError={() => setLitFailed(true)}
             />
           )}
@@ -200,8 +207,8 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
   const imgSizes = isDeal ? DEAL_SIZES : variant === 'related' ? RELATED_SIZES : sizes ?? GRID_SIZES
   // Padding on the <img> itself: object-contain fits the photo inside the content
   // box, so any aspect ratio (tall lamp, wide chandelier) shows whole and clear of
-  // the rounded corners and the overlaid buttons.
-  const imgClass = 'product-card-img object-contain p-[9%] transition-[transform,opacity] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]'
+  // the rounded corners and the overlaid buttons. Backdrop shots drop it and cover.
+  const imgClass = 'product-card-img transition-[transform,opacity] duration-500 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]'
 
   return (
     <article className="product-card group relative h-full flex flex-col overflow-hidden">
@@ -214,9 +221,10 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
             src={imgSrc}
             alt={product.name}
             fill
-            className={`${imgClass} ${baseFade}`}
+            className={`${imgClass} ${fit(baseBleed, 'p-[9%]')} ${baseFade}`}
             sizes={imgSizes}
             priority={priority && !showLit}
+            onLoad={(e) => setBaseBleed(imageHasBackdrop(e.currentTarget))}
             onError={() => setImgSrc(FALLBACK_IMAGE)}
           />
           {litMounted && litSrc && (
@@ -224,9 +232,10 @@ export default function ProductCard({ product, variant = 'grid', priority = fals
               src={litSrc}
               alt=""
               fill
-              className={`${imgClass} ${litFade}`}
+              className={`${imgClass} ${fit(litBleed, 'p-[9%]')} ${litFade}`}
               sizes={imgSizes}
               priority={priority && showLit}
+              onLoad={(e) => setLitBleed(imageHasBackdrop(e.currentTarget))}
               onError={() => setLitFailed(true)}
             />
           )}

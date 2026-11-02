@@ -111,13 +111,15 @@ export default function CollectionsSection({ categories = STATIC_CATEGORIES }: P
                   />
                   {/* Optional hover image, stacked over the main one and faded in: no src
                       swap, no layout shift. It is a lifestyle photo, not a cutout, so it
-                      fills the arch with no blend. Touch devices never match hover:hover. */}
+                      fills the arch with no blend. Touch devices cannot hover, so there it
+                      crossfades on its own loop, staggered per card into a ripple. */}
                   {cat.hoverImage?.trim() && (
                     <img
                       src={cat.hoverImage.trim()}
                       alt=""
                       loading="lazy"
-                      className="absolute inset-0 h-full w-full object-cover opacity-0 transition-[opacity,scale] duration-[400ms,700ms] [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:scale-105"
+                      style={{ animationDelay: `${i * 0.8}s` }}
+                      className="absolute inset-0 h-full w-full object-cover opacity-0 transition-[opacity,scale] duration-[400ms,700ms] [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:scale-105 [@media(hover:none)]:animate-crossfade"
                     />
                   )}
                 </div>
