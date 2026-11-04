@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { backendHeaders, isCrossSite, logEdgeHeadersOnce } from '@/lib/api/proxyGuard';
 
 const BACKEND = process.env.API_URL ?? 'http://localhost:3000';
 
@@ -11,15 +12,11 @@ async function proxyRequest(req: NextRequest, ctx: RouteContext): Promise<NextRe
   const searchParams = req.nextUrl.searchParams.toString();
   const url = `${BACKEND}/api/v1/cart/${path}${searchParams ? `?${searchParams}` : ''}`;
 
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-
-  const authorization = req.headers.get('authorization');
-  if (authorization) headers['authorization'] = authorization;
-
-  const cookie = req.headers.get('cookie');
-  if (cookie) headers['cookie'] = cookie;
+  if (isCrossSite(req.method, req.headers)) {
+    return NextResponse.json({ success: false, message: 'Cross-site request refused' }, { status: 403 });
+  }
+  logEdgeHeadersOnce(req.headers);
+  const headers = backendHeaders(req.headers);
 
   const init: RequestInit = { method: req.method, headers };
 

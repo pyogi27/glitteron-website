@@ -3,11 +3,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useAuth } from '@clerk/nextjs'
 import { useAuthStore } from '@/lib/stores/authStore'
-import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { useCartStore } from '@/lib/stores/cartStore'
+import { isPlausibleEmail, markGuestSession } from '@/lib/guestToken'
 import {
   createCheckout,
+  startGuestSession,
   verifyPayment,
   getWebsiteCart,
   getShippingRate,
@@ -34,6 +36,7 @@ const EMPTY_ADDRESS: AddressFormData = {
   city: '',
   state: '',
   zipCode: '',
+  email: '',
 }
 
 export default function CheckoutClient() {
@@ -44,7 +47,47 @@ export default function CheckoutClient() {
   const [address, setAddress] = useState<AddressFormData>(EMPTY_ADDRESS)
   const [loading, setLoading] = useState<LoadingState>(null)
   const [error, setError] = useState<string | null>(null)
-  const authChecked = useRequireAuth()
+
+  // Signed in: today's checkout, unchanged. Signed out: guest checkout, no choice to make
+  // (POST /api/guest/session sets an httpOnly cookie that the cart and payment calls carry).
+  const { isLoaded, isSignedIn } = useAuth()
+  const hydrated = useAuthStore(s => s.hydrated)
+  const [guestMode, setGuestMode] = useState(false)
+  const [guestError, setGuestError] = useState<string | null>(null)
+  const guestRequestedRef = useRef(false) // once per visit, even under Strict Mode's double effects
+  const isGuest = isLoaded && !isSignedIn && guestMode
+  const authChecked = isLoaded && (isSignedIn ? hydrated && !!user : guestMode)
+
+  const startGuest = useCallback(async () => {
+    setGuestError(null)
+    try {
+      await startGuestSession()
+      markGuestSession()
+      setGuestMode(true)
+    } catch (err: unknown) {
+      const apiErr = err as { status?: number; message?: string }
+      // 404: the backend has guest checkout switched off, so sign-in is the only way, as before.
+      if (apiErr.status === 404) router.replace('/login?redirect_url=/checkout')
+      else setGuestError(apiErr.message ?? 'Something went wrong. Please try again.')
+    }
+  }, [router])
+
+  useEffect(() => {
+    if (!isLoaded || isSignedIn || items.length === 0 || guestRequestedRef.current) return
+    guestRequestedRef.current = true
+    startGuest()
+  }, [isLoaded, isSignedIn, items.length, startGuest])
+
+  // A guest session can lapse mid-checkout (7 days): start a fresh one and retry once.
+  const withGuestSession = useCallback(async <T,>(run: () => Promise<T>): Promise<T> => {
+    try {
+      return await run()
+    } catch (err: unknown) {
+      if (!isGuest || (err as { status?: number }).status !== 401) throw err
+      await startGuestSession()
+      return run()
+    }
+  }, [isGuest])
 
   // Server cart totals (live prices, discounts, GST, shipping for the pincode typed below)
   const [serverCart, setServerCart] = useState<WebsiteCartSummary | null>(null)
@@ -77,16 +120,17 @@ export default function CheckoutClient() {
         city: user.city ?? '',
         state: user.state ?? '',
         zipCode: user.zipCode ?? '',
+        email: user.email ?? '',
       })
     }
   }, [user])
 
   // Redirect to cart if empty
   useEffect(() => {
-    if (authChecked && items.length === 0) {
+    if ((authChecked || (isLoaded && !isSignedIn)) && items.length === 0) {
       router.replace('/cart')
     }
-  }, [authChecked, items.length, router])
+  }, [authChecked, isLoaded, isSignedIn, items.length, router])
 
   const typedPincode = /^\d{6}$/.test(address.zipCode.trim()) ? address.zipCode.trim() : undefined
   const cartKey = items.map(i => `${i.apiProductId ?? i.productId}:${i.productVariationId ?? ''}:${i.quantity}`).join('|')
@@ -103,7 +147,7 @@ export default function CheckoutClient() {
     setCartLoading(true)
     const timer = setTimeout(async () => {
       try {
-        await syncCartToServer(items)
+        await withGuestSession(() => syncCartToServer(items))
       } catch {
         if (cancelled) return
         if (appliedCoupon) setPricingFailed(true)
@@ -157,7 +201,7 @@ export default function CheckoutClient() {
     setCouponLoading(true)
     setCouponError(null)
     try {
-      await syncCartToServer(items)
+      await withGuestSession(() => syncCartToServer(items))
       const summary = await validateCoupon(code, typedPincode)
       const applied = summary.couponCode ?? code
       // Mark these totals as priced, so the effect doesn't validate the same thing again.
@@ -171,7 +215,7 @@ export default function CheckoutClient() {
       setCouponLoading(false)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [couponInput, items, typedPincode, cartKey])
+  }, [couponInput, items, typedPincode, cartKey, withGuestSession])
 
   const removeCoupon = useCallback(() => {
     setAppliedCoupon(null)
@@ -201,6 +245,10 @@ export default function CheckoutClient() {
         return
       }
     }
+    if (isGuest && !isPlausibleEmail(address.email.trim())) {
+      setError('Please enter a valid email address')
+      return
+    }
     setError(null)
     clearSpinnerTimer() // a previous attempt's timer must not clear this attempt's spinner
 
@@ -219,7 +267,7 @@ export default function CheckoutClient() {
       // Reconcile rather than clear-then-re-add. On this path a failed sync must block
       // before the Razorpay modal opens — the surrounding try already does that, and
       // syncCartToServer throws rather than swallowing.
-      await syncCartToServer(items)
+      await withGuestSession(() => syncCartToServer(items))
 
       // Step 2: Create Razorpay order
       setLoading('creating_order')
@@ -229,7 +277,7 @@ export default function CheckoutClient() {
         city: address.city,
         state: address.state,
         zipCode: address.zipCode,
-      }, appliedCoupon)
+      }, appliedCoupon, isGuest ? { fullName: address.fullName.trim(), email: address.email.trim() } : undefined)
 
       // Step 3: Load Razorpay script
       const loaded = await loadRazorpayScript()
@@ -263,7 +311,7 @@ export default function CheckoutClient() {
         prefill: {
           name: address.fullName,
           contact: address.phone,
-          email: user?.email ?? '',
+          email: user?.email ?? address.email.trim(),
         },
         theme: { color: '#C9A84C' },
         handler: async (response) => {
@@ -276,7 +324,11 @@ export default function CheckoutClient() {
               razorpaySignature: response.razorpay_signature,
             })
             clearCart()
-            router.push(`/orders/${result.salesOrderId}?success=true`)
+            // Guests can't sign in to see the order: its link carries a token in the
+            // fragment, which never reaches servers or logs.
+            router.push(result.orderAccessToken
+              ? `/orders/guest#t=${result.orderAccessToken}`
+              : `/orders/${result.salesOrderId}?success=true`)
           } catch (err: unknown) {
             const apiErr = err as { status?: number; message?: string }
             if (apiErr.status === 502) {
@@ -321,7 +373,24 @@ export default function CheckoutClient() {
       }
       setLoading(null)
     }
-  }, [address, items, user, clearCart, router, appliedCoupon])
+  }, [address, items, user, clearCart, router, appliedCoupon, isGuest, withGuestSession])
+
+  if (guestError) {
+    return (
+      <div className="pt-header bg-[#EDE8E0] min-h-screen flex items-center justify-center px-4">
+        <div role="alert" className="max-w-[420px] text-center">
+          <p className="text-[14px] text-[#2C2825] mb-4">{guestError}</p>
+          <button
+            type="button"
+            onClick={startGuest}
+            className="inline-flex items-center h-11 px-6 rounded-full bg-[#2C2825] text-white text-[12px] font-semibold uppercase tracking-[0.12em] hover:bg-[#8B5E3C] transition-colors"
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   // Loading skeleton while waiting for auth check
   if (!authChecked) {
@@ -353,6 +422,7 @@ export default function CheckoutClient() {
               value={address}
               onChange={setAddress}
               disabled={loading !== null}
+              showEmail={isGuest}
             />
             <OrderSummary
               loading={loading !== null}

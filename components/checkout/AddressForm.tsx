@@ -7,15 +7,18 @@ export interface AddressFormData {
   city: string
   state: string
   zipCode: string
+  /** Guests only: the receipt and the order link are sent here. */
+  email: string
 }
 
 interface Props {
   value: AddressFormData
   onChange: (data: AddressFormData) => void
   disabled?: boolean
+  showEmail?: boolean
 }
 
-export default function AddressForm({ value, onChange, disabled }: Props) {
+export default function AddressForm({ value, onChange, disabled, showEmail }: Props) {
   const set = (field: keyof AddressFormData) => (e: React.ChangeEvent<HTMLInputElement>) =>
     onChange({ ...value, [field]: e.target.value })
 
@@ -36,6 +39,26 @@ export default function AddressForm({ value, onChange, disabled }: Props) {
             <input className={inputClass} value={value.phone} onChange={set('phone')} placeholder="9876543210" disabled={disabled} />
           </div>
         </div>
+        {showEmail && (
+          <div>
+            <label htmlFor="checkout-email" className={labelClass}>Email *</label>
+            <input
+              id="checkout-email"
+              type="email"
+              autoComplete="email"
+              inputMode="email"
+              className={inputClass}
+              value={value.email}
+              onChange={set('email')}
+              placeholder="you@example.com"
+              disabled={disabled}
+              aria-describedby="checkout-email-hint"
+            />
+            <p id="checkout-email-hint" className="text-[12px] text-[#A09488] mt-1.5">
+              We&apos;ll send your receipt and a link to view your order here.
+            </p>
+          </div>
+        )}
         <div>
           <label className={labelClass}>Address Line *</label>
           <input className={inputClass} value={value.addressLine1} onChange={set('addressLine1')} placeholder="123 Main Street" disabled={disabled} />

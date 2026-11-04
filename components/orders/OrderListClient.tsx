@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
-import { getWebsiteOrders, type WebsiteOrder } from '@/lib/auth/api'
+import { claimGuestOrders, getWebsiteOrders, type WebsiteOrder } from '@/lib/auth/api'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -52,13 +52,21 @@ export default function OrderListClient() {
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const claimedRef = useRef(false)
 
-  // Fetch orders once auth is confirmed
+  // Fetch orders once auth is confirmed. The first load first pulls in guest orders placed
+  // with this account's verified email; if that fails the list still loads, and the next
+  // visit tries again.
   useEffect(() => {
     if (!signedIn) return
     setLoading(true)
     setError(null)
-    getWebsiteOrders(page, 10)
+    const claim = claimedRef.current
+      ? Promise.resolve()
+      : claimGuestOrders().then(() => undefined, () => undefined)
+    claimedRef.current = true
+    claim
+      .then(() => getWebsiteOrders(page, 10))
       .then(res => {
         setOrders(res.orders ?? [])
         setTotalCount(res.pagination?.total ?? 0)

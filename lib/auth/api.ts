@@ -281,7 +281,13 @@ export interface ShippingAddress {
  * Creates the Razorpay order. Rejects with status 409 when `couponCode` no longer applies
  * (expired or used up since the preview): re-price without it and ask again.
  */
-export const createCheckout = (shippingAddress: ShippingAddress, couponCode?: string | null) =>
+/** Guests only: where the receipt and the order link go. Signed-in shoppers omit it. */
+export interface GuestContact {
+  fullName: string
+  email: string
+}
+
+export const createCheckout = (shippingAddress: ShippingAddress, couponCode?: string | null, contact?: GuestContact) =>
   authedFetch<{
     success: true
     razorpayOrderId: string
@@ -291,15 +297,16 @@ export const createCheckout = (shippingAddress: ShippingAddress, couponCode?: st
     reservedUntil?: string
   }>('/api/payments/checkout', {
     method: 'POST',
-    body: JSON.stringify({ shippingAddress, ...(couponCode ? { couponCode } : {}) }),
+    body: JSON.stringify({ shippingAddress, ...(couponCode ? { couponCode } : {}), ...(contact ? { contact } : {}) }),
   })
 
+/** orderAccessToken: guests only, the link to /orders/guest (they can't sign in to see it). */
 export const verifyPayment = (payload: {
   razorpayOrderId: string
   razorpayPaymentId: string
   razorpaySignature: string
 }) =>
-  authedFetch<{ success: true; salesOrderId: number }>('/api/payments/verify', {
+  authedFetch<{ success: true; salesOrderId: number; orderAccessToken?: string }>('/api/payments/verify', {
     method: 'POST',
     body: JSON.stringify(payload),
   })
@@ -359,6 +366,63 @@ export const getWebsiteOrders = (page = 1, limit = 10) =>
 
 export const getWebsiteOrder = (id: number) =>
   authedReq<{ success: true; order: WebsiteOrder }>(`/orders/${id}`)
+
+// ─── Guest checkout ───────────────────────────────────────────────────────────
+// The session is an httpOnly cookie the backend sets through /api/guest; same-origin
+// fetch sends it, so cart and payment calls work unchanged with no Clerk token.
+
+export const startGuestSession = () =>
+  authedFetch<{ success: true; expiresAt: string }>('/api/guest/session', { method: 'POST', body: '{}' })
+
+export const endGuestSession = () =>
+  authedFetch<{ success: true }>('/api/guest/session', { method: 'DELETE' })
+
+/** What an order link shows: no street address, phone or payment ids. */
+export interface GuestOrderView {
+  id: number
+  createdAt: string
+  status: WebsiteOrder['status']
+  payment: { status: WebsiteOrder['payment']['status'] } | null
+  items: {
+    name: string | null
+    variationName: string | null
+    image: string | null
+    quantity: number
+    price: string
+    total: string
+    mrp: string | null
+  }[]
+  listSubtotal: string | null
+  discountTotal: string | null
+  couponCode: string | null
+  subtotal: string
+  gstAmount: string
+  courierCharges: string
+  finalTotal: string
+  shipTo: { city: string | null; state: string | null }
+  emailMasked: string | null
+}
+
+/**
+ * "Find my orders": the backend mails fresh links if that email has guest orders. Same reply
+ * either way. Rejects with 429 after 3 tries an hour for one email, 404 while guest checkout is off.
+ */
+export const recoverGuestOrders = (email: string) =>
+  authedFetch<{ success: true; message: string }>('/api/guest/orders/recover', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  })
+
+/** Signed in: guest orders placed with this account's verified email join it. Returns how many moved. */
+export const claimGuestOrders = () =>
+  authedReq<{ success: true; claimed: number }>('/orders/claim-guest', { method: 'POST', body: '{}' })
+
+/** The token goes in the body, never a URL, so it stays out of logs. 404 for any bad link. */
+export const lookupGuestOrder = (token: string) =>
+  authedFetch<{ success: true; order: GuestOrderView }>('/api/guest/orders/lookup', {
+    method: 'POST',
+    body: JSON.stringify({ token }),
+  })
 
 // ─── Product reviews ──────────────────────────────────────────────────────────
 

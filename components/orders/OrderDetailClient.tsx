@@ -7,16 +7,16 @@ import Link from 'next/link'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { getWebsiteOrder, type WebsiteOrder } from '@/lib/auth/api'
 
-function formatDate(iso: string) {
+export function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-function formatPrice(str: string) {
+export function formatPrice(str: string): string {
   const n = parseFloat(str)
   return `₹${n.toLocaleString('en-IN')}`
 }
 
-function OrderStatusBadge({ status }: { status: WebsiteOrder['status'] }) {
+export function OrderStatusBadge({ status }: { status: WebsiteOrder['status'] }) {
   const styles = {
     approved: 'bg-green-600/10 text-green-700',
     pending: 'bg-yellow-500/10 text-yellow-700',
@@ -29,7 +29,7 @@ function OrderStatusBadge({ status }: { status: WebsiteOrder['status'] }) {
   )
 }
 
-function PaymentStatusBadge({ status }: { status: WebsiteOrder['payment']['status'] }) {
+export function PaymentStatusBadge({ status }: { status: WebsiteOrder['payment']['status'] }) {
   const styles = {
     PAID: 'bg-green-600/10 text-green-700',
     PENDING: 'bg-yellow-500/10 text-yellow-700',

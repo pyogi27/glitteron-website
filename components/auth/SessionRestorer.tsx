@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth, useClerk } from '@clerk/nextjs';
-import { getMe, setTokenGetter } from '@/lib/auth/api';
+import { endGuestSession, getMe, setTokenGetter } from '@/lib/auth/api';
+import { takeGuestSessionMark } from '@/lib/guestToken';
 import { useAuthStore } from '@/lib/stores/authStore';
 import type { ApiError } from '@/lib/auth/types';
 
@@ -32,6 +33,9 @@ export default function SessionRestorer() {
       setHydrated();
       return;
     }
+    // Signed in now: a guest session this browser started at checkout is done with.
+    // Best effort, since the backend expires it on its own within 7 days anyway.
+    if (takeGuestSessionMark()) endGuestSession().catch(() => undefined);
     let cancelled = false;
     getMe()
       .then(({ user }) => { if (!cancelled) setUser(user); })
