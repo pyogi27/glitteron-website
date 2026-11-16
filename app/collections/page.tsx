@@ -67,7 +67,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     : `Buy Lights Online in India — 500+ Handcrafted Designs${pageSuffix}`
 
   const description = category
-    ? `Shop handcrafted ${category.toLowerCase()} from LitMeUp. Free shipping across India, 5-year warranty and easy returns.`
+    ? `Shop handcrafted ${category.toLowerCase()} from LitMeUp. Free shipping across India and easy returns.`
     : 'Browse 500+ handcrafted chandeliers, pendants, ceiling and wall lights. Filter by style, room and price. Free shipping across India.'
 
   return {

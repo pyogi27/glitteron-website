@@ -87,7 +87,7 @@ export const categories: LightCategory[] = [
     // of ranking for "chandelier" answers a search for "jhoomar".
     title: 'Buy Chandeliers (Jhoomar) Online in India — Handcrafted',
     description:
-      'Buy handcrafted chandeliers and jhoomar lights online in India — brass, hand-blown glass and crystal. Free shipping, 5-year warranty, 7-day returns.',
+      'Buy handcrafted chandeliers and jhoomar lights online in India — brass, hand-blown glass and crystal. Free shipping, 7-day returns.',
     subtitle: 'Handcrafted chandeliers and jhoomars in brass, hand-blown glass and solid steel.',
     intro: [
       'A chandelier is the one fixture in a room that people look up at, so it is worth getting the scale right before the style. The usual rule: add the room’s length and width in feet, and the answer in inches is a sensible diameter. A 14 by 16 foot living room takes a 30-inch chandelier comfortably.',
@@ -149,7 +149,7 @@ export const categories: LightCategory[] = [
     shortName: 'Pendant Lights',
     title: 'Buy Pendant Lights Online in India — Handcrafted',
     description:
-      'Buy handcrafted pendant lights online in India for kitchen islands, dining tables and bedsides. Twelve finishes, free shipping, 5-year warranty.',
+      'Buy handcrafted pendant lights online in India for kitchen islands, dining tables and bedsides. Twelve finishes, free shipping, 7-day returns.',
     subtitle: 'Single pendants and clusters for islands, tables and bedsides.',
     intro: [
       'Pendants do their best work in threes over an island, in pairs beside a bed, or singly above a reading chair. The spacing convention for an island is 24 to 30 inches between centres, with the outer pendants set in from the counter edge by about 12 inches.',
@@ -199,7 +199,7 @@ export const categories: LightCategory[] = [
     shortName: 'Ceiling Lights',
     title: 'Buy Ceiling Lights Online in India — Handcrafted',
     description:
-      'Buy handcrafted ceiling lights online in India — flush and semi-flush fixtures for low ceilings, bedrooms and hallways. Free shipping, 5-year warranty.',
+      'Buy handcrafted ceiling lights online in India — flush and semi-flush fixtures for low ceilings, bedrooms and hallways. Free shipping, 7-day returns.',
     subtitle: 'Flush and semi-flush fixtures for rooms that cannot take a drop.',
     intro: [
       'Ceiling lights are the answer wherever a hanging fixture would be in the way: bedrooms with ceiling fans, hallways, bathrooms, and any room under nine feet. A flush mount sits tight to the ceiling; a semi-flush drops three to eight inches and reads less utilitarian.',
@@ -246,7 +246,7 @@ export const categories: LightCategory[] = [
     shortName: 'Wall Lights',
     title: 'Buy Wall Lights Online in India — Handcrafted',
     description:
-      'Buy handcrafted wall lights and sconces online in India for bedsides, hallways and mirrors. Twelve finishes, free shipping, 5-year warranty.',
+      'Buy handcrafted wall lights and sconces online in India for bedsides, hallways and mirrors. Twelve finishes, free shipping, 7-day returns.',
     subtitle: 'Sconces and wall lights for bedsides, hallways and mirrors.',
     intro: [
       'Wall lights are the layer that makes a room feel finished. They light faces rather than floors, which is why they belong beside mirrors and beds, and why a hallway lit by sconces reads warmer than the same hallway lit from above.',
@@ -298,7 +298,7 @@ export const categories: LightCategory[] = [
     shortName: 'Table Lamps',
     title: 'Buy Table Lamps Online in India — Handcrafted',
     description:
-      'Buy handcrafted table lamps online in India for bedsides, consoles and desks. Brass, glass and steel, free shipping, 5-year warranty.',
+      'Buy handcrafted table lamps online in India for bedsides, consoles and desks. Brass, glass and steel, free shipping, 7-day returns.',
     subtitle: 'Bedside, console and desk lamps in brass, glass and steel.',
     intro: [
       'A table lamp is the light you actually live by — the one on at 10pm when the ceiling fixture is off. Two matched lamps on a console or either side of a bed do more for a room than any amount of overhead brightness.',
@@ -336,7 +336,7 @@ export const categories: LightCategory[] = [
     shortName: 'Floor Lamps',
     title: 'Buy Floor Lamps Online in India — Handcrafted',
     description:
-      'Buy handcrafted floor lamps online in India — reading, arc and task lamps in brass and steel. Free shipping, 5-year warranty, 7-day returns.',
+      'Buy handcrafted floor lamps online in India — reading, arc and task lamps in brass and steel. Free shipping, 7-day returns.',
     subtitle: 'Reading, arc and task lamps in brass and solid steel.',
     intro: [
       'A floor lamp is the cheapest way to fix a badly lit room, because it adds light where the ceiling cannot reach — a corner, a reading chair, the dark end of a sofa. No wiring, no electrician, no holes in the ceiling.',
@@ -395,7 +395,7 @@ export const categories: LightCategory[] = [
     shortName: 'Hanging Lights',
     title: 'Buy Hanging Lights Online in India — Chandeliers & Pendants',
     description:
-      'Buy handcrafted hanging lights online in India — chandeliers, jhoomars, pendants and clusters. Free shipping, 5-year warranty, 7-day returns.',
+      'Buy handcrafted hanging lights online in India — chandeliers, jhoomars, pendants and clusters. Free shipping, 7-day returns.',
     subtitle: 'Chandeliers, jhoomars, pendants and clusters — everything that hangs.',
     intro: [
       'Hanging light is the whole family: anything suspended from the ceiling on a rod, chain or cable. In practice it splits two ways. A chandelier — jhoomar — carries several lamps on one frame and is bought to be the thing you look at. A pendant carries one, and is bought to light what is underneath it. Everything else, clusters and linear bars included, is one of those two repeated.',

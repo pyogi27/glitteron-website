@@ -226,7 +226,7 @@ export function productTitle(p: ProductCopyInput): string {
  * The backfilled descriptions (scripts/generate-descriptions.mjs) run 300-600
  * characters of body copy, and clamping one to 158 yields a sentence cut mid-clause
  * with an ellipsis — strictly worse in the SERP than the attribute build below,
- * which is written to fit and closes on price, delivery and warranty. So: take the
+ * which is written to fit and closes on price, delivery and returns. So: take the
  * whole thing if it fits, else its first complete sentence if that fits, else build
  * from attributes.
  */
@@ -261,8 +261,8 @@ function attributeMetaDescription(p: ProductCopyInput): string {
 
   const price = formatPrice(p.price)
   const commerce = price
-    ? `${price} with free delivery across India and a 5-year warranty.`
-    : 'Free delivery across India, 5-year warranty and 7-day returns.'
+    ? `${price} with free delivery across India and 7-day returns.`
+    : 'Free delivery across India and 7-day returns.'
 
   // Capitalise the opening fact — it starts the sentence.
   const sentence = facts ? `${facts[0].toUpperCase()}${facts.slice(1)}. ` : ''
@@ -320,7 +320,7 @@ export function productBodyCopy(p: ProductCopyInput): string {
     sentences.push(`Suited to the ${joinProse(rooms)}.`)
   }
 
-  sentences.push('Ships free anywhere in India with a 5-year warranty and 7-day returns.')
+  sentences.push('Ships free anywhere in India with 7-day returns.')
 
   return sentences.join(' ')
 }

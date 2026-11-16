@@ -42,9 +42,9 @@ const PERKS = [
     path: 'M1 3h13v13H1zM14 8h4l3 3v5h-7M5.5 19.5a2 2 0 100-4 2 2 0 000 4zM16.5 19.5a2 2 0 100-4 2 2 0 000 4z',
   },
   {
-    label: '5yr Warranty',
-    sub: 'On all products',
-    path: 'M12 2l8 3.5v6c0 4.8-3.3 9.1-8 10.5-4.7-1.4-8-5.7-8-10.5v-6zM9 12l2 2 4-4',
+    label: '7-Day Returns',
+    sub: 'From the day it arrives',
+    path: 'M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8M3 3v5h5',
   },
   {
     label: 'Expert Install',

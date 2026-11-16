@@ -3,7 +3,7 @@ import RevealOnScroll from '@/components/ui/RevealOnScroll'
 const stats = [
   { num: '12K+', label: 'Happy Customers' },
   { num: '500+', label: 'Designs In Stock' },
-  { num: '5yr', label: 'Warranty' },
+  { num: '7d', label: 'Returns' },
   { num: '98%', label: 'Satisfaction Rate' },
 ]
 

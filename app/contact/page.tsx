@@ -76,7 +76,7 @@ export default function ContactPage() {
         stats={[
           { num: '<1d', label: 'Reply Time' },
           { num: '6d', label: 'Days A Week' },
-          { num: '5yr', label: 'Warranty' },
+          { num: '7d', label: 'Returns' },
         ]}
       />
 

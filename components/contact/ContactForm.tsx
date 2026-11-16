@@ -7,7 +7,7 @@ const TOPICS = [
   'Product question',
   'Order status',
   'Installation help',
-  'Returns & warranty',
+  'Returns',
   'Trade / bulk enquiry',
   'Something else',
 ] as const

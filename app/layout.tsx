@@ -27,7 +27,7 @@ const TITLE = 'Buy Decorative Lights Online in India | LitMeUp'
 // actually types; both were absent from the whole site while every competitor
 // ranking above us carries them in the title tag or a parent category.
 const DESCRIPTION =
-  'Buy handcrafted chandeliers and jhoomars, hanging and pendant lights, ceiling and wall lights online in India. Free shipping, 5-year warranty, 7-day returns.'
+  'Buy handcrafted chandeliers and jhoomars, hanging and pendant lights, ceiling and wall lights online in India. Free shipping, 7-day returns.'
 
 export const metadata: Metadata = {
   // Makes every relative OG/Twitter/canonical URL absolute.

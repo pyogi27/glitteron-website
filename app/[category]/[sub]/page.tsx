@@ -53,7 +53,7 @@ interface Resolved {
 }
 
 /**
- * Shipping and warranty do not change with budget, and "is the cheap one worse
+ * Shipping and returns do not change with budget, and "is the cheap one worse
  * supported?" is the question a price-band page actually gets asked.
  */
 function bandFaqs(): CategoryFaq[] {
@@ -64,9 +64,9 @@ function bandFaqs(): CategoryFaq[] {
         'Yes. Shipping is free on every order anywhere in India with no minimum order value, and delivery is 5 to 7 days from dispatch by registered courier.',
     },
     {
-      question: 'Do lower-priced fixtures carry the same warranty?',
+      question: 'Do lower-priced fixtures have the same return policy?',
       answer:
-        'Yes — 5 years against manufacturing defects on every fixture regardless of price, and the same 7-day return window from receipt.',
+        'Yes — the same 7-day return window from receipt on every fixture, regardless of price.',
     },
   ]
 }
@@ -78,12 +78,12 @@ function resolve(category: LightCategory, sub: string): Resolved | undefined {
     const heading = `${category.shortName} Under ${price}`
     return {
       title: `Buy ${category.shortName} Under ${price} Online in India`,
-      description: `Handcrafted ${category.shortName.toLowerCase()} under ${price}, shipped free anywhere in India. 5-year warranty, 7-day returns, dimmable as standard.`,
+      description: `Handcrafted ${category.shortName.toLowerCase()} under ${price}, shipped free anywhere in India. 7-day returns, dimmable as standard.`,
       heading,
       subtitle: `Handcrafted ${category.shortName.toLowerCase()} at ${price} and below.`,
       intro: [
         band.note,
-        `Price here is the fixture, not a stripped version of it. Everything under ${price} is made in the same Surat workshop, from the same brass, glass and steel, dimmable as standard and covered by the same 5-year warranty as the pieces above it.`,
+        `Price here is the fixture, not a stripped version of it. Everything under ${price} is made in the same Surat workshop, from the same brass, glass and steel, and dimmable as standard, just like the pieces above it.`,
       ],
       faqs: bandFaqs(),
       maxPrice: String(band.max),
@@ -104,12 +104,12 @@ function resolve(category: LightCategory, sub: string): Resolved | undefined {
     const lower = category.shortName.toLowerCase()
     return {
       title: `Buy ${heading} Online in India — Handcrafted`,
-      description: `Buy handcrafted ${facet.adjective.toLowerCase()} ${lower} online in India. Free shipping, 5-year warranty, 7-day returns, dimmable as standard.`,
+      description: `Buy handcrafted ${facet.adjective.toLowerCase()} ${lower} online in India. Free shipping, 7-day returns, dimmable as standard.`,
       heading,
       subtitle: `Handcrafted ${lower} in ${facet.noun}.`,
       intro: [
         ...facet.note,
-        `Everything on this page is ${lower} in ${facet.noun}, assembled and inspected in our Surat workshop, dimmable as standard, and shipped free anywhere in India under the same 5-year warranty as the rest of the range.`,
+        `Everything on this page is ${lower} in ${facet.noun}, assembled and inspected in our Surat workshop, dimmable as standard, and shipped free anywhere in India like the rest of the range.`,
       ],
       faqs: facet.faqs,
       ...(facet.kind === 'materials' ? { material: facet.slug } : { color: facet.slug }),

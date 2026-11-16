@@ -92,7 +92,7 @@ export default function GuidesPage() {
           <Link href="/faq" className="text-[#9E4C22] underline underline-offset-2 decoration-[#9E4C22]/40 hover:decoration-[#9E4C22]">
             FAQ
           </Link>{' '}
-          handles shipping, returns and warranty, and our team answers sizing questions on the{' '}
+          handles shipping and returns, and our team answers sizing questions on the{' '}
           <Link href="/contact" className="text-[#9E4C22] underline underline-offset-2 decoration-[#9E4C22]/40 hover:decoration-[#9E4C22]">
             contact page
           </Link>

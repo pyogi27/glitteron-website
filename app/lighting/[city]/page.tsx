@@ -59,7 +59,7 @@ export default async function CityPage({ params }: Props) {
         stats={[
           { num: 'Free', label: 'Shipping' },
           { num: '5–7d', label: 'Delivery' },
-          { num: '5yr', label: 'Warranty' },
+          { num: '7d', label: 'Returns' },
         ]}
       />
 

@@ -90,11 +90,6 @@ export const FAQ_GROUPS: FaqGroup[] = [
     title: 'Products & installation',
     items: [
       {
-        question: 'What does the LitMeUp warranty cover?',
-        answer:
-          'Every fixture carries a 5-year warranty against manufacturing defects. Keep the warranty card that ships in the box — it is needed for a claim.',
-      },
-      {
         question: 'Are LitMeUp lights dimmable?',
         answer:
           'Our fixtures are designed dimmable as standard, with warm colour temperatures and glare-controlled diffusers. Check the specifications tab on the product page for the exact wattage and fitting of the piece you are looking at, or ask us with the SKU.',

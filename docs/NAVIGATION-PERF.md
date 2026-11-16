@@ -206,7 +206,25 @@ Verify after deploy:
 - the first `curl -sI` of a product/category URL shows `cf-cache-status: MISS`, the second `HIT` with `age`;
 - `curl -sI -H "rsc: 1"` and `/cart` show `DYNAMIC`.
 
-Index SQL (run by hand after `SHOW INDEX` confirms they are missing):
+### Live verification (2026-11-17, after deploy + rule)
+
+| Check | Result |
+|---|---|
+| Product and category HTML | `MISS` → `HIT`, `age` climbs, then `EXPIRED` after 60 s; query strings cached separately |
+| Request with `rsc: 1` header (unique probe URL) | `DYNAMIC`, `text/x-component`; the same URL without the header gets HTML, so there is no poisoning |
+| Real browser navigation (Playwright, 2 clicks) | 49 RSC requests, all `_rsc=`, all `DYNAMIC`, all `text/x-component`; 0 full reloads |
+| `/cart`, `/checkout`, `/about`, `/api/products` | `DYNAMIC` |
+| Unknown category / sub / product | 404 |
+| TTFB from the test machine (via Paris PoP, keep-alive) | edge HIT 164–178 ms vs origin 238–336 ms |
+| Backend `GET /api/products` | `Cache-Control: public, max-age=60`, `Vary: … Authorization` |
+
+Test-harness gotcha: in zsh, an unquoted `$2` holding `-H rsc:1` reaches curl as one argument, so no `rsc` header is
+sent. Pass headers as separate quoted arguments.
+
+Index SQL. **Applied to production on 2026-11-17.** After that, `EXPLAIN` of the category listing showed `ref` on
+`products_category_created_id_idx`, `Backward index scan; Using index`, and no filesort.
+`ProductVariations` also still has a single-column `productId` index and two identical `sku` unique indexes. Both
+are redundant but harmless at 452 rows, so they were left in place.
 
 ```sql
 CREATE INDEX products_category_created_id_idx ON products (category, created_at, id);

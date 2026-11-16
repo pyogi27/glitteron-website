@@ -39,7 +39,7 @@ const commonFaqs = (city: string): CategoryFaq[] => [
   {
     question: 'What if a fixture arrives damaged?',
     answer:
-      'Report it within 24 hours of delivery with photographs and a replacement ships within 3 days of the item reaching us. Every fixture also carries a 5-year warranty against manufacturing defects and a 7-day return window.',
+      'Report it within 24 hours of delivery with photographs and a replacement ships within 3 days of the item reaching us. Every fixture also has a 7-day return window.',
   },
 ]
 
@@ -50,7 +50,7 @@ export const cities: City[] = [
     state: 'Maharashtra',
     title: 'Buy Decorative Lights Online in Mumbai — Free Delivery',
     description:
-      'Handcrafted chandeliers, pendants and wall lights delivered free across Mumbai from our Surat workshop, about 280 km away. 5-year warranty, 7-day returns.',
+      'Handcrafted chandeliers, pendants and wall lights delivered free across Mumbai from our Surat workshop, about 280 km away. 7-day returns.',
     subtitle: 'Shipped free to Mumbai from the workshop, about 280 km up the coast.',
     intro: [
       'Mumbai is the closest metro to our workshop — roughly 280 km down the coast from Surat — and every order ships free by registered courier, arriving 5 to 7 days from dispatch.',
@@ -72,7 +72,7 @@ export const cities: City[] = [
     state: 'Delhi',
     title: 'Buy Decorative Lights Online in Delhi NCR — Free Delivery',
     description:
-      'Handcrafted chandeliers, pendants and wall lights delivered free across Delhi, Gurugram and Noida. Direct from our Surat workshop, 5-year warranty.',
+      'Handcrafted chandeliers, pendants and wall lights delivered free across Delhi, Gurugram and Noida. Direct from our Surat workshop, 7-day returns.',
     subtitle: 'Free delivery to Delhi, Gurugram, Noida and Faridabad.',
     intro: [
       'Delhi NCR is about 1,150 km north of the workshop. Orders ship free by registered courier to Delhi, Gurugram, Noida, Ghaziabad and Faridabad, arriving 5 to 7 days from dispatch.',
@@ -94,7 +94,7 @@ export const cities: City[] = [
     state: 'Karnataka',
     title: 'Buy Decorative Lights Online in Bangalore — Free Delivery',
     description:
-      'Handcrafted chandeliers, pendants and wall lights delivered free across Bangalore from our Surat workshop. 5-year warranty, 7-day returns, dimmable as standard.',
+      'Handcrafted chandeliers, pendants and wall lights delivered free across Bangalore from our Surat workshop. 7-day returns, dimmable as standard.',
     subtitle: 'Free delivery across Bangalore, direct from the workshop.',
     intro: [
       'Bangalore is roughly 1,300 km south of Surat. Orders ship free by registered courier and arrive 5 to 7 days from dispatch, tracked by email.',
@@ -109,7 +109,7 @@ export const cities: City[] = [
     state: 'Telangana',
     title: 'Buy Decorative Lights Online in Hyderabad — Free Delivery',
     description:
-      'Handcrafted chandeliers, pendants and wall lights delivered free across Hyderabad from our Surat workshop. 5-year warranty, 7-day returns.',
+      'Handcrafted chandeliers, pendants and wall lights delivered free across Hyderabad from our Surat workshop. 7-day returns.',
     subtitle: 'Free delivery across Hyderabad and Secunderabad.',
     intro: [
       'Hyderabad is about 1,000 km south-east of the workshop. Shipping is free, by registered courier, 5 to 7 days from dispatch.',
@@ -124,7 +124,7 @@ export const cities: City[] = [
     state: 'Tamil Nadu',
     title: 'Buy Decorative Lights Online in Chennai — Free Delivery',
     description:
-      'Handcrafted chandeliers, pendants and wall lights delivered free across Chennai. Humidity-resistant finishes, 5-year warranty, 7-day returns.',
+      'Handcrafted chandeliers, pendants and wall lights delivered free across Chennai. Humidity-resistant finishes, 7-day returns.',
     subtitle: 'Free delivery to Chennai, with finishes chosen for coastal air.',
     intro: [
       'Chennai is roughly 1,600 km from the workshop by road. Orders ship free by registered courier and arrive 5 to 7 days from dispatch.',
@@ -146,7 +146,7 @@ export const cities: City[] = [
     state: 'Maharashtra',
     title: 'Buy Decorative Lights Online in Pune — Free Delivery',
     description:
-      'Handcrafted chandeliers, pendants and wall lights delivered free across Pune from our Surat workshop, about 450 km away. 5-year warranty, 7-day returns.',
+      'Handcrafted chandeliers, pendants and wall lights delivered free across Pune from our Surat workshop, about 450 km away. 7-day returns.',
     subtitle: 'Free delivery to Pune, about 450 km from the workshop.',
     intro: [
       'Pune sits about 450 km from Surat, making it one of the nearer metros we ship to. Delivery is free by registered courier, 5 to 7 days from dispatch.',
@@ -176,7 +176,7 @@ export const cities: City[] = [
     state: 'West Bengal',
     title: 'Buy Decorative Lights Online in Kolkata — Free Delivery',
     description:
-      'Handcrafted chandeliers, pendants and wall lights delivered free across Kolkata. Sealed finishes for a humid climate, 5-year warranty, 7-day returns.',
+      'Handcrafted chandeliers, pendants and wall lights delivered free across Kolkata. Sealed finishes for a humid climate, 7-day returns.',
     subtitle: 'Free delivery to Kolkata, with finishes chosen for humidity.',
     intro: [
       'Kolkata is the furthest metro we ship to, about 1,900 km east of the workshop. Delivery is still free and still 5 to 7 days from dispatch by registered courier.',

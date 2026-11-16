@@ -171,7 +171,7 @@ export default async function CollectionView({
         stats={[
           { num: '500+', label: 'Designs' },
           { num: '12K+', label: 'Customers' },
-          { num: '5yr', label: 'Warranty' },
+          { num: '7d', label: 'Returns' },
         ]}
       />
       {/* The filter panel lives in the toolbar now, overlaying the grid on demand. */}

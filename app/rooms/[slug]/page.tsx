@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const room = rooms.find(r => r.slug === slug)
   if (!room) return { title: 'Rooms', robots: { index: false, follow: true } }
 
-  const description = `${room.tag}: handcrafted ${room.subtitle.toLowerCase()} curated for your ${room.name.toLowerCase()}. Free shipping across India, 5-year warranty.`
+  const description = `${room.tag}: handcrafted ${room.subtitle.toLowerCase()} curated for your ${room.name.toLowerCase()}. Free shipping across India, 7-day returns.`
   return {
     title: `${room.name} Lighting — Chandeliers & Pendants`,
     description,

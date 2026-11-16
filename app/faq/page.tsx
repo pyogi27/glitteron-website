@@ -6,9 +6,9 @@ import { FAQ_GROUPS, FAQ_ITEMS } from '@/lib/data/faq'
 import { breadcrumbSchema, faqSchema } from '@/lib/seo/schema'
 
 export const metadata: Metadata = {
-  title: 'FAQ — Shipping, Returns, Warranty & Sizing',
+  title: 'FAQ — Shipping, Returns & Sizing',
   description:
-    'Answers on LitMeUp shipping (free over ₹5,000, 5–7 days across India), the 7-day return window, the 5-year warranty, payment methods and how to size a chandelier for your room.',
+    'Answers on LitMeUp shipping (free over ₹5,000, 5–7 days across India), the 7-day return window, payment methods and how to size a chandelier for your room.',
   alternates: { canonical: '/faq' },
 }
 
@@ -32,7 +32,7 @@ export default function FaqPage() {
       <LegalPage
         eyebrow="Help"
         title="Frequently asked questions"
-        intro="Shipping, returns, warranty, payment and sizing — the questions we answer most, with the numbers rather than the runaround."
+        intro="Shipping, returns, payment and sizing — the questions we answer most, with the numbers rather than the runaround."
         sections={SECTIONS}
       >
         {FAQ_GROUPS.map(group => (

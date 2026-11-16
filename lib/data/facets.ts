@@ -82,7 +82,7 @@ const FACETS: Facet[] = [
       {
         question: 'Will the gold finish tarnish?',
         answer:
-          'No. These are plated and lacquered rather than raw brass, so they hold their colour and do not need polishing. The 5-year warranty covers finish failure as well as electrical faults.',
+          'No. These are plated and lacquered rather than raw brass, so they hold their colour and do not need polishing.',
       },
       {
         question: 'Does gold lighting work in a modern room?',

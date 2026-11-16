@@ -28,7 +28,7 @@ export const categoryRoomPages: Record<string, RoomSubPage> = {
   'chandelier-lights/living-room': {
     title: 'Living Room Chandeliers — Buy Online in India',
     description:
-      'Handcrafted chandeliers sized for Indian living rooms. Sizing and hang-height guidance, free shipping, 5-year warranty, 7-day returns.',
+      'Handcrafted chandeliers sized for Indian living rooms. Sizing and hang-height guidance, free shipping, 7-day returns.',
     heading: 'Living Room Chandeliers',
     subtitle: 'Sized, hung and dimmed for the room you actually sit in.',
     intro: [
@@ -53,7 +53,7 @@ export const categoryRoomPages: Record<string, RoomSubPage> = {
   'chandelier-lights/dining-room': {
     title: 'Dining Room Chandeliers — Buy Online in India',
     description:
-      'Chandeliers sized to the dining table, not the room. Handcrafted in brass and hand-blown glass, free shipping across India, 5-year warranty.',
+      'Chandeliers sized to the dining table, not the room. Handcrafted in brass and hand-blown glass, free shipping across India, 7-day returns.',
     heading: 'Dining Room Chandeliers',
     subtitle: 'Sized to the table, hung 30–36 inches above it.',
     intro: [
@@ -78,7 +78,7 @@ export const categoryRoomPages: Record<string, RoomSubPage> = {
   'pendant-lights/kitchen': {
     title: 'Kitchen Island Pendant Lights Online in India',
     description:
-      'Handcrafted pendant lights for kitchen islands and breakfast counters. Spacing and hang-height guidance, free shipping, 5-year warranty.',
+      'Handcrafted pendant lights for kitchen islands and breakfast counters. Spacing and hang-height guidance, free shipping, 7-day returns.',
     heading: 'Kitchen Island Pendant Lights',
     subtitle: 'Spaced 24–30 inches apart, hung 30–36 inches above the counter.',
     intro: [
@@ -103,7 +103,7 @@ export const categoryRoomPages: Record<string, RoomSubPage> = {
   'pendant-lights/dining-room': {
     title: 'Dining Table Pendant Lights Online in India',
     description:
-      'Pendant lights and clusters for dining tables, handcrafted in brass and hand-blown glass. Free shipping across India, 5-year warranty.',
+      'Pendant lights and clusters for dining tables, handcrafted in brass and hand-blown glass. Free shipping across India, 7-day returns.',
     heading: 'Dining Table Pendant Lights',
     subtitle: 'Single pendants, pairs and clusters for the table.',
     intro: [
@@ -128,7 +128,7 @@ export const categoryRoomPages: Record<string, RoomSubPage> = {
   'ceiling-lights/bedroom': {
     title: 'Bedroom Ceiling Lights — Buy Online in India',
     description:
-      'Flush and semi-flush bedroom ceiling lights, dimmable as standard and fan-compatible. Free shipping across India, 5-year warranty.',
+      'Flush and semi-flush bedroom ceiling lights, dimmable as standard and fan-compatible. Free shipping across India, 7-day returns.',
     heading: 'Bedroom Ceiling Lights',
     subtitle: 'Flush and semi-flush fixtures that clear a ceiling fan.',
     intro: [
@@ -153,7 +153,7 @@ export const categoryRoomPages: Record<string, RoomSubPage> = {
   'ceiling-lights/home-office': {
     title: 'Home Office Ceiling Lights Online in India',
     description:
-      'Ceiling lights for home offices and study rooms — neutral-white, glare-controlled, dimmable. Free shipping across India, 5-year warranty.',
+      'Ceiling lights for home offices and study rooms — neutral-white, glare-controlled, dimmable. Free shipping across India, 7-day returns.',
     heading: 'Home Office Ceiling Lights',
     subtitle: 'Even, glare-free light for a desk you sit at all day.',
     intro: [
@@ -178,7 +178,7 @@ export const categoryRoomPages: Record<string, RoomSubPage> = {
   'wall-lights/bedroom': {
     title: 'Bedroom Wall Lights — Buy Online in India',
     description:
-      'Bedside wall lights and sconces, dimmable as standard, in twelve finishes. Free shipping across India, 5-year warranty, 7-day returns.',
+      'Bedside wall lights and sconces, dimmable as standard, in twelve finishes. Free shipping across India, 7-day returns.',
     heading: 'Bedroom Wall Lights',
     subtitle: 'Bedside sconces that free the nightstand and light the page.',
     intro: [
@@ -203,7 +203,7 @@ export const categoryRoomPages: Record<string, RoomSubPage> = {
   'wall-lights/living-room': {
     title: 'Living Room Wall Lights — Buy Online in India',
     description:
-      'Handcrafted living room wall lights and sconces in brass, glass and steel. Free shipping across India, 5-year warranty, 7-day returns.',
+      'Handcrafted living room wall lights and sconces in brass, glass and steel. Free shipping across India, 7-day returns.',
     heading: 'Living Room Wall Lights',
     subtitle: 'The layer that stops a living room looking flat.',
     intro: [
@@ -228,7 +228,7 @@ export const categoryRoomPages: Record<string, RoomSubPage> = {
   'table-lamps/bedroom': {
     title: 'Bedside Table Lamps — Buy Online in India',
     description:
-      'Handcrafted bedside table lamps in brass, glass and steel, dimmable as standard. Free shipping across India, 5-year warranty.',
+      'Handcrafted bedside table lamps in brass, glass and steel, dimmable as standard. Free shipping across India, 7-day returns.',
     heading: 'Bedside Table Lamps',
     subtitle: 'Sized so the shade lands at eye level when you sit up.',
     intro: [
@@ -253,7 +253,7 @@ export const categoryRoomPages: Record<string, RoomSubPage> = {
   'table-lamps/living-room': {
     title: 'Living Room Table Lamps Online in India',
     description:
-      'Table lamps for consoles, side tables and sideboards, handcrafted in brass and glass. Free shipping across India, 5-year warranty.',
+      'Table lamps for consoles, side tables and sideboards, handcrafted in brass and glass. Free shipping across India, 7-day returns.',
     heading: 'Living Room Table Lamps',
     subtitle: 'Console, side table and sideboard lamps in brass and glass.',
     intro: [
@@ -278,7 +278,7 @@ export const categoryRoomPages: Record<string, RoomSubPage> = {
   'floor-lamps/living-room': {
     title: 'Living Room Floor Lamps — Buy Online in India',
     description:
-      'Reading and arc floor lamps for living rooms, handcrafted in brass and solid steel. Free shipping across India, 5-year warranty.',
+      'Reading and arc floor lamps for living rooms, handcrafted in brass and solid steel. Free shipping across India, 7-day returns.',
     heading: 'Living Room Floor Lamps',
     subtitle: 'Reading and arc lamps for the corners the ceiling misses.',
     intro: [
@@ -303,7 +303,7 @@ export const categoryRoomPages: Record<string, RoomSubPage> = {
   'floor-lamps/home-office': {
     title: 'Home Office Floor Lamps Online in India',
     description:
-      'Task and reading floor lamps for home offices and studies, in brass and solid steel. Free shipping across India, 5-year warranty.',
+      'Task and reading floor lamps for home offices and studies, in brass and solid steel. Free shipping across India, 7-day returns.',
     heading: 'Home Office Floor Lamps',
     subtitle: 'Task lamps that light the desk without hitting the screen.',
     intro: [

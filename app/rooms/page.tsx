@@ -28,7 +28,7 @@ export default async function RoomsPage() {
         stats={[
           { num: String(rooms.length), label: 'Spaces' },
           { num: '500+', label: 'Designs' },
-          { num: '5yr', label: 'Warranty' },
+          { num: '7d', label: 'Returns' },
         ]}
       />
 
