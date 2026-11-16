@@ -145,6 +145,67 @@ live RTT. "Before" is the live site, where every click waited for its content.
 Not yet measured live: the "after" column needs a deploy of both apps. The backend changes are verified on a throwaway
 MySQL, not against production.
 
+## Cloudflare edge cache (product + category HTML)
+
+Redis was considered and skipped. After batching, a listing is 6 queries / ~4 ms, and the storefront already caches
+backend reads for 60 s. ElastiCache would also need an App Runner VPC connector, and probably a NAT gateway.
+
+Origin side (in the app):
+
+| Response | Header Cloudflare acts on | Browser sees |
+|---|---|---|
+| Product `/collections/<slug>` (ISR) | `Cache-Control: s-maxage=60, stale-while-revalidate=…` | same; no `max-age`, so browsers do not store it |
+| Category `/<category>`, `/<category>/<sub>` (any query) | `Cloudflare-CDN-Cache-Control: max-age=60`, set in `proxy.ts` | `no-store` (Cloudflare does not forward the header) |
+| Any request with an `rsc` header (page data for client navigation) | nothing | — |
+| Unknown slugs (404), cart, checkout, account, `/api/*` | nothing / not matched by the rule | — |
+
+Cloudflare side — **Caching → Cache Rules → Create rule**, name `Edge cache product and category HTML`:
+
+```txt
+(http.host eq "www.litmeup.in"
+ and http.request.method eq "GET"
+ and not any(lower(http.request.headers.names[*])[*] eq "rsc")
+ and not http.request.uri.query contains "_rsc="
+ and (
+   starts_with(http.request.uri.path, "/collections/")
+   or http.request.uri.path in {"/chandelier-lights" "/pendant-lights" "/ceiling-lights" "/wall-lights" "/table-lamps" "/floor-lamps" "/hanging-lights"}
+   or starts_with(http.request.uri.path, "/chandelier-lights/")
+   or starts_with(http.request.uri.path, "/pendant-lights/")
+   or starts_with(http.request.uri.path, "/ceiling-lights/")
+   or starts_with(http.request.uri.path, "/wall-lights/")
+   or starts_with(http.request.uri.path, "/table-lamps/")
+   or starts_with(http.request.uri.path, "/floor-lamps/")
+   or starts_with(http.request.uri.path, "/hanging-lights/")
+ ))
+```
+
+- **Cache eligibility:** Eligible for cache
+- **Edge TTL:** *Use cache-control header if present, bypass cache if not*. Only responses the app marks are stored.
+- **Browser TTL:** Respect origin
+- **Serve stale content while revalidating:** **Off**. Next sends a ~1-year `stale-while-revalidate`, and with this
+  on, Cloudflare could keep serving an old price while it refetches.
+- **Cache key:** default (query string included, so `?page=2` and filter combinations are cached separately)
+
+Why the rule is this narrow:
+- Static pages (`/about`, `/cart`, …) send `s-maxage=31536000`. Caching them would pin HTML that points at an old
+  deploy's JS chunks.
+- RSC payloads share the page URL, and Cloudflare ignores `Vary`, so the rule must never store one.
+
+After every deploy, purge the cache (*Caching → Configuration → Purge Everything*, or the API). Otherwise cached
+HTML can point at the previous build's chunks for up to 60 s.
+
+**Freshness, honestly.**
+- Cloudflare adds at most 60 s.
+- Next's ISR still serves the first visit after a quiet period from its own stale copy, then re-renders. So an
+  idle product page's price can be older than 60 s once.
+- That was already true of the 60 s data cache before this work. Checkout re-prices from the database, so no one is
+  charged a stale price.
+- Strict ≤60 s on display would need price/stock fetched client-side, which is not done.
+
+Verify after deploy:
+- the first `curl -sI` of a product/category URL shows `cf-cache-status: MISS`, the second `HIT` with `age`;
+- `curl -sI -H "rsc: 1"` and `/cart` show `DYNAMIC`.
+
 Index SQL (run by hand after `SHOW INDEX` confirms they are missing):
 
 ```sql
