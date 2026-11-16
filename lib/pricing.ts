@@ -11,7 +11,7 @@ export interface SaleFields {
 }
 
 export interface DisplayPrice {
-  /** What the shopper pays per unit (before GST). */
+  /** What the shopper pays per unit (GST included). */
   price: number
   /** The list price, struck through. Only set when there is a discount. */
   originalPrice?: number

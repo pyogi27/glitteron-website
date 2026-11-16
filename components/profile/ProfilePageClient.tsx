@@ -33,9 +33,7 @@ function StatusBadge({ status }: { status: WebsiteOrder['status'] }) {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatPrice(n: number | string) {
-  return `₹${parseFloat(String(n)).toLocaleString('en-IN')}`;
-}
+import { formatRupees as formatPrice } from '@/lib/format';
 
 function formatDate(s: string) {
   try {

@@ -119,7 +119,7 @@ export const categories: LightCategory[] = [
       {
         question: 'Do you deliver chandeliers across India?',
         answer:
-          'Yes — free shipping on every order anywhere in India, with no minimum order value. Delivery is 5 to 7 days from dispatch by registered courier, tracked by email.',
+          'Yes — free shipping anywhere in India on orders over ₹5,000; below that, the courier charge is shown before you pay. Delivery is 5 to 7 days from dispatch by registered courier, tracked by email.',
       },
     ],
     guides: ['what-size-chandelier', 'how-high-to-hang-a-dining-light'],

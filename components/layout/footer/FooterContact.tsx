@@ -24,7 +24,7 @@ export default function FooterContact() {
         </Link>
       </address>
       {/* Mirrors the approved TrustFactors copy; change policy on /shipping and /returns first. */}
-      <p className="mt-4 text-[12px] text-[#6E655C]">Free shipping across India · 7-day returns</p>
+      <p className="mt-4 text-[12px] text-[#6E655C]">Free shipping over ₹5,000 · 7-day returns</p>
     </div>
   )
 }

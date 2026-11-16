@@ -14,6 +14,7 @@ import {
   getWebsiteCart,
   getShippingRate,
   validateCoupon,
+  updateMe,
   type WebsiteCartSummary,
 } from '@/lib/auth/api'
 import { syncCartToServer, toSyncable } from '@/lib/api/cartSync'
@@ -41,7 +42,7 @@ const EMPTY_ADDRESS: AddressFormData = {
 
 export default function CheckoutClient() {
   const router = useRouter()
-  const { user } = useAuthStore()
+  const { user, setUser } = useAuthStore()
   const { items, clearCart } = useCartStore()
 
   const [address, setAddress] = useState<AddressFormData>(EMPTY_ADDRESS)
@@ -110,9 +111,12 @@ export default function CheckoutClient() {
   const spinnerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
 
-  // Pre-fill address from user profile
+  // Pre-fill address from user profile, once: saving the address at Pay refreshes `user`,
+  // and re-running this would overwrite what the shopper typed mid-payment.
+  const prefilledRef = useRef(false)
   useEffect(() => {
-    if (user) {
+    if (user && !prefilledRef.current) {
+      prefilledRef.current = true
       setAddress({
         fullName: `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim(),
         phone: user.phone ?? '',
@@ -252,6 +256,25 @@ export default function CheckoutClient() {
     setError(null)
     clearSpinnerTimer() // a previous attempt's timer must not clear this attempt's spinner
 
+    // Signed in: remember the delivery address on the account for next time. Not awaited,
+    // and a failure never blocks payment. The phone is saved server-side with the paid order.
+    if (user && !isGuest) {
+      const saved = {
+        address: address.addressLine1.trim(),
+        city: address.city.trim(),
+        state: address.state.trim(),
+        zipCode: address.zipCode.trim(),
+      }
+      const changed = saved.address !== (user.address ?? '') || saved.city !== (user.city ?? '')
+        || saved.state !== (user.state ?? '') || saved.zipCode !== (user.zipCode ?? '')
+      if (changed) {
+        updateMe(saved)
+          .then(res => setUser(res.user))
+          .catch((err: { status?: number; message?: string }) =>
+            console.error('[checkout] saving address to account failed', err.status, err.message))
+      }
+    }
+
     try {
       // Step 1: Sync local cart → server cart (clear first to remove stale items)
       setLoading('syncing')
@@ -373,7 +396,7 @@ export default function CheckoutClient() {
       }
       setLoading(null)
     }
-  }, [address, items, user, clearCart, router, appliedCoupon, isGuest, withGuestSession])
+  }, [address, items, user, setUser, clearCart, router, appliedCoupon, isGuest, withGuestSession])
 
   if (guestError) {
     return (

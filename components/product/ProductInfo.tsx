@@ -38,7 +38,7 @@ const LOW_STOCK = 5
 const PERKS = [
   {
     label: 'Free Delivery',
-    sub: 'On every order, no minimum',
+    sub: 'On orders over ₹5,000',
     path: 'M1 3h13v13H1zM14 8h4l3 3v5h-7M5.5 19.5a2 2 0 100-4 2 2 0 000 4zM16.5 19.5a2 2 0 100-4 2 2 0 000 4z',
   },
   {

@@ -30,7 +30,7 @@ export interface City {
 const commonFaqs = (city: string): CategoryFaq[] => [
   {
     question: `Do you deliver to ${city}?`,
-    answer: `Yes. Shipping to ${city} is free on every order with no minimum value, and delivery is 5 to 7 days from dispatch by registered courier, tracked by email.`,
+    answer: `Yes. Shipping to ${city} is free on orders over ₹5,000 (below that, the courier charge is shown before you pay), and delivery is 5 to 7 days from dispatch by registered courier, tracked by email.`,
   },
   {
     question: `Do you have a showroom in ${city}?`,

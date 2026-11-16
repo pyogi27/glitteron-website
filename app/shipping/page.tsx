@@ -11,7 +11,7 @@ import LegalPage, {
 export const metadata: Metadata = {
   title: 'Shipping Policy',
   description:
-    'Free shipping across India on every LitMeUp order, delivered in 5 to 7 days by registered courier partners with email tracking.',
+    'Free shipping across India on orders over ₹5,000, delivered in 5 to 7 days by registered courier partners with email tracking.',
   alternates: { canonical: '/shipping' },
 }
 
@@ -22,7 +22,7 @@ const SECTIONS: SectionSpec[] = [
 ]
 
 const DELIVERY = [
-  'We extend free shipping to all orders placed with us.',
+  'Shipping is free on every order of ₹5,000 or more. Below that, a courier charge based on your pincode and the package weight is shown in your cart and at checkout before you pay.',
   'The items are sent to the delivery location that is registered during the checkout process.',
   'The items will be dispatched and arrive at your doorstep within a span of 5 to 7 days.',
   'After the shipment has been dispatched, the tracking number and shipping agency information will be provided to you via email.',

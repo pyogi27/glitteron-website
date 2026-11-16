@@ -30,7 +30,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
       {
         question: 'Does LitMeUp ship free across India?',
         answer:
-          'Yes. Shipping is free on every LitMeUp order, anywhere in India, with no minimum order value. Orders go out through registered courier partners to the address entered at checkout.',
+          'Yes, on every order of ₹5,000 or more, anywhere in India. Below that, a courier charge based on your pincode and the package weight is shown in your cart and at checkout before you pay. Orders go out through registered courier partners to the address entered at checkout.',
       },
       {
         question: 'How long does delivery take?',

@@ -1,5 +1,6 @@
 'use client'
 import { useFilterStore } from '@/lib/stores/filterStore'
+import LightToggle from '@/components/ui/LightToggle'
 
 const SORT_OPTIONS = [
   { value: 'featured', label: 'Featured' },
@@ -13,16 +14,20 @@ interface Props {
 }
 
 export default function RoomToolbar({ total }: Props) {
-  const { sortBy, setSortBy, viewMode, setViewMode } = useFilterStore()
+  // Same store as the category Toolbar, so the light state carries between them.
+  const { sortBy, setSortBy, viewMode, setViewMode, lightOn, setLightOn } = useFilterStore()
 
   return (
     // ponytail: CSS sticky, no scroll listener. top matches fixed Header h-header.
     <div className="sticky top-header z-40 bg-[#EDE8E0]/95 backdrop-blur-md border-b border-[#D8D0C4]">
-      <div className="flex items-center justify-between px-4 md:px-8 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-y-2 px-4 md:px-8 py-3">
         <span className="text-[12px] text-[#A09488]">
           Showing <strong className="text-[#2C2825]">{total}</strong> {total === 1 ? 'result' : 'results'}
         </span>
         <div className="flex items-center gap-3">
+          <LightToggle on={lightOn} onChange={setLightOn} />
+
+          <span aria-hidden="true" className="w-px h-5 bg-[#D8D0C4]" />
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value)}

@@ -47,7 +47,7 @@ const FACTORS = [
   {
     Icon: TruckIcon,
     title: 'Free Shipping',
-    subtitle: <>Across India, delivered in <span className="whitespace-nowrap">5–7 days</span></>,
+    subtitle: <>On orders over <span className="whitespace-nowrap">₹5,000</span>, delivered in <span className="whitespace-nowrap">5–7 days</span></>,
   },
   { Icon: ReturnIcon, title: 'Easy Returns', subtitle: 'Within 7 days of delivery' },
   { Icon: LockIcon, title: 'Secure Payments', subtitle: 'Safe, encrypted checkout system' },

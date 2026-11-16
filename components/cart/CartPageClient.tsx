@@ -10,12 +10,9 @@ import { serverLineFor } from '@/lib/pricing'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { getWebsiteCart, type WebsiteCartSummary } from '@/lib/auth/api'
 import { syncCartToServer, toSyncable } from '@/lib/api/cartSync'
+import { FREE_SHIPPING_MIN, FREE_SHIPPING_MIN_LABEL } from '@/lib/shipping'
 
-const SHIPPING_THRESHOLD = 15000
-
-function formatPrice(amount: number) {
-  return `₹${amount.toLocaleString('en-IN')}`
-}
+import { formatRupees as formatPrice } from '@/lib/format'
 
 export default function CartPageClient() {
   const items = useCartStore((s) => s.items)
@@ -103,13 +100,11 @@ export default function CartPageClient() {
   const localSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const hasServer = serverCart !== null && serverCart.items.length > 0
 
-  // Before discounts; the discount row below brings it down to what GST is charged on.
-  const listSubtotal = hasServer ? (serverCart.listSubtotal ?? serverCart.subtotal) : localSubtotal
+  // Before discounts. Prices include GST, so nothing is added on top.
+  const listSubtotal = hasServer ? (serverCart.listSubtotal ?? localSubtotal) : localSubtotal
   const discountTotal = hasServer ? (serverCart.discountTotal ?? 0) : 0
-  const gstRate = hasServer ? serverCart.gstRate : 18
-  const gstAmount = hasServer ? serverCart.gstAmount : Math.round(localSubtotal * 0.18)
   const courierCharges = hasServer ? serverCart.courierCharges : 0
-  const finalTotal = hasServer ? serverCart.finalTotal : localSubtotal + gstAmount + courierCharges
+  const finalTotal = hasServer ? serverCart.finalTotal : localSubtotal + courierCharges
 
   /** Unit and line prices for a local line: the server's (after discounts) when it has the line. */
   const linePrice = (item: CartItem) => {
@@ -125,7 +120,8 @@ export default function CartPageClient() {
     }
   }
 
-  const progress = Math.min(100, (localSubtotal / SHIPPING_THRESHOLD) * 100)
+  const qualifiesFreeShipping = listSubtotal >= FREE_SHIPPING_MIN
+  const progress = Math.min(100, (listSubtotal / FREE_SHIPPING_MIN) * 100)
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
 
   return (
@@ -286,22 +282,16 @@ export default function CartPageClient() {
                 <span>
                   {summaryLoading
                     ? <span className="text-[#EDE8E0]/40">—</span>
-                    : !hasServer
-                      // Never claim "Free" from the local fallback: courierCharges is 0
-                      // there because it was never calculated, not because delivery is
-                      // free. Shipping depends on the pincode and the item weights.
+                    : qualifiesFreeShipping
+                      ? <span className="text-[#C9A84C]">Free</span>
+                      : !hasServer
+                      // Below the threshold the local fallback can't claim "Free": its
+                      // courierCharges is 0 because it was never calculated. Shipping
+                      // depends on the pincode and the item weights.
                       ? <span className="text-[#EDE8E0]/50">Calculated at checkout</span>
                       : courierCharges === 0
                         ? <span className="text-[#C9A84C]">Free</span>
                         : formatPrice(courierCharges)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-[#EDE8E0]/80">
-                <span>GST ({gstRate}%)</span>
-                <span>
-                  {summaryLoading
-                    ? <span className="text-[#EDE8E0]/40">—</span>
-                    : formatPrice(gstAmount)}
                 </span>
               </div>
               <div className="h-px bg-white/15 my-1.5" />
@@ -320,13 +310,14 @@ export default function CartPageClient() {
                     : formatPrice(finalTotal)}
                 </span>
               </div>
+              <p className="text-right text-[11px] text-[#EDE8E0]/55">Prices include GST</p>
             </div>
 
-            {/* Free delivery progress — shown while server totals are loading or user not logged in */}
-            {!hasServer && items.length > 0 && (
+            {/* Free shipping progress — same threshold the backend's free_shipping discount uses */}
+            {!summaryLoading && items.length > 0 && (
               <div className="mt-6 rounded-2xl bg-white/6 border border-white/12 p-4">
                 <p className="text-[11px] uppercase tracking-[0.08em] text-[#E8A87C] mb-2">
-                  Free delivery threshold
+                  Free shipping over {FREE_SHIPPING_MIN_LABEL}
                 </p>
                 <div className="h-2.5 rounded-full bg-white/12 overflow-hidden">
                   <div
@@ -334,24 +325,14 @@ export default function CartPageClient() {
                     style={{ width: `${progress}%` }}
                   />
                 </div>
-                {localSubtotal >= SHIPPING_THRESHOLD ? (
-                  <p className="text-[12px] text-[#EDE8E0]/80 mt-2">You unlocked free delivery.</p>
+                {qualifiesFreeShipping ? (
+                  <p className="text-[12px] text-[#EDE8E0]/80 mt-2">Your order ships free.</p>
                 ) : (
                   <p className="text-[12px] text-[#EDE8E0]/80 mt-2">
-                    Add {formatPrice(Math.max(0, SHIPPING_THRESHOLD - localSubtotal))} more for free delivery.
+                    Add {formatPrice(FREE_SHIPPING_MIN - listSubtotal)} more for free shipping.
+                    Until then, the courier charge depends on your pincode and is shown before you pay.
                   </p>
                 )}
-              </div>
-            )}
-
-            {/* Shipping note once server totals are loaded */}
-            {hasServer && items.length > 0 && (
-              <div className="mt-6 rounded-2xl bg-white/6 border border-white/12 p-4">
-                <p className="text-[11px] text-[#EDE8E0]/60">
-                  {courierCharges === 0
-                    ? 'Free shipping applied based on your delivery address.'
-                    : 'Shipping calculated based on your saved delivery address. May update at checkout.'}
-                </p>
               </div>
             )}
 

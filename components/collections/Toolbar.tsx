@@ -41,16 +41,36 @@ interface Props {
   filters: ListingFilters
   /** Where filter changes navigate: /collections, or the category landing page itself. */
   filterPath: string
+  /**
+   * Categories this page is showing. Landing pages (/chandelier-lights) name theirs in
+   * the path, not in ?category=, so without this the rail highlighted "All" over a
+   * filtered grid and shoppers tapped the category again. Two for /hanging-lights.
+   */
+  activeCategories?: string[]
 }
 
-export default function Toolbar({ categories = [], total, filters, filterPath }: Props) {
+export default function Toolbar({ categories = [], total, filters, filterPath, activeCategories }: Props) {
   const { sortBy, setSortBy, viewMode, setViewMode, lightOn, setLightOn } = useFilterStore()
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const activeCategory = searchParams.get('category') ?? 'All'
+  const queryCategory = searchParams.get('category')
+  const active = activeCategories?.length ? activeCategories : queryCategory ? [queryCategory] : ['All']
 
   const tabs: Category[] = [{ name: 'All' }, ...categories]
+
+  // The rail scrolls sideways on phones: bring the highlighted tab into view, or a
+  // category far down the list (Floor Lamps) would still look like "All".
+  const railRef = useRef<HTMLDivElement>(null)
+  const activeKey = active.join('|')
+  // Sets the rail's own scrollLeft: scrollIntoView would also scroll the page when the
+  // rail sits below the fold.
+  useEffect(() => {
+    const rail = railRef.current
+    const tab = rail?.querySelector<HTMLElement>('[aria-pressed="true"]')
+    if (!rail || !tab) return
+    rail.scrollLeft = tab.offsetLeft - (rail.clientWidth - tab.offsetWidth) / 2
+  }, [activeKey])
 
   // Headroom, after whisperinghomes.com: scrolling down tucks the header and this
   // bar away so the grid gets the whole screen; any scroll up brings them back.
@@ -145,10 +165,10 @@ export default function Toolbar({ categories = [], total, filters, filterPath }:
       {/* ponytail: CSS sticky; the scroll listener above only toggles hiding. top matches fixed Header h-header. */}
       <div className="collection-toolbar sticky top-header z-40 bg-[#EDE8E0]/95 backdrop-blur-md border-b border-[#D8D0C4] transition-transform duration-300">
         {/* Category tab rail */}
-        <div className="relative px-4 md:px-8 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div ref={railRef} className="relative px-4 md:px-8 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <div className="flex items-end gap-0 min-w-max">
             {tabs.map(tab => {
-              const isActive = activeCategory === tab.name
+              const isActive = active.includes(tab.name)
               return (
                 <button
                   key={tab.name}

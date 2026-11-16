@@ -11,10 +11,8 @@ export function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-export function formatPrice(str: string): string {
-  const n = parseFloat(str)
-  return `₹${n.toLocaleString('en-IN')}`
-}
+import { formatRupees as formatPrice } from '@/lib/format'
+export { formatPrice }
 
 export function OrderStatusBadge({ status }: { status: WebsiteOrder['status'] }) {
   const styles = {

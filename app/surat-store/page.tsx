@@ -35,7 +35,7 @@ const FAQS = [
   {
     question: 'Do you have stores in other cities?',
     answer:
-      'No. Surat is our only location. We sell direct to customers everywhere else in India, with free shipping and no dealer margin in the price.',
+      'No. Surat is our only location. We sell direct to customers everywhere else in India, with free shipping over ₹5,000 and no dealer margin in the price.',
   },
 ]
 
@@ -128,7 +128,7 @@ export default function SuratStorePage() {
           </p>
           <p className="text-[15px] font-normal leading-[1.9] text-[#2C2825]/75 mb-5">
             Surat is about 265 km from Ahmedabad and 280 km from Mumbai, both an easy drive.
-            If you cannot make it, everything here ships free anywhere in India with a 7-day
+            If you cannot make it, everything here ships anywhere in India, free over ₹5,000, with a 7-day
             return window, so buying unseen is not the risk it sounds like.
           </p>
 

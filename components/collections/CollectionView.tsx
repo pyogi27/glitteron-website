@@ -175,7 +175,13 @@ export default async function CollectionView({
         ]}
       />
       {/* The filter panel lives in the toolbar now, overlaying the grid on demand. */}
-      <Toolbar categories={categories} total={total} filters={filters} filterPath={filterPath} />
+      <Toolbar
+        categories={categories}
+        total={total}
+        filters={filters}
+        filterPath={filterPath}
+        activeCategories={categoryNames ?? (categoryName ? [categoryName] : undefined)}
+      />
       <div className="min-h-screen bg-[#EDE8E0]">
         <InfiniteProductGrid
           initialProducts={products}

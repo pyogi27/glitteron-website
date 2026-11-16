@@ -4,10 +4,9 @@ import Image from 'next/image'
 import { useCartStore } from '@/lib/stores/cartStore'
 import type { WebsiteCartSummary } from '@/lib/auth/api'
 import { serverLineFor } from '@/lib/pricing'
+import { FREE_SHIPPING_MIN } from '@/lib/shipping'
 
-function formatPrice(n: number) {
-  return `₹${n.toLocaleString('en-IN')}`
-}
+import { formatRupees as formatPrice } from '@/lib/format'
 
 export interface CouponProps {
   input: string
@@ -53,14 +52,12 @@ export default function OrderSummary({
   const serverItems = serverCart?.items ?? []
 
   // Server values when available; the local fallback has no shipping and no discounts.
+  // Prices include GST, so nothing is added on top of the subtotal.
   const localSubtotal = localItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
-  const listSubtotal = serverCart?.listSubtotal ?? serverCart?.subtotal ?? localSubtotal
-  const subtotal = serverCart?.subtotal ?? localSubtotal
-  const gstRate = serverCart?.gstRate ?? 18
-  const gstAmount = serverCart?.gstAmount ?? Math.round(subtotal * 0.18)
+  const listSubtotal = serverCart?.listSubtotal ?? localSubtotal
   const shipping = serverCart?.courierCharges ?? 0
   const shippingWaived = (serverCart?.courierWaived ?? 0) > 0
-  const total = serverCart?.finalTotal ?? subtotal + gstAmount + shipping
+  const total = serverCart?.finalTotal ?? localSubtotal + shipping
   const lineDiscounts = (serverCart?.appliedDiscounts ?? []).filter(d => d.type === 'percentage' && d.amount > 0)
 
   return (
@@ -162,9 +159,7 @@ export default function OrderSummary({
           <span>
             {cartLoading ? (
               <span className="text-[#EDE8E0]/40 text-[11px]">Calculating…</span>
-            ) : !shippingAvailable ? (
-              <span className="text-[#EDE8E0]/60 text-[11px]">Calculated at delivery</span>
-            ) : shipping === 0 ? (
+            ) : shipping === 0 && (shippingWaived || listSubtotal >= FREE_SHIPPING_MIN) ? (
               <span className="text-[#C9A84C]">
                 {shippingWaived && (
                   <span className="mr-1.5 text-[11px] text-[#EDE8E0]/45 line-through">
@@ -173,20 +168,22 @@ export default function OrderSummary({
                 )}
                 Free
               </span>
-            ) : (
+            ) : shipping > 0 ? (
               formatPrice(shipping)
+            ) : !shippingAvailable ? (
+              // No courier rate for this pincode: the courier collects it on delivery.
+              <span className="text-[#EDE8E0]/60 text-[11px]">Calculated at delivery</span>
+            ) : (
+              <span className="text-[#EDE8E0]/60 text-[11px]">Calculated from your pincode</span>
             )}
           </span>
-        </div>
-        <div className="flex justify-between text-[#EDE8E0]/80">
-          <span>GST ({gstRate}%)</span>
-          <span>{cartLoading ? <Dash /> : formatPrice(gstAmount)}</span>
         </div>
         <div className="h-px bg-white/15" />
         <div className="flex justify-between text-[16px] font-medium text-white">
           <span>Total</span>
           <span>{cartLoading ? <span className="text-[#EDE8E0]/60">—</span> : formatPrice(total)}</span>
         </div>
+        <p className="-mt-1 text-right text-[11px] text-[#EDE8E0]/55">Prices include GST</p>
       </div>
 
       {pricingFailed && (

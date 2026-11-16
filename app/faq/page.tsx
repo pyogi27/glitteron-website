@@ -8,7 +8,7 @@ import { breadcrumbSchema, faqSchema } from '@/lib/seo/schema'
 export const metadata: Metadata = {
   title: 'FAQ — Shipping, Returns, Warranty & Sizing',
   description:
-    'Answers on LitMeUp shipping (free, 5–7 days across India), the 7-day return window, the 5-year warranty, payment methods and how to size a chandelier for your room.',
+    'Answers on LitMeUp shipping (free over ₹5,000, 5–7 days across India), the 7-day return window, the 5-year warranty, payment methods and how to size a chandelier for your room.',
   alternates: { canonical: '/faq' },
 }
 

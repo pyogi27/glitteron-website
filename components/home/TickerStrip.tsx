@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 
-const items = ['Handcrafted Chandeliers', 'Free Delivery On Every Order', '5-Year Warranty', '12,000+ Happy Customers', 'Expert Installation Available', '500+ Designs In Stock']
+const items = ['Handcrafted Chandeliers', 'Free Delivery Over ₹5,000', '5-Year Warranty', '12,000+ Happy Customers', 'Expert Installation Available', '500+ Designs In Stock']
 
 export default function TickerStrip() {
   const [visible, setVisible] = useState(false)

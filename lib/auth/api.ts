@@ -145,10 +145,10 @@ export interface WebsiteCartItem {
   quantity: number
   /** List unit price. */
   livePrice: number
-  /** What this line costs after discounts, before GST. */
+  /** What this line costs after discounts (GST included). */
   lineTotal: number
   compareAtPrice?: number
-  /** Unit price after discounts, before GST. */
+  /** Unit price after discounts (GST included). */
   discountedPrice?: number
   /** e.g. "20% off", or null. */
   discountLabel?: string | null
@@ -168,7 +168,8 @@ export interface AppliedDiscount {
 
 /**
  * GET /api/v1/cart (and POST /cart/coupon/validate). Every total is what checkout will
- * charge: `subtotal` is after discounts and before GST.
+ * charge. Prices include GST: `finalTotal` is listSubtotal − discountTotal + courierCharges,
+ * and `subtotal`/`gstAmount` split the net amount into its pre-GST value and the GST inside it.
  */
 export interface WebsiteCartSummary {
   success: true

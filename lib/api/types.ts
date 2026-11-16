@@ -69,7 +69,7 @@ export interface ApiProduct {
   originalPrice?: number | string;
   discount?: number | string;
   // Website discounts (backend adds these for website requests only). discountedPrice
-  // is what the shopper pays per unit before GST; compareAtPrice is the list price.
+  // is what the shopper pays per unit (GST included); compareAtPrice is the list price.
   compareAtPrice?: number | string | null;
   discountedPrice?: number | string | null;
   discountLabel?: string | null;
