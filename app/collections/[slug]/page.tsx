@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import type { Product } from '@/lib/types'
 import { getProductBySlug, getRelatedProducts } from '@/lib/data/products'
-import { categoryIdOf, fetchProducts, fetchRelatedProducts, findApiProductBySlug, fetchProductById, mapApiProduct, resolveCategoryName } from '@/lib/api/server'
+import { categoryIdOf, fetchProducts, fetchRelatedProducts, findApiProductBySlug, fetchProductById, mapApiProduct, resolveCategoryName, slugify } from '@/lib/api/server'
 import { productMetaDescription, productTitle } from '@/lib/seo/product-copy'
 import ProductHero from '@/components/product/ProductHero'
 import ProductReviews from '@/components/product/ProductReviews'
@@ -18,19 +18,29 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
-// Generate static params from API products (limit high for coverage)
 /**
- * Products render on demand and are then cached, rather than prerendered.
+ * Only the newest in-stock products are prerendered; the rest render on first
+ * visit and are then cached (ISR).
  *
- * A full prerender needs one fetchProductById per product (~1000 requests for
- * variations and specs), but the backend allows 1000 requests per 15 minutes —
- * so building every page always tripped the limit and every product emitted a
- * 404 shell. On-demand keeps the build at a handful of calls; each product is
- * rendered once on first visit and served from cache afterwards. All 1017 URLs
- * are still listed in the sitemap, so discovery is unaffected.
+ * A full prerender needs one fetchProductById per product (~1000 requests), but
+ * the backend allows 1000 requests per 15 minutes, so building every page
+ * tripped the limit and emitted 404 shells.
+ *
+ * generateStaticParams must exist for ISR at all: without it Next renders this
+ * route on every request and ignores `revalidate` (measured 2026-11-16: the
+ * route built as dynamic and was served `no-store`). Returning [] on a backend
+ * failure still keeps ISR on.
  */
+const PRERENDERED_PRODUCTS = 24
+
+export async function generateStaticParams() {
+  const { products } = await fetchProducts({ limit: PRERENDERED_PRODUCTS })
+  return products.map(p => ({ slug: (p.slug ?? slugify(p.name)).trim().toLowerCase() }))
+}
+
 export const dynamicParams = true
-export const revalidate = 3600
+// Price and stock are in the HTML, so the page may be at most 60 s stale.
+export const revalidate = 60
 
 /**
  * Titles and descriptions come from lib/seo/product-copy.ts, not from the bare
@@ -45,10 +55,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const apiProduct = await findApiProductBySlug(slug)
   if (apiProduct) {
+    // Price from the detail fetch (60 s), not the catalog memo (up to 1 h old).
+    // Same cached request the page body makes, so no extra backend call.
+    const detail = await fetchProductById(apiProduct.id)
     const copy = {
       ...apiProduct,
       categoryName: resolveCategoryName(apiProduct),
-      price: listingPrice(apiProduct).price,
+      price: detail?.price ?? listingPrice(apiProduct).price,
     }
     const title = productTitle(copy)
     const description = productMetaDescription(copy)
@@ -100,13 +113,21 @@ export default async function ProductPage({ params }: Props) {
   const apiProduct = await findApiProductBySlug(slug)
   let product = null
 
+  let apiRelated: Product[] = []
   if (apiProduct) {
-    product = await fetchProductById(apiProduct.id)
+    // categoryIdOf, not apiProduct.categoryId: the wire format is `category: "5"`.
+    // Related needs only the listing record, so it runs alongside the detail fetch.
+    const categoryId = categoryIdOf(apiProduct)
+    const [detail, sameCategory] = await Promise.all([
+      fetchProductById(apiProduct.id),
+      categoryId ? fetchRelatedProducts(categoryId, apiProduct.id, 4) : Promise.resolve([]),
+    ])
+    apiRelated = sameCategory
     // GET /api/products/:id omits lightOnImage; the listing record carries it.
-    if (product) product = {
-      ...product,
+    if (detail) product = {
+      ...detail,
       apiProductId: apiProduct.id,
-      lightOnImage: product.lightOnImage ?? apiProduct.lightOnImage ?? undefined,
+      lightOnImage: detail.lightOnImage ?? apiProduct.lightOnImage ?? undefined,
     }
   }
 
@@ -118,14 +139,6 @@ export default async function ProductPage({ params }: Props) {
 
   let related = getRelatedProducts(product.id)
   if (apiProduct) {
-    let apiRelated: Product[] = []
-    // categoryIdOf, not apiProduct.categoryId: the wire format is `category: "5"`,
-    // so this branch never ran and every product showed the same four unrelated
-    // pieces from the generic fallback below.
-    const categoryId = categoryIdOf(apiProduct)
-    if (categoryId) {
-      apiRelated = await fetchRelatedProducts(categoryId, apiProduct.id, 4)
-    }
     if (apiRelated.length === 0) {
       // Fallback: fetch any real products excluding the current one
       const { products: allProducts } = await fetchProducts({ limit: 5 })

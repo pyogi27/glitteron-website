@@ -274,12 +274,15 @@ export async function fetchProducts(params?: {
       return { products: [], total: 0, totalPages: 1 };
     }
     const body = await res.json();
+    // The backend can repeat a product within one page (and across pages, since it
+    // sorts on a non-unique created_at), so every caller gets a deduped list.
+    const seen = new Set<number>();
     const products = extractArray<ApiProduct>(
       body,
       "data",
       "products",
       "items",
-    );
+    ).filter((p) => !seen.has(p.id) && Boolean(seen.add(p.id)));
     const total: number =
       body?.pagination?.total ??
       body?.total ??
@@ -358,12 +361,16 @@ const getCatalog = (): Promise<ApiProduct[]> => {
         return [];
       }
 
-      const rest: ApiProduct[] = [];
-      for (let page = 2; page <= firstPage.totalPages; page += 1) {
-        const { products } = await fetchProducts({ page, limit, includeOutOfStock: true });
-        rest.push(...products);
-      }
-      return [...firstPage.products, ...rest];
+      // Remaining pages in parallel: ~4 requests, well inside the backend's burst limit.
+      const pages = Array.from({ length: Math.max(0, firstPage.totalPages - 1) }, (_, i) => i + 2);
+      const rest = await Promise.all(
+        pages.map((page) => fetchProducts({ page, limit, includeOutOfStock: true })),
+      );
+      // Pages can overlap (non-unique sort key on the backend), so dedupe across them.
+      const seen = new Set<number>();
+      return [firstPage, ...rest]
+        .flatMap((r) => r.products)
+        .filter((p) => !seen.has(p.id) && Boolean(seen.add(p.id)));
     })().catch(err => {
       catalogPromise = null;
       throw err;
