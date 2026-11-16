@@ -1,3 +1,4 @@
+import { acrylicVsGlassChandeliers } from './acrylic-vs-glass-chandeliers'
 import { bedroomLighting } from './bedroom-lighting'
 import { chandelierSize } from './chandelier-size'
 import { colourTemperature } from './colour-temperature'
@@ -19,6 +20,7 @@ export const guides: Guide[] = [
   livingRoomLighting,
   bedroomLighting,
   colourTemperature,
+  acrylicVsGlassChandeliers,
 ]
 
 export function getGuideBySlug(slug: string): Guide | undefined {
